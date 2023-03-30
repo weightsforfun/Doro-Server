@@ -1,4 +1,4 @@
-package com.example.DoroServer.domain.core;
+package com.example.DoroServer.domain.base;
 
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedBy;
