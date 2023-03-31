@@ -1,5 +1,7 @@
 package com.example.DoroServer.domain.lecture.entity;
 
+import com.example.DoroServer.domain.chat.entity.Chat;
+import com.example.DoroServer.domain.lectureContent.entity.LectureContent;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,6 +11,9 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.Date;
+
+import static javax.persistence.CascadeType.*;
+import static javax.persistence.FetchType.*;
 
 @Entity
 @Getter
@@ -50,8 +55,14 @@ public class Lecture {
 
     private LocalDateTime enrollEndDate; // 강의 등록 종료 날짜
 
-//    private Long lectureContentId; // 강의 내용
+    // Lecture와 LectureContent는 일대일(One-to-One) 관계
+    @OneToOne(fetch = LAZY, cascade = ALL)
+    @JoinColumn(name = "lecture_content_id")
+    private LectureContent lectureContent; // 강의 내용
 
-//    private Long chatId; // 강의 채팅
+    // Lecture와 Chat은 일대일(One-to-One) 관계
+    @OneToOne(fetch = LAZY, cascade = ALL)
+    @JoinColumn(name ="chat_id")
+    private Chat chat; // 강의 채팅
 
 }
