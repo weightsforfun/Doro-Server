@@ -1,0 +1,23 @@
+package com.example.DoroServer.global.exception;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
+
+import static org.springframework.http.HttpStatus.*;
+
+@Getter
+@AllArgsConstructor
+public enum ErrorCode {
+    //오류 등록 예시 (HTTP_STATUS,ERROR_CODE,MESSAGE)
+    EXAMPLE_ERROR(BAD_REQUEST,"EXAMPLE001","예외 코드 예시입니다.");
+    // 인증 관련 오류 AUTH001,AUTH002...
+
+    //USER 관련 오류 U001,U002...
+
+    //강의 관련 오류 L001,L002..
+
+    private final HttpStatus httpStatus;
+    private final String code;
+    private final String message;
+}
