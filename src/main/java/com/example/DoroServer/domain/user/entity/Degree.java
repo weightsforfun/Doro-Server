@@ -1,29 +1,24 @@
 package com.example.DoroServer.domain.user.entity;
 
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Embeddable;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Embeddable
 @Getter
 public class Degree {
 
-    private String school;
-    private String studentId;
-    private String major;
+    private String school; // 학교 정보
+    private String studentId; // 학번
+    private String major; // 전공
     @Enumerated(EnumType.STRING)
-    private StudentStatus studentStatus;
-
-    protected Degree() {
-    }
-
-    public Degree(String school, String studentId, String major, StudentStatus studentStatus) {
-        this.school = school;
-        this.studentId = studentId;
-        this.major = major;
-        this.studentStatus = studentStatus;
-    }
+    private StudentStatus studentStatus; // 학생 재적 상태 [ATTENDING, ABSENCE, GRADUATION]
 }
