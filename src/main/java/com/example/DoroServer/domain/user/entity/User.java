@@ -50,6 +50,7 @@ public class User extends BaseEntity {
     @NotNull(message = "사용자 인증코드가 필요합니다.")
     private Long certificationCode; // 사용자 인증코드
 
+    @Column(columnDefinition = "BLOB")
     private byte[] profileImg;
 
     //== 연관관계 매핑 ==//
