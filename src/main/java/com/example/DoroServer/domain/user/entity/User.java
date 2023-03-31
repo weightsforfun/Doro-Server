@@ -1,6 +1,7 @@
 package com.example.DoroServer.domain.user.entity;
 
 import com.example.DoroServer.domain.base.BaseEntity;
+import com.example.DoroServer.domain.userLecture.entity.UserLecture;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,6 +9,8 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -17,7 +20,7 @@ import javax.validation.constraints.NotNull;
 public class User extends BaseEntity {
 
     @Id
-    @GeneratedValue // strategy = GenerationType.IDENTITY ??
+    @GeneratedValue
     @Column(name = "user_id")
     private Long id; // PK
 
@@ -47,6 +50,12 @@ public class User extends BaseEntity {
     @NotNull(message = "사용자 인증코드가 필요합니다.")
     private Long certificationCode; // 사용자 인증코드
 
-    private String profileImg; // 이미지 파일은 바이너리로 변환?
+    private byte[] profileImg;
+
+    //== 연관관계 매핑 ==//
+
+    // User와 UserLecture는 다대일(One-to-Many) 관계
+    @OneToMany(mappedBy = "user")
+    private List<UserLecture> userLectures = new ArrayList<>();
 
 }

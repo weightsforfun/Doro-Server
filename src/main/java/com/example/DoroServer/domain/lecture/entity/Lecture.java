@@ -2,6 +2,8 @@ package com.example.DoroServer.domain.lecture.entity;
 
 import com.example.DoroServer.domain.chat.entity.Chat;
 import com.example.DoroServer.domain.lectureContent.entity.LectureContent;
+import com.example.DoroServer.domain.user.entity.User;
+import com.example.DoroServer.domain.userLecture.entity.UserLecture;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,7 +12,9 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static javax.persistence.CascadeType.*;
 import static javax.persistence.FetchType.*;
@@ -55,6 +59,8 @@ public class Lecture {
 
     private LocalDateTime enrollEndDate; // 강의 등록 종료 날짜
 
+    //== 연관관계 매핑 ==//
+
     // Lecture와 LectureContent는 일대일(One-to-One) 관계
     @OneToOne(fetch = LAZY, cascade = ALL)
     @JoinColumn(name = "lecture_content_id")
@@ -64,5 +70,9 @@ public class Lecture {
     @OneToOne(fetch = LAZY, cascade = ALL)
     @JoinColumn(name ="chat_id")
     private Chat chat; // 강의 채팅
+
+    // Lecture와 UserLecture는 일대다(One-to-Many) 관계
+    @OneToMany(mappedBy = "lecture")
+    private List<UserLecture> userLectures = new ArrayList<>();
 
 }
