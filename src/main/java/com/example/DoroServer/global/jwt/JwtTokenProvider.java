@@ -1,13 +1,11 @@
 package com.example.DoroServer.global.jwt;
 
-import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.repository.UserRepository;
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,22 +14,35 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
-import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
-import java.util.Optional;
 
-@RequiredArgsConstructor
+
 @Component
 @Slf4j
+@PropertySource("classpath:/jwt.properties")
 public class JwtTokenProvider {
     private final CustomUserDetailsService customUserDetailsService;
     private final UserRepository userRepository;
-    @Value("${jwt.secret}") private String secretKey;
-    @Value("${jwt.secret-refresh}") private final String refreshSecretKey;
-    @Value("${jwt.access-token-seconds}") private final long accessTime;
-    @Value("${jwt.refresh-token-seconds}")private final long refreshTime;
+    private String secretKey;
+    private final String refreshSecretKey;
+    private final Integer accessTime;
+    private final Integer refreshTime;
 
+    public JwtTokenProvider(
+            UserRepository userRepository,
+            CustomUserDetailsService customUserDetailsService,
+            @Value("${jwt.secret}") String secretKey,
+            @Value("${jwt.secret-refresh}") String refreshSecretKey,
+            @Value("${jwt.access-token-seconds}") Integer accessTime,
+            @Value("${jwt.refresh-token-seconds}") Integer refreshTime) {
+        this.userRepository = userRepository;
+        this.customUserDetailsService = customUserDetailsService;
+        this.secretKey = secretKey;
+        this.refreshSecretKey = refreshSecretKey;
+        this.accessTime = accessTime;
+        this.refreshTime = refreshTime;
+    }
     // 시크릿키 Base64 인코딩
     @PostConstruct
     protected void init(){
