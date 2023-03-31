@@ -4,10 +4,7 @@ import com.example.DoroServer.domain.chat.entity.Chat;
 import com.example.DoroServer.domain.lectureContent.entity.LectureContent;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.userLecture.entity.UserLecture;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -22,7 +19,7 @@ import static javax.persistence.FetchType.*;
 @Entity
 @Getter
 @Builder
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Lecture {
 

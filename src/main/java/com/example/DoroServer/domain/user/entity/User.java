@@ -5,10 +5,7 @@ import com.example.DoroServer.domain.chat.entity.Chat;
 import com.example.DoroServer.domain.userChat.entity.UserChat;
 import com.example.DoroServer.domain.userLecture.entity.UserLecture;
 import com.example.DoroServer.domain.userNotification.entity.UserNotification;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -18,7 +15,7 @@ import java.util.List;
 @Entity
 @Getter
 @Builder
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class User extends BaseEntity {
 

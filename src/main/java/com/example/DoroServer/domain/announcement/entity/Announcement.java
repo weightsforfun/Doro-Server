@@ -1,10 +1,7 @@
 package com.example.DoroServer.domain.announcement.entity;
 
 import com.example.DoroServer.domain.base.BaseEntity;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,7 +12,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Getter
 @Builder
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Announcement extends BaseEntity {
 

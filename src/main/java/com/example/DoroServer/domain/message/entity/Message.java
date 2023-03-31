@@ -2,17 +2,14 @@ package com.example.DoroServer.domain.message.entity;
 
 import com.example.DoroServer.domain.chat.entity.Chat;
 import com.example.DoroServer.domain.user.entity.User;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
 @Getter
 @Builder
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Message {
 

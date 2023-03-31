@@ -2,10 +2,7 @@ package com.example.DoroServer.domain.userNotification.entity;
 
 import com.example.DoroServer.domain.notification.entity.Notification;
 import com.example.DoroServer.domain.user.entity.User;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import net.bytebuddy.asm.Advice;
 
 import javax.persistence.*;
@@ -14,7 +11,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Builder
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class UserNotification {
 

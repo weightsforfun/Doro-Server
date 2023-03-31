@@ -2,10 +2,7 @@ package com.example.DoroServer.domain.userLecture.entity;
 
 import com.example.DoroServer.domain.lecture.entity.Lecture;
 import com.example.DoroServer.domain.user.entity.User;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -14,7 +11,7 @@ import static javax.persistence.FetchType.LAZY;
 @Entity
 @Getter
 @Builder
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class UserLecture {
 
