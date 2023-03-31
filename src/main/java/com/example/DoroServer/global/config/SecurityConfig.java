@@ -1,5 +1,6 @@
 package com.example.DoroServer.global.config;
 
+import com.example.DoroServer.global.jwt.JwtAuthenticationFilter;
 import com.example.DoroServer.global.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -36,10 +37,10 @@ public class SecurityConfig{
 
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/user/**").hasRole("USER")
-                .anyRequest().authenticated();
+                .anyRequest().authenticated()
 
-                //.and()
-                //.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+                .and()
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }
