@@ -37,7 +37,7 @@ public class SecurityConfig{
 
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/user/**").hasRole("USER")
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
 
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);

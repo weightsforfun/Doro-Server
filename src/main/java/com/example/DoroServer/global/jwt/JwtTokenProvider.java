@@ -49,7 +49,7 @@ public class JwtTokenProvider {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
 
-    public String createToken(Long userId) {
+    public String createToken(String userId) {
         Date now = new Date();
         return Jwts.builder()
                 .setHeaderParam("type","jwt")
@@ -69,7 +69,7 @@ public class JwtTokenProvider {
 
     //토큰에서 회원 정보 추출
     private String getUserPk(String token) {
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().get("userId", String.class);
     }
 
     // 토큰의 유효성, 만료일자 확인
