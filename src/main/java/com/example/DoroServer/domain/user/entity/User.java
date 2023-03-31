@@ -1,6 +1,7 @@
 package com.example.DoroServer.domain.user.entity;
 
 import com.example.DoroServer.domain.base.BaseEntity;
+import com.example.DoroServer.domain.chat.entity.Chat;
 import com.example.DoroServer.domain.userLecture.entity.UserLecture;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -54,8 +55,11 @@ public class User extends BaseEntity {
 
     //== 연관관계 매핑 ==//
 
-    // User와 UserLecture는 다대일(One-to-Many) 관계
+    // User와 UserLecture는 일대다(One-to-Many) 관계
     @OneToMany(mappedBy = "user")
     private List<UserLecture> userLectures = new ArrayList<>();
 
+    // User와 UserChat은 일대다(One-to-Many) 관계
+    @OneToMany(mappedBy = "user")
+    private List<Chat> chats = new ArrayList<>();
 }
