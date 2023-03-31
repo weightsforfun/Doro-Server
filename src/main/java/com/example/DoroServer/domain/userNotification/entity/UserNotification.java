@@ -1,15 +1,14 @@
 package com.example.DoroServer.domain.userNotification.entity;
 
+import com.example.DoroServer.domain.notification.entity.Notification;
+import com.example.DoroServer.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.bytebuddy.asm.Advice;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -24,9 +23,19 @@ public class UserNotification {
     @Column(name = "user_notification_id")
     private Long id; // PK
 
-//    private Long userId;
-
-//    private Long notificationId;
-
     private LocalDateTime expirationPeriod; // 만료 기간
+
+    //== 연관관계 매핑 ==//
+
+    // UserNotification과 User는 다대일(Many-to-One) 관계
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    // UserNotification과 Notification은 다대일(Many-to-One) 관계
+    @ManyToOne
+    @JoinColumn(name = "notification_id")
+    private Notification notification;
+
+
 }
