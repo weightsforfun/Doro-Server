@@ -1,6 +1,5 @@
 package com.example.DoroServer.global.exception;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -9,9 +8,9 @@ import static org.springframework.http.HttpStatus.*;
 
 @Getter
 @RequiredArgsConstructor
-public enum ErrorCode {
+public enum Code {
 
-    OK(OK,"SUCCESS","OK"),
+    SUCCESS(OK,"SUCCESS","OK"),
     //오류 등록 예시 (HTTP_STATUS,ERROR_CODE,MESSAGE)
     EXAMPLE_ERROR(BAD_REQUEST,"EX001","예외 코드 예시입니다."),
     EXAMPLE_ERROR2(REQUEST_TIMEOUT,"EX002","2번째 예외 코드 예시입니다.");
