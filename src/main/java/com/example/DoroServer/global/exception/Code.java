@@ -10,6 +10,8 @@ import static org.springframework.http.HttpStatus.*;
 @Getter
 @RequiredArgsConstructor
 public enum ErrorCode {
+
+    OK(OK,"SUCCESS","OK"),
     //오류 등록 예시 (HTTP_STATUS,ERROR_CODE,MESSAGE)
     EXAMPLE_ERROR(BAD_REQUEST,"EX001","예외 코드 예시입니다."),
     EXAMPLE_ERROR2(REQUEST_TIMEOUT,"EX002","2번째 예외 코드 예시입니다.");
