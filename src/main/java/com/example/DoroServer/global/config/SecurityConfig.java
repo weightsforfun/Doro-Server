@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -17,6 +18,23 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig{
 
     private final JwtTokenProvider jwtTokenProvider;
+
+
+    // 필터를 거치지 않는 요청
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer(){
+        return (web) -> web.ignoring()
+                .antMatchers(
+                        "/favicon.ico",
+                        "/join",
+                        "/login",
+                        "/",
+                        "/swagger-ui.html",
+                        "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/swagger-resources/**",
+                        "/docs/**");
+    }
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -26,14 +44,8 @@ public class SecurityConfig{
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/swagger-resources/**").permitAll()
-                .antMatchers("/swagger-ui/**").permitAll()
-                .antMatchers("/v3/api-docs").permitAll()
-                .antMatchers("/image/**").permitAll()
-                .antMatchers("/users/refresh").permitAll()
 
                 .antMatchers("/test").authenticated()
-                .antMatchers("/login/**").permitAll()
 
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/user/**").hasRole("USER")

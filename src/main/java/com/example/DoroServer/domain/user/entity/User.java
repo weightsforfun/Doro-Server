@@ -31,7 +31,6 @@ import java.util.List;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@NoArgsConstructor
 public class User extends BaseEntity implements UserDetails {
 
     @Id
@@ -81,8 +80,6 @@ public class User extends BaseEntity implements UserDetails {
     // User와 UserNotification은 일대다(One-to-Many) 관계
     @OneToMany(mappedBy = "user")
     private List<UserNotification> userNotifications = new ArrayList<>();
-
-    private String role;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
