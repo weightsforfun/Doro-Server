@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.Date;
 
 
@@ -49,12 +51,16 @@ public class JwtTokenProvider {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
 
-    public String createToken(String userId) {
+    public String createToken(String account, Collection<? extends GrantedAuthority> authorities) {
         Date now = new Date();
+        // sub: account 형태로 저장된다
+        Claims claims = Jwts.claims().setSubject(account);
+        claims.put("role", authorities);
+        log.info("claims={}", claims);
         return Jwts.builder()
                 .setHeaderParam("type","jwt")
                 //Payload에 Private Claim을 담기 위함
-                .claim("userId",userId)
+                .setClaims(claims)
                 //발급시간
                 .setIssuedAt(now)
                 .setExpiration(new Date(System.currentTimeMillis()+accessTime))
@@ -63,13 +69,13 @@ public class JwtTokenProvider {
     }
     // 토큰에서 인증 정보 가져오기 - 권한 처리를 위함
     public Authentication getAuthentication(String token) {
-        UserDetails userDetails = customUserDetailsService.loadUserByUsername(getUserPk(token));
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(getAccount(token));
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
     //토큰에서 회원 정보 추출
-    private String getUserPk(String token) {
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().get("userId", String.class);
+    private String getAccount(String token) {
+        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
     }
 
     // 토큰의 유효성, 만료일자 확인
