@@ -16,8 +16,8 @@ public class BaseEntity{
 
     @CreatedBy
     @Column(updatable = false)
-    private String createdBy;
+    private String createdBy; // 생성 날짜
 
     @LastModifiedBy
-    private String lastModifiedBy;
+    private String lastModifiedBy; // 수정 날짜
 }
