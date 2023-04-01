@@ -27,7 +27,7 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "user_id")
     private Long id;
 
-    private String username;
+    private String account;
 
     private String password;
 
@@ -48,6 +48,15 @@ public class User extends BaseEntity implements UserDetails {
         Collection<GrantedAuthority> collect = new ArrayList<GrantedAuthority>();
         collect.add(this::getRole);
         return collect;
+    }
+
+    @Override
+    public String getUsername() {
+        return account;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     @Override
