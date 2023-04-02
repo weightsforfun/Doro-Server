@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 
 @Component
@@ -29,7 +30,7 @@ public class JwtTokenProvider {
     private final CustomUserDetailsService customUserDetailsService;
     private final UserRepository userRepository;
     private String secretKey;
-    private final String refreshSecretKey;
+    private String refreshSecretKey;
     private final Integer accessTime;
     private final Integer refreshTime;
 
@@ -51,39 +52,28 @@ public class JwtTokenProvider {
     @PostConstruct
     protected void init(){
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
+        refreshSecretKey = Base64.getEncoder().encodeToString(refreshSecretKey.getBytes());
     }
 
-    public String createAccessToken(String account, Collection<? extends GrantedAuthority> authorities) {
+    public String createToken(String account, List<String> roles, Integer tokenValidTime, String key) {
+        Claims claims = Jwts.claims().setSubject(account); // sub: account 형태로 저장
+        claims.put("roles", roles);
         Date now = new Date();
-        // sub: account 형태로 저장된다
-        Claims claims = Jwts.claims().setSubject(account);
-        claims.put("role", authorities);
-        log.info("claims={}", claims);
         return Jwts.builder()
                 .setHeaderParam("type","jwt")
-                //Payload에 Private Claim을 담기 위함
-                .setClaims(claims)
-                //발급시간
-                .setIssuedAt(now)
-                .setExpiration(new Date(System.currentTimeMillis() + accessTime))
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .setClaims(claims) //Payload에 Private Claim을 담기 위함
+                .setIssuedAt(now) //발급시간
+                .setExpiration(new Date(System.currentTimeMillis() + tokenValidTime))
+                .signWith(SignatureAlgorithm.HS256, key)
                 .compact();
     }
 
-    public String createRefreshToken(String account, Collection<? extends GrantedAuthority> authorities) {
-        Date now = new Date();
-        Claims claims = Jwts.claims().setSubject(account);
-        claims.put("role", authorities);
-        log.info("claims={}", claims);
-        return Jwts.builder()
-                .setHeaderParam("type","jwt")
-                //Payload에 Private Claim을 담기 위함
-                .setClaims(claims)
-                //발급시간
-                .setIssuedAt(now)
-                .setExpiration(new Date(System.currentTimeMillis() + refreshTime))
-                .signWith(SignatureAlgorithm.HS256, refreshSecretKey)
-                .compact();
+    public String createAccessToken(String account, List<String> roles) {
+        return this.createToken(account, roles, accessTime, secretKey);
+    }
+
+    public String createRefreshToken(String account, List<String> roles) {
+        return this.createToken(account, roles, refreshTime, refreshSecretKey);
     }
 
     // 토큰에서 인증 정보 가져오기 - 권한 처리를 위함
