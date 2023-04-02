@@ -22,6 +22,7 @@ public class SecurityConfig{
 
 
     // 필터를 거치지 않는 요청
+    // csrf로부터 보호받지 못한다. - 필터 체인 무시와 트레이드 오프
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer(){
         return (web) -> web.ignoring()
