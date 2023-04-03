@@ -31,7 +31,6 @@ import java.util.List;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@NoArgsConstructor
 public class User extends BaseEntity implements UserDetails {
 
     @Id
@@ -65,8 +64,7 @@ public class User extends BaseEntity implements UserDetails {
     @NotNull(message = "사용자 인증코드가 필요합니다.")
     private Long certificationCode; // 사용자 인증코드
 
-    @Column(columnDefinition = "BLOB")
-    private byte[] profileImg;
+    private String profileImg; // 사용자 이미지
 
     //== 연관관계 매핑 ==//
 
@@ -81,8 +79,6 @@ public class User extends BaseEntity implements UserDetails {
     // User와 UserNotification은 일대다(One-to-Many) 관계
     @OneToMany(mappedBy = "user")
     private List<UserNotification> userNotifications = new ArrayList<>();
-
-    private String role;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

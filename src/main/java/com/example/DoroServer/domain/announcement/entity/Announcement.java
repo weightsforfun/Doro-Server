@@ -25,7 +25,6 @@ public class Announcement extends BaseEntity {
 
     private String content; // 공지 내용
 
-    @Column(columnDefinition = "BLOB")
-    private byte[] picture; // 공지 첨부 사진 - 업로드 사이즈 제한 추가 필요
+    private String  picture; // 공지 첨부 사진 - 업로드 사이즈 제한 추가 필요
 
 }
