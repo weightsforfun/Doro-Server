@@ -7,6 +7,7 @@ import com.example.DoroServer.domain.userLecture.entity.UserLecture;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,33 +29,32 @@ public class Lecture {
     @Column(name = "lecture_id")
     private Long id; // PK
 
-    @NotNull
+    @NotBlank
     private String institution; // 강의 기관
 
-    @NotNull
+    @NotBlank
     private String city; // 강의 도시
 
+    @NotBlank
     private String studentGrade; // 청강 학생 학년
 
+    @NotBlank
     private String studentNumber; // 청강 학생 수
 
-    @NotNull
-    private Long mainTutor; // 강의 메인 강사
+    @NotBlank
+    private String  mainTutor; // 강의 메인 강사 수
 
-    @NotNull
-    private Long subTutor; // 강의 서브 강사
+    @NotBlank
+    private String  subTutor; // 강의 서브 강사 수
 
-    private Long staff; // 강의 스태프
+    private String  staff; // 강의 스태프 수
 
-    @NotNull
     @Enumerated(EnumType.STRING)
+    @NotNull
     private LectureStatus status; // 강의 상태 [RECRUITING, ALLOCATION_COMP,FINISH]
 
-    private LocalDateTime lectureDate; // 강의 날짜
-
-    private LocalDateTime enrollStateDate; // 강의 등록 시작 날짜
-
-    private LocalDateTime enrollEndDate; // 강의 등록 종료 날짜
+    @Embedded
+    private LectureDate lectureDate; // 강의 날짜 관련 [lectureStartDates, enrollStateDates, enrollEndDates]
 
     //== 연관관계 매핑 ==//
 
