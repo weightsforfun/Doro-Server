@@ -55,7 +55,7 @@ public class JwtTokenProvider {
         refreshSecretKey = Base64.getEncoder().encodeToString(refreshSecretKey.getBytes());
     }
 
-    public String createToken(String account, List<String> roles, Integer tokenValidTime, String key) {
+    public String createToken(String account, Collection<? extends GrantedAuthority> roles, Integer tokenValidTime, String key) {
         Claims claims = Jwts.claims().setSubject(account); // sub: account 형태로 저장
         claims.put("roles", roles);
         Date now = new Date();
@@ -68,11 +68,11 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public String createAccessToken(String account, List<String> roles) {
+    public String createAccessToken(String account, Collection<? extends GrantedAuthority> roles) {
         return this.createToken(account, roles, accessTime, secretKey);
     }
 
-    public String createRefreshToken(String account, List<String> roles) {
+    public String createRefreshToken(String account, Collection<? extends GrantedAuthority> roles) {
         return this.createToken(account, roles, refreshTime, refreshSecretKey);
     }
 
