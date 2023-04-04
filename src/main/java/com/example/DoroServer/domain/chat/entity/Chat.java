@@ -22,15 +22,11 @@ public class Chat {
 
     private int totalCount; // 채팅방 정원
 
-
     //== 연관관계 매핑 ==//
 
-    // Chat과 UserChat은 일대다(One-to-Many) 관계
-    @OneToMany(mappedBy = "chat")
-    private List<UserChat> userChats = new ArrayList<>();
-
-    // Chat과 Message는 일대다(One-to-Many) 관계
-    @OneToMany(mappedBy = "chat")
+    // Chat과 Message는 일대다(One-to-Many) 관계 DB에서 Message의 chat_id를 Chat의 messages에서 관리
+    @OneToMany
+    @JoinColumn(name = "chat_id")
     private List<Message> messages = new ArrayList<>();
 
 }

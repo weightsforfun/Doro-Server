@@ -54,22 +54,19 @@ public class Lecture {
     private LectureStatus status; // 강의 상태 [RECRUITING, ALLOCATION_COMP,FINISH]
 
     @Embedded
-    private LectureDate lectureDate; // 강의 날짜 관련 [lectureStartDates, enrollStateDates, enrollEndDates]
+    private LectureDate lectureDate; // 강의 날짜 관련 [lectureStartDates, enrollStateDate, enrollEndDate]
 
     //== 연관관계 매핑 ==//
 
-    // Lecture와 LectureContent는 일대일(One-to-One) 관계
-    @OneToOne(fetch = LAZY, cascade = ALL)
+    // Lecture와 LectureContent는 다대일(Many-to-One) 관계
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "lecture_content_id")
     private LectureContent lectureContent; // 강의 내용
 
     // Lecture와 Chat은 일대일(One-to-One) 관계
-    @OneToOne(fetch = LAZY, cascade = ALL)
+    @OneToOne(fetch = LAZY)
     @JoinColumn(name ="chat_id")
     private Chat chat; // 강의 채팅
 
-    // Lecture와 UserLecture는 일대다(One-to-Many) 관계
-    @OneToMany(mappedBy = "lecture")
-    private List<UserLecture> userLectures = new ArrayList<>();
 
 }

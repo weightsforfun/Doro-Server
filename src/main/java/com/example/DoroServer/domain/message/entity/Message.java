@@ -6,6 +6,8 @@ import lombok.*;
 
 import javax.persistence.*;
 
+import static javax.persistence.FetchType.*;
+
 @Entity
 @Getter
 @Builder
@@ -22,13 +24,9 @@ public class Message {
 
     //== 연관관계 매핑 ==//
 
-    // Message와 Chat은 다대일(Many-to-One) 관계
-    @ManyToOne
-    @JoinColumn(name = "chat_id")
-    private Chat chat;
 
     // Message와 User는 다대일(Many-to-One) 관계
-    @ManyToOne
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 

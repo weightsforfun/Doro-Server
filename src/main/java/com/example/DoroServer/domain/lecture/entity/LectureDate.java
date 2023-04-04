@@ -8,9 +8,9 @@ import java.util.List;
 @Embeddable
 public class LectureDate {
 
-    private List<LocalDateTime> lectureStartDates = new ArrayList<>(); // 강의 날짜
-
-    private List<LocalDateTime> enrollStateDates = new ArrayList<>(); // 강의 등록 시작 날짜
-
-    private List<LocalDateTime> enrollEndDates = new ArrayList<>(); // 강의 등록 종료 날짜
+    private List<LocalDateTime> lectureDates = new ArrayList<>(); // 강의 날짜
+//
+    private LocalDateTime enrollStateDates; // 강의 등록 시작 날짜
+    //
+    private LocalDateTime enrollEndDates; // 강의 등록 종료 날짜
 }

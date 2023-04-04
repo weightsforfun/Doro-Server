@@ -22,6 +22,7 @@ import com.example.DoroServer.domain.userNotification.entity.UserNotification;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +51,7 @@ public class User extends BaseEntity implements UserDetails {
 
     private String gender; // 사용자 성별
 
+    @NotBlank(message = "전화번호는 필수입니다.")
     private String phone; // 사용자 전화번호
 
     @Embedded
@@ -61,24 +63,9 @@ public class User extends BaseEntity implements UserDetails {
     @NotNull(message = "사용자 직책이 필요합니다.")
     private String role; // 사용자 직책
 
-    @NotNull(message = "사용자 인증코드가 필요합니다.")
-    private Long certificationCode; // 사용자 인증코드
-
-    private String profileImg; // 사용자 이미지
+    private String profileImg; // 사용자 이미
 
     //== 연관관계 매핑 ==//
-
-    // User와 UserLecture는 일대다(One-to-Many) 관계
-    @OneToMany(mappedBy = "user")
-    private List<UserLecture> userLectures = new ArrayList<>();
-
-    // User와 UserChat은 일대다(One-to-Many) 관계
-    @OneToMany(mappedBy = "user")
-    private List<UserChat> userChats = new ArrayList<>();
-
-    // User와 UserNotification은 일대다(One-to-Many) 관계
-    @OneToMany(mappedBy = "user")
-    private List<UserNotification> userNotifications = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
