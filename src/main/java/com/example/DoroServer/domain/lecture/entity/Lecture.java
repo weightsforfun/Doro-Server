@@ -1,5 +1,6 @@
 package com.example.DoroServer.domain.lecture.entity;
 
+import com.example.DoroServer.domain.base.BaseEntity;
 import com.example.DoroServer.domain.chat.entity.Chat;
 import com.example.DoroServer.domain.lectureContent.entity.LectureContent;
 import com.example.DoroServer.domain.user.entity.User;
@@ -22,7 +23,7 @@ import static javax.persistence.FetchType.*;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Lecture {
+public class Lecture extends BaseEntity {
 
     @Id
     @GeneratedValue

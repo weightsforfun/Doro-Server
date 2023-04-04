@@ -1,5 +1,6 @@
 package com.example.DoroServer.domain.chat.entity;
 
+import com.example.DoroServer.domain.base.BaseEntity;
 import com.example.DoroServer.domain.message.entity.Message;
 import com.example.DoroServer.domain.userChat.entity.UserChat;
 import lombok.*;
@@ -13,7 +14,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Chat {
+public class Chat extends BaseEntity {
 
     @Id
     @GeneratedValue

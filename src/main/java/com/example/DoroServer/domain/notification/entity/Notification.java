@@ -1,5 +1,6 @@
 package com.example.DoroServer.domain.notification.entity;
 
+import com.example.DoroServer.domain.base.BaseEntity;
 import lombok.*;
 
 import javax.persistence.*;
@@ -10,7 +11,7 @@ import javax.validation.constraints.NotBlank;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Notification {
+public class Notification extends BaseEntity {
 
     @Id
     @GeneratedValue

@@ -1,5 +1,6 @@
 package com.example.DoroServer.domain.message.entity;
 
+import com.example.DoroServer.domain.base.BaseEntity;
 import com.example.DoroServer.domain.chat.entity.Chat;
 import com.example.DoroServer.domain.user.entity.User;
 import lombok.*;
@@ -14,7 +15,7 @@ import static javax.persistence.FetchType.*;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Message {
+public class Message extends BaseEntity {
 
     @Id
     @GeneratedValue
