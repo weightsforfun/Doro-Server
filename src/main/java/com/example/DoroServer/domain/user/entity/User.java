@@ -39,14 +39,16 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "user_id")
     private Long id; // PK
 
-    @NotNull(message = "아이디는 필수입니다.")
+    @NotBlank(message = "아이디는 필수입니다.")
     private String account;
     
-    @NotNull(message = "비밀번호는 필수입니다.")
+    @NotBlank(message = "비밀번호는 필수입니다.")
     private String password; // 사용자 비밀번호
 
+    @NotBlank
     private String name; // 사용자 이름
 
+    @NotNull
     private int age; // 사용자 나이
 
     private String gender; // 사용자 성별

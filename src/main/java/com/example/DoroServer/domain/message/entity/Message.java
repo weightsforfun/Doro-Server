@@ -5,6 +5,7 @@ import com.example.DoroServer.domain.user.entity.User;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 import static javax.persistence.FetchType.*;
 
@@ -20,6 +21,7 @@ public class Message {
     @Column(name = "message_id")
     private Long id; //PK
 
+    @NotNull
     private String content; // 메시지 내용
 
     //== 연관관계 매핑 ==//

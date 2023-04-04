@@ -7,6 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Entity
@@ -21,8 +22,10 @@ public class Announcement extends BaseEntity {
     @Column(name = "announcement_id")
     private Long id; //PK
 
+    @NotBlank
     private String title; // 공지 제목
 
+    @NotBlank
     private String content; // 공지 내용
 
     private String  picture; // 공지 첨부 사진 - 업로드 사이즈 제한 추가 필요
