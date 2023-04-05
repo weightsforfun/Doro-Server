@@ -17,9 +17,9 @@ public class ExceptionController {
     @GetMapping("/error/{id}")
     public SuccessResponse exception(@PathVariable("id") String id){
         if(id.equals("ex")){
-            throw new BaseException(EXAMPLE_ERROR);
+            throw new BaseException(BAD_REQUEST);
         } else if (id.equals("ex2")) {
-            throw new BaseException(EXAMPLE_ERROR2);
+            throw new BaseException(BAD_REQUEST);
         } else {
             User user= User.builder()
                     .age(10)
