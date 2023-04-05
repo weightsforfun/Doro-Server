@@ -25,9 +25,5 @@ public class Chat extends BaseEntity {
 
     //== 연관관계 매핑 ==//
 
-    // Chat과 Message는 일대다(One-to-Many) 관계 DB에서 Message의 chat_id를 Chat의 messages에서 관리
-    @OneToMany
-    @JoinColumn(name = "chat_id")
-    private List<Message> messages = new ArrayList<>();
 
 }
