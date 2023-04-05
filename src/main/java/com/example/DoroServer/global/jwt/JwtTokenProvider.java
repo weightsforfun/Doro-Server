@@ -1,6 +1,8 @@
 package com.example.DoroServer.global.jwt;
 
 import com.example.DoroServer.domain.user.repository.UserRepository;
+import com.example.DoroServer.global.exception.Code;
+import com.example.DoroServer.global.exception.JwtAuthenticationException;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -92,20 +94,15 @@ public class JwtTokenProvider {
         try {
             Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
             return !claims.getBody().getExpiration().before(new Date());
-        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            servletRequest.setAttribute("exception","MalformedJwtException");
-            log.info("잘못된 JWT 서명입니다.");
-        } catch (ExpiredJwtException e) {
-            servletRequest.setAttribute("exception","ExpiredJwtException");
-            log.info("만료된 JWT 토큰입니다.");
-        } catch (UnsupportedJwtException e) {
-            servletRequest.setAttribute("exception","UnsupportedJwtException");
-            log.info("지원되지 않는 JWT 토큰입니다.");
-        } catch (IllegalArgumentException e) {
-            servletRequest.setAttribute("exception","IllegalArgumentException");
-            log.info("JWT 토큰이 잘못되었습니다.");
+        }catch(io.jsonwebtoken.security.SecurityException | MalformedJwtException e){
+            throw new JwtAuthenticationException(Code.JWT_BAD_REQUEST);
+        }catch(ExpiredJwtException e){
+            throw new JwtAuthenticationException(Code.JWT_TOKEN_EXPIRED);
+        }catch(UnsupportedJwtException e){
+            throw new JwtAuthenticationException(Code.JWT_UNSUPPORTED_TOKEN);
+        }catch(IllegalArgumentException e){
+            throw new JwtAuthenticationException(Code.JWT_BAD_REQUEST);
         }
-        return false;
     }
 
     public String resolveToken(HttpServletRequest request){
