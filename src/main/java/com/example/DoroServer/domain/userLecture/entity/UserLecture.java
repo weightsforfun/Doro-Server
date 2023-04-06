@@ -1,10 +1,12 @@
 package com.example.DoroServer.domain.userLecture.entity;
 
 import com.example.DoroServer.domain.lecture.entity.Lecture;
+import com.example.DoroServer.domain.lecture.entity.LectureStatus;
 import com.example.DoroServer.domain.user.entity.User;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 import static javax.persistence.FetchType.LAZY;
 
@@ -23,6 +25,9 @@ public class UserLecture {
     @Enumerated(EnumType.STRING)
     private TutorRole tutorRole; // 튜터 역할 [MAIN_TUTOR,SUB_TUTOR,STAFF]
 
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    private LectureStatus status;
     //== 연관관계 매핑 ==//
 
     // UserLecture와 User는 다대일(Many-to-One) 관계
@@ -34,7 +39,6 @@ public class UserLecture {
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "lecture_id")
     private Lecture lecture;
-
 
 
 }
