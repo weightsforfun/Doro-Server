@@ -1,5 +1,6 @@
 package com.example.DoroServer.domain.chat.entity;
 
+import com.example.DoroServer.domain.base.BaseEntity;
 import com.example.DoroServer.domain.message.entity.Message;
 import com.example.DoroServer.domain.userChat.entity.UserChat;
 import lombok.*;
@@ -13,7 +14,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Chat {
+public class Chat extends BaseEntity {
 
     @Id
     @GeneratedValue
@@ -22,15 +23,7 @@ public class Chat {
 
     private int totalCount; // 채팅방 정원
 
-
     //== 연관관계 매핑 ==//
 
-    // Chat과 UserChat은 일대다(One-to-Many) 관계
-    @OneToMany(mappedBy = "chat")
-    private List<UserChat> userChats = new ArrayList<>();
-
-    // Chat과 Message는 일대다(One-to-Many) 관계
-    @OneToMany(mappedBy = "chat")
-    private List<Message> messages = new ArrayList<>();
 
 }
