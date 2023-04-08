@@ -2,6 +2,7 @@ package com.example.DoroServer.domain.user.entity;
 
 import com.example.DoroServer.domain.base.BaseEntity;
 
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -41,7 +42,7 @@ public class User extends BaseEntity implements UserDetails {
 
     @NotBlank(message = "아이디는 필수입니다.")
     private String account;
-    
+
     @NotBlank(message = "비밀번호는 필수입니다.")
     private String password; // 사용자 비밀번호
 
@@ -49,9 +50,10 @@ public class User extends BaseEntity implements UserDetails {
     private String name; // 사용자 이름
 
     @NotNull
-    private int age; // 사용자 나이
+    private LocalDate birth; // 생년월일
 
-    private String gender; // 사용자 성별
+    @Enumerated(EnumType.STRING)
+    private Gender gender; // 사용자 성별
 
     @NotBlank(message = "전화번호는 필수입니다.")
     private String phone; // 사용자 전화번호
