@@ -17,18 +17,13 @@ import lombok.ToString;
 @AllArgsConstructor
 public class FindAllLecturesRes {
 
-    @NotEmpty
     private String title;
-    @NotEmpty
     private LectureStatus lectureStatus;
-    @NotEmpty
     private LocalDateTime enrollEndDate;
-    @NotEmpty
     private String city;
-    @NotEmpty
     private String mainTutor;
-    @NotEmpty
     private String subTutor;
+    private String time;
 
     public static FindAllLecturesRes fromEntity(Lecture lecture) {
         return FindAllLecturesRes.builder()
@@ -38,6 +33,7 @@ public class FindAllLecturesRes {
                 .city(lecture.getCity())
                 .mainTutor(lecture.getMainTutor())
                 .subTutor(lecture.getSubTutor())
+                .title(lecture.getTime())
                 .build();
     }
 
