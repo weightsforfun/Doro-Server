@@ -1,23 +1,30 @@
 package com.example.DoroServer.global.message;
 
-import com.example.DoroServer.global.auth.dto.AuthRequestDto.SendAuthNumDto;
-import com.example.DoroServer.global.auth.dto.AuthRequestDto.VerifyAuthNumDto;
+import com.example.DoroServer.global.auth.dto.SendAuthNumReq;
+import com.example.DoroServer.global.auth.dto.VerifyAuthNumReq;
+import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
 import com.example.DoroServer.global.exception.MessageException;
+import com.example.DoroServer.global.jwt.RedisService;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Random;
+import lombok.extern.slf4j.Slf4j;
 import net.nurigo.sdk.NurigoApp;
 import net.nurigo.sdk.message.model.KakaoOption;
 import net.nurigo.sdk.message.model.Message;
 import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
-import net.nurigo.sdk.message.response.SingleMessageSentResponse;
 import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Service
+@Slf4j
 public class MessageServiceImpl implements MessageService{
 
     private final DefaultMessageService defaultMessageService;
+    private final RedisService redisService;
     private final String fromNumber;
     private final String pfId;
     private final String templateId;
@@ -27,16 +34,17 @@ public class MessageServiceImpl implements MessageService{
                             @Value("${solapi.from-number}") String fromNumber,
                             @Value("${solapi.domain}") String domain,
                             @Value("${solapi.pfid}") String pfid,
-                            @Value("${solapi.templateId}") String templateId) {
+                            @Value("${solapi.templateId}") String templateId,
+                            RedisService redisService) {
         this.defaultMessageService = NurigoApp.INSTANCE.initialize(apiKey, apiSecret, domain);
         this.fromNumber = fromNumber;
         this.pfId = pfid;
         this.templateId = templateId;
+        this.redisService = redisService;
     }
-
     @Transactional
     @Override
-    public void sendAuthNum(SendAuthNumDto sendAuthNumDto) {
+    public void sendAuthNum(SendAuthNumReq sendAuthNumReq) {
         try{
             String authNum = numberGen(6);
             KakaoOption kakaoOption = new KakaoOption();
@@ -49,20 +57,29 @@ public class MessageServiceImpl implements MessageService{
 
             Message message = new Message();
             message.setFrom(fromNumber);
-            message.setTo(sendAuthNumDto.getPhone());
+            message.setTo(sendAuthNumReq.getPhone());
             message.setKakaoOptions(kakaoOption);
 
             defaultMessageService.sendOne(new SingleMessageSendingRequest(message));
+            log.info("메시지 전송 성공");
+            redisService.setValues(sendAuthNumReq.getPhone(), authNum, Duration.ofSeconds(300));
+            log.info("Redis 저장 성공");
         }catch (Exception e){
             throw new MessageException(Code.MESSAGE_SEND_FAILED);
         }
 
 
+
     }
 
     @Override
-    public void verifyAuthNum(VerifyAuthNumDto verifyAuthNumDto) {
-
+    public void verifyAuthNum(VerifyAuthNumReq verifyAuthNumReq) {
+        String redisAuthNum = redisService.getValues(verifyAuthNumReq.getPhone());
+        if(redisAuthNum == null || !redisAuthNum.equals(verifyAuthNumReq.getAuthNum())){
+            throw new BaseException(Code.VERIFICATION_DID_NOT_MATCH);
+        }
+        redisService.deleteValues(verifyAuthNumReq.getPhone());
+        redisService.setValues(verifyAuthNumReq.getPhone(), "Verified", Duration.ofMinutes(30));
     }
 
     /**
