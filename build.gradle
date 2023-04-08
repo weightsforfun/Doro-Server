@@ -52,6 +52,8 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
 	// Redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	// 알림톡 (Solapi)
+	implementation 'net.nurigo:sdk:4.2.9'
 }
 
 tasks.named('test') {
