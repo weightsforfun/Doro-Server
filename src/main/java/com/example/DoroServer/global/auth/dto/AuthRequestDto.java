@@ -10,7 +10,7 @@ import lombok.Getter;
 public class AuthRequestDto {
 
     @Getter
-    public static class LoginDto{
+    public static class JoinDto{
         @NotBlank
         private String account;
 
@@ -54,6 +54,16 @@ public class AuthRequestDto {
         private String role;
 
         private String profileImg;
+    }
+
+    @Getter
+    public static class SendAuthNumDto{
+        @NotBlank
+        private String name;
+
+        @NotBlank
+        @Pattern(regexp = "^01([016789])-?([0-9]{3,4})-?([0-9]{4})$", message = "올바른 휴대폰 번호 형식이 아닙니다.")
+        private String phone;
     }
 
 }
