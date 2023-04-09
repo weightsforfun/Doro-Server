@@ -5,6 +5,8 @@ import com.example.DoroServer.domain.user.entity.StudentStatus;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.entity.UserRole;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import lombok.Getter;
 
@@ -24,7 +26,7 @@ public class JoinReq {
     @NotBlank
     private String name;
 
-    @NotBlank
+    @NotNull
     private int age;
 
     @NotBlank
@@ -43,13 +45,13 @@ public class JoinReq {
     @NotBlank
     private String major;
 
-    @NotBlank
+    @NotNull
     private StudentStatus studentStatus;
 
-    @NotBlank
+    @NotNull
     private int generation;
 
-    @NotBlank
+    @NotNull
     private UserRole role;
 
     @NotBlank
@@ -57,7 +59,7 @@ public class JoinReq {
 
     private String profileImg;
 
-    public User toEntity(){
+    public User toUserEntity(){
         return User.builder()
             .account(account)
             .password(password)
