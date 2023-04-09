@@ -60,10 +60,10 @@ public class MessageServiceImpl implements MessageService{
             message.setTo(sendAuthNumReq.getPhone());
             message.setKakaoOptions(kakaoOption);
 
-            defaultMessageService.sendOne(new SingleMessageSendingRequest(message));
-            log.info("메시지 전송 성공");
             redisService.setValues(sendAuthNumReq.getPhone(), authNum, Duration.ofSeconds(300));
             log.info("Redis 저장 성공");
+            defaultMessageService.sendOne(new SingleMessageSendingRequest(message));
+            log.info("메시지 전송 성공");
         }catch (Exception e){
             throw new MessageException(Code.MESSAGE_SEND_FAILED);
         }
