@@ -1,6 +1,9 @@
 package com.example.DoroServer.global.auth.dto;
 
+import com.example.DoroServer.domain.user.entity.Degree;
 import com.example.DoroServer.domain.user.entity.StudentStatus;
+import com.example.DoroServer.domain.user.entity.User;
+import com.example.DoroServer.domain.user.entity.UserRole;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import lombok.Getter;
@@ -47,7 +50,32 @@ public class JoinReq {
     private int generation;
 
     @NotBlank
-    private String role;
+    private UserRole role;
+
+    @NotBlank
+    private String doroAuth;
 
     private String profileImg;
+
+    public User toEntity(){
+        return User.builder()
+            .account(account)
+            .password(password)
+            .name(name)
+            .age(age)
+            .gender(gender)
+            .phone(phone)
+            .degree(
+                Degree.builder()
+                    .school(school)
+                    .studentId(studentId)
+                    .major(major)
+                    .studentStatus(studentStatus)
+                    .build()
+            )
+            .generation(generation)
+            .role(role)
+            .profileImg(profileImg)
+            .build();
+    }
 }
