@@ -64,8 +64,9 @@ public class User extends BaseEntity implements UserDetails {
     @NotNull(message = "사용자 기수가 필요합니다.")
     private int generation; // 사용자 기수
 
+    @Enumerated(EnumType.STRING)
     @NotNull(message = "사용자 직책이 필요합니다.")
-    private String role; // 사용자 직책
+    private UserRole role; // 사용자 직책
 
     private String profileImg; // 사용자 이미
 
@@ -74,7 +75,7 @@ public class User extends BaseEntity implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> collect = new ArrayList<GrantedAuthority>();
-        collect.add(this::getRole);
+        collect.add(() -> String.valueOf(this.getRole()));
         return collect;
     }
 
