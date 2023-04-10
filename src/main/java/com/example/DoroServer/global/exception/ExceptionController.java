@@ -1,8 +1,10 @@
 package com.example.DoroServer.global.exception;
 
 
+import com.example.DoroServer.domain.user.entity.Gender;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.global.common.SuccessResponse;
+import java.time.LocalDate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,15 +24,15 @@ public class ExceptionController {
             throw new BaseException(BAD_REQUEST);
         } else {
             User user= User.builder()
-                    .age(10)
+                    .birth(LocalDate.of(1999,8,10))
                     .phone("123123")
                     .name("youn")
-                    .gender(id).build();
+                    .gender(Gender.FEMALE).build();
             User user2= User.builder()
-                    .age(11)
+                    .birth(LocalDate.of(1999,8,10))
                     .phone("1231313123")
                     .name("oh")
-                    .gender(id).build();
+                    .gender(Gender.MALE).build();
             User[] arr=new User[2];
             arr[0]=user;
             arr[1]=user2;

@@ -1,14 +1,16 @@
 package com.example.DoroServer.global.auth.dto;
 
 import com.example.DoroServer.domain.user.entity.Degree;
+import com.example.DoroServer.domain.user.entity.Gender;
 import com.example.DoroServer.domain.user.entity.StudentStatus;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.entity.UserRole;
+import java.time.LocalDate;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import lombok.Getter;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Getter
 public class JoinReq {
@@ -27,10 +29,10 @@ public class JoinReq {
     private String name;
 
     @NotNull
-    private int age;
+    private LocalDate birth;
 
-    @NotBlank
-    private String gender;
+    @NotNull
+    private Gender gender;
 
     @NotBlank
     @Pattern(regexp = "^01([016789])-?([0-9]{3,4})-?([0-9]{4})$", message = "올바른 휴대폰 번호 형식이 아닙니다.")
@@ -64,7 +66,7 @@ public class JoinReq {
             .account(account)
             .password(password)
             .name(name)
-            .age(age)
+            .birth(birth)
             .gender(gender)
             .phone(phone)
             .degree(
