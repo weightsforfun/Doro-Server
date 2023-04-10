@@ -40,8 +40,12 @@ public class AuthServiceImpl implements AuthService{
     @Override
     public void join(JoinReq joinReq) {
         // 레디스 인증된 번호 조회
-        if(!"Verified".equals(redisService.getValues(joinReq.getPhone()))) {
+        if(!"Verified".equals(redisService.getValues("JOIN" + joinReq.getPhone()))) {
             throw new BaseException(Code.UNAUTHORIZED_PHONE_NUMBER);
+        }
+        // 휴대폰 번호 중복 체크
+        if(userRepository.existsByPhone(joinReq.getPhone())){
+            throw new BaseException(Code.EXIST_PHONE);
         }
         // 비밀번호, 비밀번호 확인 비교
         if(!joinReq.getPassword().equals(joinReq.getPasswordCheck())){
@@ -68,5 +72,15 @@ public class AuthServiceImpl implements AuthService{
         if(userRepository.existsByAccount(account)){
             throw new BaseException(Code.EXIST_ACCOUNT);
         }
+    }
+
+    @Override
+    public String findAccount(String phone) {
+        if(!"Verified".equals(redisService.getValues("ACCOUNT" + phone))) {
+            throw new BaseException(Code.UNAUTHORIZED_PHONE_NUMBER);
+        }
+        User user = userRepository.findByPhone(phone).orElseThrow(()
+            -> new BaseException(Code.ACCOUNT_NOT_FOUND));
+        return user.getAccount();
     }
 }

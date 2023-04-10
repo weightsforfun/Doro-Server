@@ -98,6 +98,15 @@ public class AuthController {
         authService.checkAccount(account);
         return SuccessResponse.successResponse("사용 가능한 아이디입니다.");
     }
+
+    @Operation(summary = "001_", description = "아이디 찾기")
+    @GetMapping("/find/account")
+    public SuccessResponse<String> findAccount(@RequestParam String phone){
+        String account = authService.findAccount(phone);
+        return SuccessResponse.successResponse(account);
+    }
+
+
     private String createAccessToken(UsernamePasswordAuthenticationToken authenticationToken) {
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);

@@ -1,6 +1,8 @@
 package com.example.DoroServer.global.auth.dto;
 
+import com.example.DoroServer.global.auth.dto.SendAuthNumReq.MessageType;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import lombok.Getter;
 
@@ -12,4 +14,7 @@ public class VerifyAuthNumReq {
 
     @NotBlank
     private String authNum;
+
+    @NotNull
+    private MessageType messageType;
 }
