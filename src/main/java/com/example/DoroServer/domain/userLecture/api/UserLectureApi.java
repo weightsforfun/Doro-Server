@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.*;
 public class UserLectureApi {
 
     @GetMapping("/lectures/{id}")
-    public SuccessResponse findAllTutors(@PathVariable("id") String id) {
+    public SuccessResponse findAllTutors(@PathVariable("id") Long id) {
         //fetchjoin 필요
         return SuccessResponse.successResponse(id + "th tutors");
     }
 
     @GetMapping("/users/{id}")
-    public SuccessResponse findMyLectures(@PathVariable("id") String id) {
+    public SuccessResponse findMyLectures(@PathVariable("id") Long id) {
         //fetchjoin필요
         return SuccessResponse.successResponse(id + "user's lectures");
     }
