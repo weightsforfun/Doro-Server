@@ -32,22 +32,16 @@ public class Lecture extends BaseEntity {
 
     private String title; // 강의 제목
 
-    @NotBlank
     private String institution; // 강의 기관
 
-    @NotBlank
     private String city; // 강의 도시
 
-    @NotBlank
     private String studentGrade; // 강의 대상
 
-    @NotBlank
     private String studentNumber; // 인원수
 
-    @NotBlank
     private String  mainTutor; // 강의 메인 강사 수
 
-    @NotBlank
     private String  subTutor; // 강의 서브 강사 수
 
     private String  staff; // 강의 스태프 수
@@ -57,7 +51,6 @@ public class Lecture extends BaseEntity {
     private String time; // 시간
 
     @Enumerated(EnumType.STRING)
-    @NotNull
     private LectureStatus status; // 강의 상태 [RECRUITING, ALLOCATION_COMP,FINISH]
 
     @Embedded
@@ -74,6 +67,10 @@ public class Lecture extends BaseEntity {
     @OneToOne(fetch = LAZY)
     @JoinColumn(name ="chat_id")
     private Chat chat; // 강의 채팅
+
+    public void setLectureContent(LectureContent lectureContent){
+        this.lectureContent=lectureContent;
+    }
 
 
 }
