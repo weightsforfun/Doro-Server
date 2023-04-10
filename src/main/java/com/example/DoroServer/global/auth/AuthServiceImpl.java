@@ -9,6 +9,7 @@ import com.example.DoroServer.global.exception.Code;
 import com.example.DoroServer.global.jwt.RedisService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,15 +17,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class AuthServiceImpl implements AuthService{
 
+    private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final RedisService redisService;
     private final String DORO_ADMIN;
     private final String DORO_USER;
 
-    public AuthServiceImpl(UserRepository userRepository,
+
+    public AuthServiceImpl(PasswordEncoder passwordEncoder,
+                            UserRepository userRepository,
                             RedisService redisService,
                             @Value("${doro.admin}") String doro_admin,
                             @Value("${doro.user}") String doro_user) {
+        this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.redisService = redisService;
         DORO_ADMIN = doro_admin;
@@ -53,6 +58,7 @@ public class AuthServiceImpl implements AuthService{
             throw new BaseException(Code.DORO_USER_AUTH_FAILED);
         }
         User user = joinReq.toUserEntity();
+        user.updatePassword(passwordEncoder.encode(joinReq.getPassword()));
         userRepository.save(user);
     }
 
