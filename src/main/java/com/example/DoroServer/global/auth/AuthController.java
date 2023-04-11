@@ -1,6 +1,7 @@
 package com.example.DoroServer.global.auth;
 
 import com.example.DoroServer.domain.user.repository.UserRepository;
+import com.example.DoroServer.global.auth.dto.ChangePasswordReq;
 import com.example.DoroServer.global.auth.dto.JoinReq;
 import com.example.DoroServer.global.auth.dto.LoginReq;
 import com.example.DoroServer.global.auth.dto.SendAuthNumReq;
@@ -106,6 +107,13 @@ public class AuthController {
         return SuccessResponse.successResponse(account);
     }
 
+    @Operation(summary = "001_", description = "비밀번호 변경")
+    @PostMapping("/change/password")
+    public SuccessResponse<String> changePassword(@RequestBody ChangePasswordReq changePasswordReq){
+        authService.changePassword(changePasswordReq);
+        return SuccessResponse.successResponse("비밀번호가 변경되었습니다.");
+    }
+
 
     private String createAccessToken(UsernamePasswordAuthenticationToken authenticationToken) {
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
@@ -113,6 +121,7 @@ public class AuthController {
         log.info("AccessToken 생성 준비 끝");
         return tokenProvider.createAccessToken(authentication.getName(), authentication.getAuthorities());
     }
+
     private String createRefreshToken(UsernamePasswordAuthenticationToken authenticationToken) {
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(authenticationToken.getName());
         return tokenProvider.createRefreshToken(userDetails.getUsername(), userDetails.getAuthorities());
