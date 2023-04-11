@@ -54,25 +54,28 @@ public class JwtTokenProvider {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
 
-    public String createToken(String account, Collection<? extends GrantedAuthority> roles, Integer tokenValidTime, String key) {
+
+    public String createAccessToken(String account, Collection<? extends GrantedAuthority> roles) {
         Claims claims = Jwts.claims().setSubject(account); // sub: account 형태로 저장
         claims.put("roles", roles);
         Date now = new Date();
         return Jwts.builder()
-                .setHeaderParam("type","jwt")
-                .setClaims(claims) //Payload에 Private Claim을 담기 위함
-                .setIssuedAt(now) //발급시간
-                .setExpiration(new Date(System.currentTimeMillis() + tokenValidTime))
-                .signWith(SignatureAlgorithm.HS256, key)
-                .compact();
+            .setHeaderParam("type","jwt")
+            .setClaims(claims) //Payload에 Private Claim을 담기 위함
+            .setIssuedAt(now) //발급시간
+            .setExpiration(new Date(System.currentTimeMillis() + accessTime))
+            .signWith(SignatureAlgorithm.HS256, secretKey)
+            .compact();
     }
 
-    public String createAccessToken(String account, Collection<? extends GrantedAuthority> roles) {
-        return this.createToken(account, roles, accessTime, secretKey);
-    }
-
-    public String createRefreshToken(String account, Collection<? extends GrantedAuthority> roles) {
-        return this.createToken(account, roles, refreshTime, secretKey);
+    public String createRefreshToken() {
+        Date now = new Date();
+        return Jwts.builder()
+            .setHeaderParam("type","jwt")
+            .setIssuedAt(now) //발급시간
+            .setExpiration(new Date(System.currentTimeMillis() + refreshTime))
+            .signWith(SignatureAlgorithm.HS256, secretKey)
+            .compact();
     }
 
     // 토큰에서 인증 정보 가져오기 - 권한 처리를 위함

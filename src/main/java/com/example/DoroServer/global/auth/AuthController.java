@@ -68,15 +68,16 @@ public class AuthController {
         log.info("AuthenticationToken.getCredentials={}", authenticationToken.getCredentials());
         log.info("AuthenticationToken={}", authenticationToken);
         String accessToken = createAccessToken(authenticationToken);
-        String refreshToken = createRefreshToken(authenticationToken);
+        String refreshToken = createRefreshToken();
 
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("Authorization", "Bearer " + accessToken);
+        httpHeaders.add("Authorization", accessToken);
 
-        redisService.setValues(loginReq.getAccount(), refreshToken, Duration.ofDays(180));
+        redisService.setValues("RTK" + loginReq.getAccount(), refreshToken, Duration.ofDays(60));
 
         return ResponseEntity.ok()
-            .headers(httpHeaders).build();
+            .headers(httpHeaders)
+            .body(refreshToken);
     }
 
     @Operation(summary = "001_", description = "인증번호 전송")
@@ -115,6 +116,7 @@ public class AuthController {
     }
 
 
+
     private String createAccessToken(UsernamePasswordAuthenticationToken authenticationToken) {
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -122,9 +124,8 @@ public class AuthController {
         return tokenProvider.createAccessToken(authentication.getName(), authentication.getAuthorities());
     }
 
-    private String createRefreshToken(UsernamePasswordAuthenticationToken authenticationToken) {
-        UserDetails userDetails = customUserDetailsService.loadUserByUsername(authenticationToken.getName());
-        return tokenProvider.createRefreshToken(userDetails.getUsername(), userDetails.getAuthorities());
+    private String createRefreshToken() {
+        return tokenProvider.createRefreshToken();
     }
 
 
