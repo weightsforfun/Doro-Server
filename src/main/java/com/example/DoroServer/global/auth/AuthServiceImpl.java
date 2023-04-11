@@ -45,10 +45,10 @@ public class AuthServiceImpl implements AuthService{
         if(!"Verified".equals(redisService.getValues("JOIN" + joinReq.getPhone()))) {
             throw new BaseException(Code.UNAUTHORIZED_PHONE_NUMBER);
         }
-        // 휴대폰 번호 중복 체크
-        if(userRepository.existsByPhone(joinReq.getPhone())){
-            throw new BaseException(Code.EXIST_PHONE);
-        }
+//        // 휴대폰 번호 중복 체크
+//        if(userRepository.existsByPhone(joinReq.getPhone())){
+//            throw new BaseException(Code.EXIST_PHONE);
+//        }
         // 비밀번호, 비밀번호 확인 비교
         if(!joinReq.getPassword().equals(joinReq.getPasswordCheck())){
             throw new BaseException(Code.PASSWORD_DID_NOT_MATCH);
