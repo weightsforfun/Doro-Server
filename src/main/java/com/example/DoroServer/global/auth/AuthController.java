@@ -4,9 +4,13 @@ import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.global.auth.dto.ChangePasswordReq;
 import com.example.DoroServer.global.auth.dto.JoinReq;
 import com.example.DoroServer.global.auth.dto.LoginReq;
+import com.example.DoroServer.global.auth.dto.ReissueReq;
 import com.example.DoroServer.global.auth.dto.SendAuthNumReq;
 import com.example.DoroServer.global.auth.dto.VerifyAuthNumReq;
 import com.example.DoroServer.global.common.SuccessResponse;
+import com.example.DoroServer.global.exception.BaseException;
+import com.example.DoroServer.global.exception.Code;
+import com.example.DoroServer.global.exception.JwtAuthenticationException;
 import com.example.DoroServer.global.jwt.CustomUserDetailsService;
 import com.example.DoroServer.global.jwt.JwtTokenProvider;
 import com.example.DoroServer.global.jwt.RedisService;
@@ -14,6 +18,7 @@ import com.example.DoroServer.global.message.MessageService;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import java.time.Duration;
+import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -115,6 +121,46 @@ public class AuthController {
         return SuccessResponse.successResponse("비밀번호가 변경되었습니다.");
     }
 
+    @Operation(summary = "001_", description = "토큰 재발급")
+    @PostMapping("/reissue")
+    public ResponseEntity<?> reissue(@RequestBody ReissueReq reissueReq){
+        if(!tokenProvider.validateToken(reissueReq.getRefreshToken())){
+            throw new JwtAuthenticationException(Code.JWT_BAD_REQUEST);
+        }
+        Authentication authentication = tokenProvider.getAuthentication(
+            reissueReq.getAccessToken());
+        String refreshToken = redisService.getValues("RTK" + authentication.getName());
+        if(!reissueReq.getRefreshToken().equals(refreshToken)){
+            throw new JwtAuthenticationException(Code.REFRESH_TOKEN_DID_NOT_MATCH);
+        }
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
+            = new UsernamePasswordAuthenticationToken(authentication.getName(), null,
+                                            authentication.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+
+        String newAccessToken = tokenProvider.createAccessToken(
+            usernamePasswordAuthenticationToken.getName(),
+            usernamePasswordAuthenticationToken.getAuthorities());
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("Authorization", newAccessToken);
+
+        return ResponseEntity.ok()
+            .headers(httpHeaders).build();
+    }
+
+    private String createReissueAccessToken(String account) {
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(account);
+
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
+            = new UsernamePasswordAuthenticationToken(userDetails.getUsername(),
+            null, userDetails.getAuthorities());
+
+        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+        log.info("AuthenticationToken={}", usernamePasswordAuthenticationToken);
+        return tokenProvider.createAccessToken(usernamePasswordAuthenticationToken.getName(),
+            usernamePasswordAuthenticationToken.getAuthorities());
+    }
 
 
     private String createAccessToken(UsernamePasswordAuthenticationToken authenticationToken) {
