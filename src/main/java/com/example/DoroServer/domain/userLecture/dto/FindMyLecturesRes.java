@@ -24,11 +24,11 @@ public class FindMyLecturesRes {
     private String time;
     private TutorRole tutorRole;
 
-    private static FindMyLecturesRes fromEntity(UserLecture userLecture){
+    public static FindMyLecturesRes fromEntity(UserLecture userLecture){
         Lecture lecture=userLecture.getLecture();
         return FindMyLecturesRes.builder()
                 .title(lecture.getTitle())
-                .lectureStatus(userLecture.getStatus())
+                .lectureStatus(lecture.getStatus())
                 .enrollEndDate(lecture.getLectureDate().getEnrollEndDate())
                 .city(lecture.getCity())
                 .time(lecture.getTime())
