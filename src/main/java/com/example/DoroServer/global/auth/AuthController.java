@@ -131,6 +131,7 @@ public class AuthController {
         Authentication authentication = tokenProvider.getAuthentication(
             reissueReq.getAccessToken().substring(7));
         String refreshToken = redisService.getValues("RTK" + authentication.getName());
+
         if(!reissueReq.getRefreshToken().equals(refreshToken)){
             throw new JwtAuthenticationException(Code.REFRESH_TOKEN_DID_NOT_MATCH);
         }
@@ -164,6 +165,8 @@ public class AuthController {
         }
         Long expiration = tokenProvider.getExpiration(accessToken);
         redisService.setValues(accessToken, "logout", Duration.ofMillis(expiration));
+
+        SecurityContextHolder.clearContext();
 
         return SuccessResponse.successResponse("로그아웃 완료");
     }
