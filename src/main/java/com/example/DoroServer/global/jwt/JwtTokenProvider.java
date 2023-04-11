@@ -32,7 +32,6 @@ public class JwtTokenProvider {
     private final CustomUserDetailsService customUserDetailsService;
     private final UserRepository userRepository;
     private String secretKey;
-    private String refreshSecretKey;
     private final Integer accessTime;
     private final Integer refreshTime;
 
@@ -46,7 +45,6 @@ public class JwtTokenProvider {
         this.userRepository = userRepository;
         this.customUserDetailsService = customUserDetailsService;
         this.secretKey = secretKey;
-        this.refreshSecretKey = refreshSecretKey;
         this.accessTime = accessTime;
         this.refreshTime = refreshTime;
     }
@@ -54,7 +52,6 @@ public class JwtTokenProvider {
     @PostConstruct
     protected void init(){
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
-        refreshSecretKey = Base64.getEncoder().encodeToString(refreshSecretKey.getBytes());
     }
 
     public String createToken(String account, Collection<? extends GrantedAuthority> roles, Integer tokenValidTime, String key) {
@@ -75,7 +72,7 @@ public class JwtTokenProvider {
     }
 
     public String createRefreshToken(String account, Collection<? extends GrantedAuthority> roles) {
-        return this.createToken(account, roles, refreshTime, refreshSecretKey);
+        return this.createToken(account, roles, refreshTime, secretKey);
     }
 
     // 토큰에서 인증 정보 가져오기 - 권한 처리를 위함
