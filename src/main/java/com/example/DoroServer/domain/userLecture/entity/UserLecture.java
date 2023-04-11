@@ -26,8 +26,7 @@ public class UserLecture {
     private TutorRole tutorRole; // 튜터 역할 [MAIN_TUTOR,SUB_TUTOR,STAFF]
 
     @Enumerated(EnumType.STRING)
-    @NotNull
-    private LectureStatus status;
+    private TutorStatus tutorStatus;
     //== 연관관계 매핑 ==//
 
     // UserLecture와 User는 다대일(Many-to-One) 관계
@@ -40,5 +39,12 @@ public class UserLecture {
     @JoinColumn(name = "lecture_id")
     private Lecture lecture;
 
-
+    public void changeTutorStatus(){
+        if(this.tutorStatus == TutorStatus.ASSIGNED){
+            this.tutorStatus=TutorStatus.WAITING;
+        }
+        else{
+            this.tutorStatus=TutorStatus.ASSIGNED;
+        }
+    }
 }
