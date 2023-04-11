@@ -33,6 +33,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -128,7 +129,7 @@ public class AuthController {
             throw new JwtAuthenticationException(Code.JWT_BAD_REQUEST);
         }
         Authentication authentication = tokenProvider.getAuthentication(
-            reissueReq.getAccessToken());
+            reissueReq.getAccessToken().substring(7));
         String refreshToken = redisService.getValues("RTK" + authentication.getName());
         if(!reissueReq.getRefreshToken().equals(refreshToken)){
             throw new JwtAuthenticationException(Code.REFRESH_TOKEN_DID_NOT_MATCH);
@@ -147,6 +148,24 @@ public class AuthController {
 
         return ResponseEntity.ok()
             .headers(httpHeaders).build();
+    }
+
+    @Operation(summary = "001_", description = "로그아웃")
+    @PostMapping("/logout")
+    public SuccessResponse<String> logout(@RequestHeader(value = "Authorization")
+                                            String bearerAccessToken){
+        String accessToken = bearerAccessToken.substring(7);
+        if(!tokenProvider.validateToken(accessToken)){
+            throw new JwtAuthenticationException(Code.BAD_REQUEST);
+        }
+        Authentication authentication = tokenProvider.getAuthentication(accessToken);
+        if(redisService.getValues("RTK" + authentication.getName()) != null){
+            redisService.deleteValues("RTK" + authentication.getName());
+        }
+        Long expiration = tokenProvider.getExpiration(accessToken);
+        redisService.setValues(accessToken, "logout", Duration.ofMillis(expiration));
+
+        return SuccessResponse.successResponse("로그아웃 완료");
     }
 
     private String createReissueAccessToken(String account) {
