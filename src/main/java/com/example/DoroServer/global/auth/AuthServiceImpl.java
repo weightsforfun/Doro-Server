@@ -3,6 +3,7 @@ package com.example.DoroServer.global.auth;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.entity.UserRole;
 import com.example.DoroServer.domain.user.repository.UserRepository;
+import com.example.DoroServer.global.auth.dto.ChangePasswordReq;
 import com.example.DoroServer.global.auth.dto.JoinReq;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
+@Transactional
 public class AuthServiceImpl implements AuthService{
 
     private final PasswordEncoder passwordEncoder;
@@ -36,7 +38,7 @@ public class AuthServiceImpl implements AuthService{
         DORO_USER = doro_user;
     }
 
-    @Transactional
+
     @Override
     public void join(JoinReq joinReq) {
         // 레디스 인증된 번호 조회
@@ -66,7 +68,6 @@ public class AuthServiceImpl implements AuthService{
         userRepository.save(user);
     }
 
-    @Transactional
     @Override
     public void checkAccount(String account) {
         if(userRepository.existsByAccount(account)){
@@ -82,5 +83,19 @@ public class AuthServiceImpl implements AuthService{
         User user = userRepository.findByPhone(phone).orElseThrow(()
             -> new BaseException(Code.ACCOUNT_NOT_FOUND));
         return user.getAccount();
+    }
+
+    @Override
+    public void changePassword(ChangePasswordReq changePasswordReq) {
+        if(!"Verified".equals(redisService.getValues("PASSWORD" + changePasswordReq.getPhone()))) {
+            throw new BaseException(Code.UNAUTHORIZED_PHONE_NUMBER);
+        }
+        if(!changePasswordReq.getNewPassword().equals(changePasswordReq.getNewPasswordCheck())){
+            throw new BaseException(Code.PASSWORD_DID_NOT_MATCH);
+        }
+        User user = userRepository.findByAccountAndPhone(changePasswordReq.getAccount(),
+                changePasswordReq.getPhone())
+            .orElseThrow(() -> new BaseException(Code.ACCOUNT_NOT_FOUND));
+        user.updatePassword(passwordEncoder.encode(changePasswordReq.getNewPassword()));
     }
 }

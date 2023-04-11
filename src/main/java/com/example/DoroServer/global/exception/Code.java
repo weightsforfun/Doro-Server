@@ -25,6 +25,8 @@ public enum Code {
     PASSWORD_DID_NOT_MATCH(HttpStatus.BAD_REQUEST, "AUTH010", "비밀번호가 일치하지 않습니다."),
     DORO_ADMIN_AUTH_FAILED(HttpStatus.UNAUTHORIZED, "AUTH011", "관리자 인증번호가 일치하지 않습니다."),
     DORO_USER_AUTH_FAILED(HttpStatus.UNAUTHORIZED, "AUTH012", "도로 인증번호가 일치하지 않습니다."),
+    ACCOUNT_NOT_FOUND(HttpStatus.NOT_FOUND, "AUTH013", "가입된 아이디가 없습니다."),
+    EXIST_PHONE(HttpStatus.CONFLICT, "AUTH014", "이미 존재하는 휴대폰 번호입니다."),
     //USER 관련 오류 U001,U002...
 
     //강의 관련 오류 L001,L002..
