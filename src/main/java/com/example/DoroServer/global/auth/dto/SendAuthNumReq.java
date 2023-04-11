@@ -15,6 +15,6 @@ public class SendAuthNumReq {
     private MessageType messageType;
 
     public enum MessageType{
-        JOIN, ACCOUNT, PASSWORD
+        JOIN, ACCOUNT, PASSWORD, UPDATE
     }
 }
