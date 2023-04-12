@@ -1,5 +1,6 @@
 package com.example.DoroServer.global.exception;
 
+import com.google.api.Http;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -31,7 +32,10 @@ public enum Code {
 
     // 알림톡 관련 오류 M001, M002...
     MESSAGE_SEND_FAILED(HttpStatus.BAD_REQUEST, "M001", "메시지 전송이 실패했습니다. 올바른 번호인지 확인하세요."),
-    VERIFICATION_DID_NOT_MATCH(HttpStatus.BAD_REQUEST, "M002", "인증 번호가 일치하지 않습니다.");
+    VERIFICATION_DID_NOT_MATCH(HttpStatus.BAD_REQUEST, "M002", "인증 번호가 일치하지 않습니다."),
+
+    // FCM 푸쉬 관련 오류
+    NOTIFICATION_PUSH_FAIL(HttpStatus.BAD_REQUEST,"NOTI001","FCM 알림 푸쉬에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
