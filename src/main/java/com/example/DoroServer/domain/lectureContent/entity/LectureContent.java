@@ -21,9 +21,6 @@ public class LectureContent {
     private Long id; // PK
 
     @NotBlank
-    private String title; // 강의 제목
-
-    @NotBlank
     private String kit; // 강의 사용 키트
 
     private String detail; // 강의 세부 구성

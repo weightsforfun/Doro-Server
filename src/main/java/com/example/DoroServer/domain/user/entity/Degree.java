@@ -3,6 +3,7 @@ package com.example.DoroServer.domain.user.entity;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +15,7 @@ import javax.persistence.Enumerated;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Embeddable
 @Getter
+@Builder
 public class Degree {
 
     private String school; // 학교 정보
