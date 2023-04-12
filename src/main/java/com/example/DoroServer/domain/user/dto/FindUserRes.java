@@ -26,7 +26,6 @@ public class FindUserRes {
     private Gender gender; // 사용자 성별
     private String phone; // 사용자 전화번호
     private int generation; // 사용자 기수
-    private String role; // 사용자 직책
     private String profileImg; // 사용자 이미
     private String school; // 학교 정보
     private String studentId; // 학번
@@ -39,7 +38,6 @@ public class FindUserRes {
                 .gender(user.getGender())
                 .phone(user.getPhone())
                 .generation(user.getGeneration())
-                .role(user.getRole())
                 .profileImg(user.getProfileImg())
                 .school(user.getDegree().getSchool())
                 .studentId(user.getDegree().getStudentId())

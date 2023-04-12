@@ -4,7 +4,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
 
+
+@Getter
 public class UpdateLectureReq {
     private String title; // 강의 제목
     private String institution; // 강의 기관
