@@ -24,15 +24,15 @@ public class ExceptionController {
             throw new BaseException(BAD_REQUEST);
         } else {
             User user= User.builder()
-                    .birth(LocalDate.of(1999,8,10))
+                    .birth(LocalDate.of(1000,10,10))
                     .phone("123123")
                     .name("youn")
-                    .gender(Gender.FEMALE).build();
+                    .gender(Gender.MALE).build();
             User user2= User.builder()
-                    .birth(LocalDate.of(1999,8,10))
+                    .birth(LocalDate.of(1000,10,10))
                     .phone("1231313123")
                     .name("oh")
-                    .gender(Gender.MALE).build();
+                    .gender(Gender.FEMALE).build();
             User[] arr=new User[2];
             arr[0]=user;
             arr[1]=user2;

@@ -25,7 +25,7 @@ public class LectureContentDto {
     @NotEmpty
     private String requirement; // 강의 자격 요건
 
-    public LectureContent toEntity() {
+    public  LectureContent toEntity() {
         return LectureContent.builder()
                 .kit(kit)
                 .detail(detail)

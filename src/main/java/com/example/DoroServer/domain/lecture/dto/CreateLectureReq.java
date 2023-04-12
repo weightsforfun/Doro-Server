@@ -50,7 +50,10 @@ public class CreateLectureReq {
     @NotBlank
     private LocalDateTime enrollEndDate; // 강의 등록 종료 날짜
 
-    private LectureContentDto lectureContentDto;
+    @NotBlank
+    private Long lectureContentId;
+
+
     public Lecture toEntity(){
         return Lecture.builder()
                 .institution(institution)
