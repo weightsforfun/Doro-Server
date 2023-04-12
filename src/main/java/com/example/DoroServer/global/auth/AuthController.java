@@ -1,11 +1,16 @@
 package com.example.DoroServer.global.auth;
 
 import com.example.DoroServer.domain.user.repository.UserRepository;
+import com.example.DoroServer.global.auth.dto.ChangePasswordReq;
 import com.example.DoroServer.global.auth.dto.JoinReq;
 import com.example.DoroServer.global.auth.dto.LoginReq;
+import com.example.DoroServer.global.auth.dto.ReissueReq;
 import com.example.DoroServer.global.auth.dto.SendAuthNumReq;
 import com.example.DoroServer.global.auth.dto.VerifyAuthNumReq;
 import com.example.DoroServer.global.common.SuccessResponse;
+import com.example.DoroServer.global.exception.BaseException;
+import com.example.DoroServer.global.exception.Code;
+import com.example.DoroServer.global.exception.JwtAuthenticationException;
 import com.example.DoroServer.global.jwt.CustomUserDetailsService;
 import com.example.DoroServer.global.jwt.JwtTokenProvider;
 import com.example.DoroServer.global.jwt.RedisService;
@@ -13,6 +18,7 @@ import com.example.DoroServer.global.message.MessageService;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import java.time.Duration;
+import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,11 +27,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -67,15 +75,16 @@ public class AuthController {
         log.info("AuthenticationToken.getCredentials={}", authenticationToken.getCredentials());
         log.info("AuthenticationToken={}", authenticationToken);
         String accessToken = createAccessToken(authenticationToken);
-        String refreshToken = createRefreshToken(authenticationToken);
+        String refreshToken = createRefreshToken();
 
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("Authorization", "Bearer " + accessToken);
+        httpHeaders.add("Authorization", accessToken);
 
-        redisService.setValues(loginReq.getAccount(), refreshToken, Duration.ofDays(180));
+        redisService.setValues("RTK" + loginReq.getAccount(), refreshToken, Duration.ofDays(60));
 
         return ResponseEntity.ok()
-            .headers(httpHeaders).build();
+            .headers(httpHeaders)
+            .body(refreshToken);
     }
 
     @Operation(summary = "001_", description = "인증번호 전송")
@@ -98,15 +107,93 @@ public class AuthController {
         authService.checkAccount(account);
         return SuccessResponse.successResponse("사용 가능한 아이디입니다.");
     }
+
+    @Operation(summary = "001_", description = "아이디 찾기")
+    @GetMapping("/find/account")
+    public SuccessResponse<String> findAccount(@RequestParam String phone){
+        String account = authService.findAccount(phone);
+        return SuccessResponse.successResponse(account);
+    }
+
+    @Operation(summary = "001_", description = "비밀번호 변경")
+    @PostMapping("/change/password")
+    public SuccessResponse<String> changePassword(@RequestBody ChangePasswordReq changePasswordReq){
+        authService.changePassword(changePasswordReq);
+        return SuccessResponse.successResponse("비밀번호가 변경되었습니다.");
+    }
+
+    @Operation(summary = "001_", description = "토큰 재발급")
+    @PostMapping("/reissue")
+    public ResponseEntity<?> reissue(@RequestBody ReissueReq reissueReq){
+        if(!tokenProvider.validateToken(reissueReq.getRefreshToken())){
+            throw new JwtAuthenticationException(Code.JWT_BAD_REQUEST);
+        }
+        Authentication authentication = tokenProvider.getAuthentication(
+            reissueReq.getAccessToken().substring(7));
+        String refreshToken = redisService.getValues("RTK" + authentication.getName());
+
+        if(!reissueReq.getRefreshToken().equals(refreshToken)){
+            throw new JwtAuthenticationException(Code.REFRESH_TOKEN_DID_NOT_MATCH);
+        }
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
+            = new UsernamePasswordAuthenticationToken(authentication.getName(), null,
+                                            authentication.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+
+        String newAccessToken = tokenProvider.createAccessToken(
+            usernamePasswordAuthenticationToken.getName(),
+            usernamePasswordAuthenticationToken.getAuthorities());
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("Authorization", newAccessToken);
+
+        return ResponseEntity.ok()
+            .headers(httpHeaders).build();
+    }
+
+    @Operation(summary = "001_", description = "로그아웃")
+    @PostMapping("/logout")
+    public SuccessResponse<String> logout(@RequestHeader(value = "Authorization")
+                                            String bearerAccessToken){
+        String accessToken = bearerAccessToken.substring(7);
+        if(!tokenProvider.validateToken(accessToken)){
+            throw new JwtAuthenticationException(Code.BAD_REQUEST);
+        }
+        Authentication authentication = tokenProvider.getAuthentication(accessToken);
+        if(redisService.getValues("RTK" + authentication.getName()) != null){
+            redisService.deleteValues("RTK" + authentication.getName());
+        }
+        Long expiration = tokenProvider.getExpiration(accessToken);
+        redisService.setValues(accessToken, "logout", Duration.ofMillis(expiration));
+
+        SecurityContextHolder.clearContext();
+
+        return SuccessResponse.successResponse("로그아웃 완료");
+    }
+
+    private String createReissueAccessToken(String account) {
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(account);
+
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
+            = new UsernamePasswordAuthenticationToken(userDetails.getUsername(),
+            null, userDetails.getAuthorities());
+
+        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+        log.info("AuthenticationToken={}", usernamePasswordAuthenticationToken);
+        return tokenProvider.createAccessToken(usernamePasswordAuthenticationToken.getName(),
+            usernamePasswordAuthenticationToken.getAuthorities());
+    }
+
+
     private String createAccessToken(UsernamePasswordAuthenticationToken authenticationToken) {
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         log.info("AccessToken 생성 준비 끝");
         return tokenProvider.createAccessToken(authentication.getName(), authentication.getAuthorities());
     }
-    private String createRefreshToken(UsernamePasswordAuthenticationToken authenticationToken) {
-        UserDetails userDetails = customUserDetailsService.loadUserByUsername(authenticationToken.getName());
-        return tokenProvider.createRefreshToken(userDetails.getUsername(), userDetails.getAuthorities());
+
+    private String createRefreshToken() {
+        return tokenProvider.createRefreshToken();
     }
 
 

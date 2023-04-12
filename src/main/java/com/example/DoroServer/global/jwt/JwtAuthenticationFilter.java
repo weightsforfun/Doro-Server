@@ -20,6 +20,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends GenericFilterBean {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final RedisService redisService;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -27,11 +28,12 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         String jwtToken = jwtTokenProvider.resolveToken(httpServletRequest);
         String requestURI = httpServletRequest.getRequestURI();
 
-        if (StringUtils.hasText(jwtToken) && jwtTokenProvider.validateToken(request, jwtToken)) {
-            Authentication authentication = jwtTokenProvider.getAuthentication(jwtToken);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            log.info("Security Context에 '{}' 인증 정보를 저장했습니다, uri: {}", authentication.getName(), requestURI);
-
+        if (StringUtils.hasText(jwtToken) && jwtTokenProvider.validateToken(jwtToken)) {
+            if(redisService.getValues(jwtToken) == null) {
+                Authentication authentication = jwtTokenProvider.getAuthentication(jwtToken);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                log.info("Security Context에 '{}' 인증 정보를 저장했습니다, uri: {}", authentication.getName(), requestURI);
+            }
         } else {
             log.info("유효한 JWT 토큰이 없습니다, uri: {}", requestURI);
         }

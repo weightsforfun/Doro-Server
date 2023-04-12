@@ -4,6 +4,7 @@ import com.example.DoroServer.domain.user.entity.Degree;
 import com.example.DoroServer.domain.user.entity.Gender;
 import com.example.DoroServer.domain.user.entity.StudentStatus;
 import com.example.DoroServer.domain.user.entity.User;
+import com.example.DoroServer.domain.user.entity.UserRole;
 import java.time.LocalDate;
 import javax.persistence.Embedded;
 import javax.persistence.EnumType;
