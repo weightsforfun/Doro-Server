@@ -1,46 +1,53 @@
 package com.example.DoroServer.domain.userLecture.api;
 
+import com.example.DoroServer.domain.user.entity.User;
+import com.example.DoroServer.domain.userLecture.dto.FindAllTutorsRes;
+import com.example.DoroServer.domain.userLecture.dto.FindMyLecturesRes;
 import com.example.DoroServer.domain.userLecture.dto.SelectTutorReq;
 import com.example.DoroServer.domain.userLecture.dto.CreateTutorReq;
+import com.example.DoroServer.domain.userLecture.service.UserLectureService;
 import com.example.DoroServer.global.common.SuccessResponse;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController()
 @RequestMapping("/users-lectures")
+@RequiredArgsConstructor
 public class UserLectureApi {
 
+    private final UserLectureService userLectureService;
+
     @GetMapping("/lectures/{id}")
-    public SuccessResponse findAllTutors(@PathVariable("id") String id) {
-        //fetchjoin 필요
-        return SuccessResponse.successResponse(id + "th tutors");
+    public SuccessResponse findAllTutors(@PathVariable("id") Long id) {
+        List<FindAllTutorsRes> allTutorsResList = userLectureService.findAllTutors(id);
+        return SuccessResponse.successResponse(allTutorsResList);
     }
 
     @GetMapping("/users/{id}")
-    public SuccessResponse findMyLectures(@PathVariable("id") String id) {
-        //fetchjoin필요
-        return SuccessResponse.successResponse(id + "user's lectures");
+    public SuccessResponse findMyLectures(@PathVariable("id") Long id) {
+        List<FindMyLecturesRes> findMyLecturesResList = userLectureService.findMyLectures(id);
+        return SuccessResponse.successResponse(findMyLecturesResList);
     }
 
     @PostMapping("/lectures/{id}")
     //토큰에서 user id 갖고오고 신청대기, role선택해서 저장
     //이미 신청한 user  일시 예외 출력
     public SuccessResponse createTutor(
-            @PathVariable("id") String id,
+            @PathVariable("id") Long id,
             @RequestBody CreateTutorReq createTutorReq) {
-        return SuccessResponse.successResponse(id + "added as"+createTutorReq.getTutorRole() );
+        Long userLectureId = userLectureService.createTutor(id, createTutorReq );
+
+        return SuccessResponse.successResponse(userLectureId + "is created");
     }
 
     @PatchMapping("/lectures/{id}")
     public SuccessResponse selectTutor(
-            @PathVariable("id") String id,
-            @RequestBody SelectTutorReq selectTutor) {
-        //선정된 유저, 역할 갖고와서 서비스계층에서 변경
-        //sql로 선정됐거나 id 해당 유저들 다 갖고와서 일단 초기화 시키고
-        //id 선택된 애들만 바꾸는 식으로 하는게 좋을듯
-        return SuccessResponse.successResponse(
-                id + "th main patched"+
-                "assignedUser:"+selectTutor.getAssignedUser()+
-                "as" + selectTutor.getTutorRole());
+            @PathVariable("id") Long id,
+            @RequestBody SelectTutorReq selectTutorReq) {
+        String result = userLectureService.selectTutor(id, selectTutorReq);
+        return SuccessResponse.successResponse("change to"+result);
     }
 
 }
