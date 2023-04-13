@@ -24,7 +24,7 @@ public class FindAllUsersRes {
     private String major;
 
 
-    private static FindAllUsersRes fromEntity(User user){
+    public static FindAllUsersRes fromEntity(User user){
         return FindAllUsersRes.builder()
                 .name(user.getName())
                 .birth(user.getBirth())
