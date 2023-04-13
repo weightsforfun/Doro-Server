@@ -8,7 +8,7 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 @Getter
-public class NotificationRes {
+public class NotificationDto {
 
     private boolean validateOnly;
     private Message message;
@@ -56,6 +56,7 @@ public class NotificationRes {
 
         private String title;
         private String body;
+//        private String image;
     }
 }
 

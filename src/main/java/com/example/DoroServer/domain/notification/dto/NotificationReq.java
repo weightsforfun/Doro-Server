@@ -1,10 +1,13 @@
 package com.example.DoroServer.domain.notification.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 @Getter
-public class FCMMessageReq {
+@Builder
+public class NotificationReq {
     private String targetToken;
     private String title;
     private String body;
