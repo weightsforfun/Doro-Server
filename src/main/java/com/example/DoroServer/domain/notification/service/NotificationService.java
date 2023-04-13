@@ -1,58 +1,121 @@
 package com.example.DoroServer.domain.notification.service;
 
-import com.example.DoroServer.domain.notification.dto.FCMMessageRes;
+import com.example.DoroServer.domain.notification.dto.NotificationContentReq;
+import com.example.DoroServer.domain.notification.dto.NotificationRes;
+import com.example.DoroServer.domain.notification.dto.NotificationReq;
+import com.example.DoroServer.domain.notification.dto.NotificationDto;
+import com.example.DoroServer.domain.notification.entity.Notification;
+import com.example.DoroServer.domain.notification.repository.NotificationRepository;
+import com.example.DoroServer.domain.user.entity.User;
+import com.example.DoroServer.domain.user.repository.UserRepository;
+import com.example.DoroServer.global.exception.BaseException;
+import com.example.DoroServer.global.exception.Code;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
 @Service
-@RequiredArgsConstructor
+@Transactional(readOnly = true)
+@Slf4j
 public class NotificationService {
-    private final String API_URL = "https://fcm.googleapis.com/v1/projects/{project-id}/messages:send";
-    private final String PROJECT_ID = "test-1c99b";
-    private final ObjectMapper objectMapper;
-    private final OkHttpClient httpClient;
 
-    public NotificationService() {
-        objectMapper = new ObjectMapper();
-        httpClient = new OkHttpClient.Builder().build();
+    private final NotificationRepository notificationRepository;
+
+    private final UserRepository userRepository;
+
+    private final ObjectMapper objectMapper;
+
+    private final String API_URL;
+
+    private final String PROJECT_ID;
+
+    public NotificationService(
+            NotificationRepository notificationRepository,
+            ObjectMapper objectMapper,
+            UserRepository userRepository,
+            @Value("${api.url}") String apiUrl,
+            @Value("${project.id}") String projectId) {
+        this.notificationRepository = notificationRepository;
+        this.objectMapper = objectMapper;
+        this.userRepository = userRepository;
+        this.API_URL = apiUrl;
+        this.PROJECT_ID = projectId;
     }
+
+    public List<NotificationRes> findAllNotifications() {
+        return notificationRepository.findAllRes();
+    }
+
+    public NotificationRes findNotification(Long id) {
+        Optional<Notification> notification = notificationRepository.findById(id);
+        return notification.orElseThrow(() -> {
+            log.info("Notification을 찾을 수 없습니다. id = {}", id);
+            throw new BaseException(Code.NOTIFICATION_NOT_FOUND);
+        }).toRes();
+    }
+
+    @Transactional
+    public Long createNotification(NotificationContentReq notificationContentReq) {
+        Notification notification = notificationContentReq.toEntity();
+        notificationRepository.save(notification);
+        return notification.getId();
+    }
+
+    //todo: user전체 받아와서 user마다 토큰 조회해서 메세지 전송
+/*
+    public void sendMessageToAll(NotificationContentReq notificationContentReq) {
+        List<User> users = userRepository.findAll();
+        users.stream().forEach(
+                user -> {
+                    NotificationReq notificationReq = NotificationReq.builder()
+                            .targetToken(user.getTargetToken())
+                            .title(notificationContentReq.getTitle())
+                            .body(notificationContentReq.getBody())
+                            .build();
+                    sendMessageTo(notificationReq);
+                }
+        );
+    }
+*/
+
 
     /**
      * FCM 메시지를 보내는 메소드
-     * @param targetToken FCM 메시지를 받을 대상의 토큰
-     * @param title FCM 메시지의 제목
-     * @param body FCM 메시지의 내용
+     *
+     * @param notificationReq
      */
-    public void sendMessageTo(String targetToken, String title, String body) throws IOException {
+    public void sendMessageTo(NotificationReq notificationReq) {
         // FCM 메시지 생성
-        String message = makeMessage(targetToken, title, body);
+        String message = makeMessage(notificationReq);
+        OkHttpClient httpClient = new OkHttpClient();
         RequestBody requestBody = RequestBody.create(message,
                 MediaType.get("application/json; charset=utf-8"));
 
-        // HTTP 요청 생성
-        Request request = new Request.Builder()
-                .url(API_URL.replace("{project-id}", PROJECT_ID))
-                .post(requestBody)
-                .addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getAccessToken())
-                .addHeader(HttpHeaders.CONTENT_TYPE, "application/json; UTF-8")
-                .build();
-
         try {
+        // HTTP 요청 생성
+            Request request = new Request.Builder()
+                    .url(API_URL.replace("{project-id}", PROJECT_ID))
+                    .post(requestBody)
+                    .addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getAccessToken())
+                    .addHeader(HttpHeaders.CONTENT_TYPE, "application/json; UTF-8")
+                    .build();
+
             // HTTP 요청 실행
             Response response = httpClient.newCall(request).execute();
             if (response != null && response.body() != null) {
@@ -75,35 +138,33 @@ public class NotificationService {
                     }
                 }
             }
-            // 예외처리도 수정 필요
         } catch (IOException e) {
-            System.err.println(e.toString());
+            throw new BaseException(Code.NOTIFICATION_PUSH_FAIL);
         }
     }
 
     /**
      * FCM 메시지를 생성하는 메소드
-     * @param targetToken FCM 메시지를 받을 대상의 토큰
-     * @param title FCM 메시지의 제목
-     * @param body FCM 메시지의 내용
+     *
+     * @param notificationReq
      * @return 생성된 FCM 메시지를 JSON 문자열로 반환
      */
-    private String makeMessage(String targetToken, String title, String body) {
-        FCMMessageRes fcmMessage =
-                FCMMessageRes.builder()
+    private String makeMessage(NotificationReq notificationReq) {
+        NotificationDto fcmMessage =
+                NotificationDto.builder()
                         .message(
-                                FCMMessageRes.Message.builder()
-                                        .token(targetToken)
+                                NotificationDto.Message.builder()
+                                        .token(notificationReq.getTargetToken())
                                         .notification(
-                                                FCMMessageRes.Notification.builder()
-                                                        .title(title)
-                                                        .body(body)
+                                                NotificationDto.Notification.builder()
+                                                        .title(notificationReq.getTitle())
+                                                        .body(notificationReq.getBody())
                                                         .build())
                                         .apns(
-                                                FCMMessageRes.Apns.builder()
+                                                NotificationDto.Apns.builder()
                                                         .payload(
-                                                                FCMMessageRes.Payload.builder()
-                                                                        .aps(FCMMessageRes.Aps.builder()
+                                                                NotificationDto.Payload.builder()
+                                                                        .aps(NotificationDto.Aps.builder()
                                                                                 .sound("default")
                                                                                 .build())
                                                                         .build())
@@ -137,4 +198,6 @@ public class NotificationService {
         googleCredentials.refreshIfExpired();
         return googleCredentials.getAccessToken().getTokenValue();
     }
+
 }
+
