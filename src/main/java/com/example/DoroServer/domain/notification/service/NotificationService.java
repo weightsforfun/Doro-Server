@@ -21,13 +21,13 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class FCMService {
+public class NotificationService {
     private final String API_URL = "https://fcm.googleapis.com/v1/projects/{project-id}/messages:send";
     private final String PROJECT_ID = "test-1c99b";
     private final ObjectMapper objectMapper;
     private final OkHttpClient httpClient;
 
-    public FCMService() {
+    public NotificationService() {
         objectMapper = new ObjectMapper();
         httpClient = new OkHttpClient.Builder().build();
     }
