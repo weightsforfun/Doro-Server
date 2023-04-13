@@ -27,6 +27,7 @@ public class Notification extends BaseEntity {
 
     private Boolean isRead; // 알림 읽음 유무
 
+    // Notification을 NotificationRes객체로 변환해주는 메소드
     public NotificationRes toRes() {
         return NotificationRes.builder()
                 .id(id)
@@ -38,6 +39,7 @@ public class Notification extends BaseEntity {
                 .build();
     }
 
+    // 알림 확인 후 읽음 처리하는 메소드
     public void isReadTrue() {
         this.isRead = true;
     }

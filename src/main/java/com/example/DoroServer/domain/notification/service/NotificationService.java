@@ -6,7 +6,6 @@ import com.example.DoroServer.domain.notification.dto.NotificationReq;
 import com.example.DoroServer.domain.notification.dto.NotificationDto;
 import com.example.DoroServer.domain.notification.entity.Notification;
 import com.example.DoroServer.domain.notification.repository.NotificationRepository;
-import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
@@ -17,7 +16,6 @@ import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -41,9 +39,9 @@ public class NotificationService {
 
     private final ObjectMapper objectMapper;
 
-    private final String API_URL;
+    private final String API_URL;       // FCM 전송 Api URL
 
-    private final String PROJECT_ID;
+    private final String PROJECT_ID;    // 생성한 FCM Project Id
 
     public NotificationService(
             NotificationRepository notificationRepository,
@@ -58,10 +56,12 @@ public class NotificationService {
         this.PROJECT_ID = projectId;
     }
 
+    // 알림 전부를 조회하는 메소드
     public List<NotificationRes> findAllNotifications() {
         return notificationRepository.findAllRes();
     }
 
+    // id에 해당하는 알림을 조회하는 메소드
     public NotificationRes findNotification(Long id) {
         Optional<Notification> notification = notificationRepository.findById(id);
         return notification.orElseThrow(() -> {
@@ -70,8 +70,9 @@ public class NotificationService {
         }).toRes();
     }
 
+    // 전달받은 title과 body로 알림을 저장하는 메소드
     @Transactional
-    public Long createNotification(NotificationContentReq notificationContentReq) {
+    public Long saveNotification(NotificationContentReq notificationContentReq) {
         Notification notification = notificationContentReq.toEntity();
         notificationRepository.save(notification);
         return notification.getId();
@@ -94,12 +95,7 @@ public class NotificationService {
     }
 */
 
-
-    /**
-     * FCM 메시지를 보내는 메소드
-     *
-     * @param notificationReq
-     */
+    // FCM 메시지를 보내는 메소드
     public void sendMessageTo(NotificationReq notificationReq) {
         // FCM 메시지 생성
         String message = makeMessage(notificationReq);
@@ -143,12 +139,8 @@ public class NotificationService {
         }
     }
 
-    /**
-     * FCM 메시지를 생성하는 메소드
-     *
-     * @param notificationReq
-     * @return 생성된 FCM 메시지를 JSON 문자열로 반환
-     */
+
+    // FCM 메시지를 생성하는 메소드
     private String makeMessage(NotificationReq notificationReq) {
         NotificationDto fcmMessage =
                 NotificationDto.builder()
@@ -175,7 +167,6 @@ public class NotificationService {
 
         String fcmMessageString = "";
 
-        //예외처리 필요
         try {
             fcmMessageString = objectMapper.writeValueAsString(fcmMessage);
         } catch (JsonProcessingException e) {
@@ -184,6 +175,7 @@ public class NotificationService {
         return fcmMessageString;
     }
 
+    // GoogleApi 사용하기 위해 Firebase 에서부터 AccessToken 발급받는 메소드
     private String getAccessToken() throws IOException {
         // 서비스 키 파일이 위치한 경로
         String firebaseConfigPath = "firebase/firebase_service_key.json";
@@ -196,6 +188,7 @@ public class NotificationService {
 
         // 토큰 만료 확인
         googleCredentials.refreshIfExpired();
+        log.info("{}",googleCredentials.getAccessToken().getTokenValue());
         return googleCredentials.getAccessToken().getTokenValue();
     }
 

@@ -5,7 +5,7 @@ import javax.validation.constraints.NotBlank;
 import lombok.Getter;
 
 @Getter
-public class AnnouncementReq {
+public class AnnouncementReq {  // 공지 생성 시 전달 받는 객체
 
     @NotBlank(message = "제목이 비어있습니다.")
     private String title; // 공지 제목

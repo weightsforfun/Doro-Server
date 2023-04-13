@@ -25,21 +25,21 @@ public class NotificationApi {
     private final NotificationService notificationService;
     private final UserRepository userRepository;
 
+    // 모든 Notification 조회 메소드
     @GetMapping
     public SuccessResponse findAllNotifications() {
-        List<NotificationRes> allNotifications = notificationService.findAllNotifications();
-        return SuccessResponse.successResponse(allNotifications);
+        List<NotificationRes> notifications = notificationService.findAllNotifications();
+        return SuccessResponse.successResponse(notifications);
     }
 
     // FCM 서버에 알림 전송요청
     //todo: sendMessageTo -> sendMessageToAll 함수 만들어서 교체
-    //todo: NotificationReq -> NotificationContentReq로 변경 (나중에는 유저에서 토큰 받아 새로 만들거라 token 받아올 필요 없음)
     @PostMapping
     public SuccessResponse pushNotification(
             @RequestBody NotificationContentReq notificationContentReq) {
-        // FCM 서버에 메시지 전송
-
+        // FCM토큰 가져오기위해 유저 조회
         List<User> users = userRepository.findAll();
+        // FCM 서버에 메시지 전송
         // todo: 유저에 토큰 생기면 아래거 이걸로 교체
 //        notificationService.sendMessageToAll(notificationContentReq);
         notificationService.sendMessageTo(NotificationReq.builder()
@@ -49,9 +49,9 @@ public class NotificationApi {
                 .body(notificationContentReq.getBody())
                 .build());
 
-        notificationService.createNotification(notificationContentReq);
+        // 푸쉬알림 저장
+        notificationService.saveNotification(notificationContentReq);
 
-        // 성공적으로 메시지를 전송한 경우 200 OK 응답 반환
         return SuccessResponse.successResponse("push complete");
     }
 }

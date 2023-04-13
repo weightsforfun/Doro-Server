@@ -25,12 +25,14 @@ public class AnnouncementApi {
     private final AnnouncementService announcementService;
     private final NotificationService notificationService;
 
+    // 모든 공지를 찾아 반환
     @GetMapping
     public SuccessResponse findAllAnnouncement() {
         List<AnnouncementRes> announcements = announcementService.findAllAnnouncements();
         return SuccessResponse.successResponse(announcements);
     }
 
+    // 공지 생성 후 생성 확인 알림 전송
     @PostMapping
     public SuccessResponse createAnnouncement(@RequestBody AnnouncementReq announcementReq) {
         Long announcementId = announcementService.createAnnouncement(announcementReq);
@@ -39,6 +41,7 @@ public class AnnouncementApi {
 //                .title(announcementReq.getTitle())
 //                .body(announcementReq.getBody())
 //                .build());
+        // 생성된 공지 알림 전송
         notificationService.sendMessageTo(NotificationReq.builder()
                 .targetToken("") // 임시 토큰 나중에 사용자들에게서 직접 받을 것
                 .title(announcementReq.getTitle())
@@ -48,12 +51,14 @@ public class AnnouncementApi {
         return SuccessResponse.successResponse("announcement created " + announcementId);
     }
 
+    // id에 해당하는 공지 하나 조회
     @GetMapping("/{id}")
     public SuccessResponse findAnnouncement(@PathVariable("id") Long id) {
         AnnouncementRes announcementRes = announcementService.findById(id);
         return SuccessResponse.successResponse(announcementRes);
     }
 
+    // id에 해당하는 공지 수정
     @PatchMapping("/{id}")
     public SuccessResponse editAnnouncement(@PathVariable("id") Long id,
             @RequestBody AnnouncementReq announcementReq) {
@@ -61,6 +66,7 @@ public class AnnouncementApi {
         return SuccessResponse.successResponse("update complete");
     }
 
+    // iddp 해당하는 공지 삭제
     @DeleteMapping("/{id}")
     public SuccessResponse deleteAnnouncement(@PathVariable("id") Long id) {
         announcementService.deleteAnnouncement(id);

@@ -8,7 +8,7 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 @Getter
-public class NotificationDto {
+public class NotificationDto {  // Fcm 서버에 보낼 객체
 
     private boolean validateOnly;
     private Message message;
@@ -36,7 +36,7 @@ public class NotificationDto {
     @Getter
     public static class Aps {
 
-        private String sound;
+        private String sound;   // 알림 울리는 사운드
     }
 
     @Builder
@@ -45,7 +45,7 @@ public class NotificationDto {
     public static class Message {
 
         private Notification notification;
-        private String token;
+        private String token;   // 전송할 대상 토큰
         private Apns apns;
     }
 
@@ -54,9 +54,9 @@ public class NotificationDto {
     @Getter
     public static class Notification {
 
-        private String title;
-        private String body;
-//        private String image;
+        private String title;   // 알림 제목
+        private String body;    // 알림 내용
+//        private String image; // 알림 표기 사진
     }
 }
 

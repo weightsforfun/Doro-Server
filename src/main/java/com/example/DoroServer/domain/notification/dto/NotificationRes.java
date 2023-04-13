@@ -1,7 +1,6 @@
 package com.example.DoroServer.domain.notification.dto;
 
 import java.time.LocalDateTime;
-import javax.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,8 +18,8 @@ public class NotificationRes {
 
     private Boolean isRead; // 알림 읽음 유무
 
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt; // 알림 생성 시간
 
-    private LocalDateTime lastModifiedAt;
+    private LocalDateTime lastModifiedAt; // 알림 수정 시간
 
 }

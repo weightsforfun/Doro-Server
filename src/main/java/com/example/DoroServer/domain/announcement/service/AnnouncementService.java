@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +21,7 @@ public class AnnouncementService {
 
     private final AnnouncementRepository announcementRepository;
 
+    // AnnouncementRes Dto객체 단일 조회
     public AnnouncementRes findById(Long id) {
         Optional<Announcement> announcement = announcementRepository.findById(id);
         return announcement.orElseThrow(() -> {
@@ -30,14 +30,12 @@ public class AnnouncementService {
         }).toRes();
     }
 
+    // AnnouncementRes Dto객체 전부 조회
     public List<AnnouncementRes> findAllAnnouncements() {
         return announcementRepository.findAllRes();
-//        List<Announcement> announcements = announcementRepository.findAll();
-//        return announcements.stream()
-//                .map(Announcement::toRes)
-//                .collect(Collectors.toList());
     }
 
+    // Announcement 생성 메소드
     @Transactional
     public Long createAnnouncement(AnnouncementReq announcementReq) {
         Announcement announcement = announcementReq.toEntity();
@@ -45,6 +43,7 @@ public class AnnouncementService {
         return announcement.getId();
     }
 
+    // Announcement 수정 메소드
     @Transactional
     public void updateAnnouncement(Long id, AnnouncementReq announcementReq) {
         Optional<Announcement> announcement = announcementRepository.findById(id);
@@ -55,6 +54,7 @@ public class AnnouncementService {
         updateAnnouncement.update(announcementReq);
     }
 
+    // Announcement 수정 메서드
     @Transactional
     public void deleteAnnouncement(Long id) {
         Optional<Announcement> announcement = announcementRepository.findById(id);

@@ -31,7 +31,7 @@ public class Announcement extends BaseEntity {
 
     private String  picture; // 공지 첨부 사진 - 업로드 사이즈 제한 추가 필요
 
-
+    // Announcement를 AnnouncementRes 객체로 변환하는 메소드
     public AnnouncementRes toRes() {
         return AnnouncementRes.builder()
                 .id(id)
@@ -42,6 +42,8 @@ public class Announcement extends BaseEntity {
                 .lastModifiedAt(getLastModifiedAt())
                 .build();
     }
+
+    // Announcement 수정 메소드
     public void update(AnnouncementReq announcementReq) {
         this.title = announcementReq.getTitle();
         this.body = announcementReq.getBody();

@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class NotificationContentReq {
+public class NotificationContentReq {   // 알림이 생성될 때, 토큰 없이 title과 body만 전달받는 객체
 
     @NotBlank(message = "알림 제목을 입력하세요.")
     private String title;
