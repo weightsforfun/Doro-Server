@@ -1,6 +1,7 @@
 package com.example.DoroServer.domain.notification.entity;
 
 import com.example.DoroServer.domain.base.BaseEntity;
+import com.example.DoroServer.domain.notification.dto.NotificationRes;
 import lombok.*;
 
 import javax.persistence.*;
@@ -18,10 +19,26 @@ public class Notification extends BaseEntity {
     @Column(name = "notification_id")
     private Long id; // PK
 
-    @NotBlank
+    @NotBlank(message = "알림 제목을 입력하세요.")
     private String title; // 알림 제목
 
-    @NotBlank
-    private String content; // 알림 내용
+    @NotBlank(message = "알림 내용을 입력하세요")
+    private String body; // 알림 내용
 
+    private Boolean isRead; // 알림 읽음 유무
+
+    public NotificationRes toRes() {
+        return NotificationRes.builder()
+                .id(id)
+                .title(title)
+                .body(body)
+                .isRead(isRead)
+                .createdAt(getCreatedAt())
+                .lastModifiedAt(getLastModifiedAt())
+                .build();
+    }
+
+    public void isReadTrue() {
+        this.isRead = true;
+    }
 }
