@@ -48,34 +48,28 @@ public class UserLectureService {
     }
 
     public Long createTutor(Long id, CreateTutorReq createTutorReq) {
-        Optional<Lecture> optionalLecture = lectureRepository.findById(id);
-        Optional<User> optionalUser = userRepository.findById(createTutorReq.getUserId());
-        if (optionalLecture.isPresent() && optionalUser.isPresent()) {
-            UserLecture userLecture = UserLecture.builder()
-                    .tutorRole(createTutorReq.getTutorRole())
-                    .user(optionalUser.get())
-                    .lecture(optionalLecture.get())
-                    .tutorStatus(TutorStatus.WAITING)
-                    .build();
-            UserLecture savedUserLecture = userLectureRepository.save(userLecture);
-            return savedUserLecture.getId();
-        } else if (!optionalLecture.isPresent() && optionalUser.isPresent()) {
-            throw new BaseException(Code.FORBIDDEN);
-        } else if (optionalLecture.isPresent() && !optionalUser.isPresent()) {
-            throw new BaseException(Code.JWT_BAD_REQUEST);
-        }
-        throw new BaseException(Code.BAD_REQUEST);
+        Lecture lecture = lectureRepository.findById(id).
+                orElseThrow(() -> new BaseException(Code.LECTURE_NOT_FOUND));
+        User user = userRepository.findById(createTutorReq.getUserId())
+                .orElseThrow(() -> new BaseException(Code.USER_NOT_FOUND));
+        UserLecture userLecture = UserLecture.builder()
+                .tutorRole(createTutorReq.getTutorRole())
+                .user(user)
+                .lecture(lecture)
+                .tutorStatus(TutorStatus.WAITING)
+                .build();
+        UserLecture savedUserLecture = userLectureRepository.save(userLecture);
+        return savedUserLecture.getId();
+
 
     }
 
     public String selectTutor(Long lectureId, SelectTutorReq selectTutorReq) {
-        Optional<UserLecture> userLectureOptional = userLectureRepository.findUerLecture(lectureId,
-                selectTutorReq.getUserId(),selectTutorReq.getTutorRole());
-        if (userLectureOptional.isPresent()) {
-            UserLecture userLecture = userLectureOptional.get();
-            userLecture.changeTutorStatus();
-            return String.valueOf(userLecture.getTutorStatus());
-        }
-        throw new BaseException(Code.BAD_REQUEST);
+        UserLecture userLecture = userLectureRepository.findUerLecture(lectureId,
+                        selectTutorReq.getUserId(), selectTutorReq.getTutorRole())
+                .orElseThrow(() -> new BaseException(Code.TUTOR_NOT_FOUND));
+
+        userLecture.changeTutorStatus();
+        return String.valueOf(userLecture.getTutorStatus());
     }
 }

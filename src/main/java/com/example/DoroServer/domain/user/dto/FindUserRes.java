@@ -32,7 +32,7 @@ public class FindUserRes {
     private String studentId; // 학번
     private String major; // 전공
     private StudentStatus studentStatus; // 학생 재적 상태 [ATTENDING, ABSENCE, GRADUATION]
-    private static FindUserRes fromEntity(User user) {
+    public static FindUserRes fromEntity(User user) {
         return FindUserRes.builder()
                 .name(user.getName())
                 .birth(user.getBirth())

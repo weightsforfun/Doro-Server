@@ -44,7 +44,7 @@ public class LectureDto {
                 .staff(lecture.getStaff())
                 .payment(lecture.getPayment())
                 .time(lecture.getTime())
-                .lectureDates(lecture.getLectureDate().getLectureDates())
+                .lectureDates(lecture.getLectureDates())
                 .enrollStartDate(lecture.getLectureDate().getEnrollStartDate())
                 .enrollEndDate(lecture.getLectureDate().getEnrollEndDate())
                 .build();

@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Getter
 public class FindAllUsersRes {
-
+    private Long id;
     private String name; // 사용자 이름
     private LocalDate birth; // 생년월일
     private int generation; // 사용자 기수
@@ -24,8 +24,9 @@ public class FindAllUsersRes {
     private String major;
 
 
-    private static FindAllUsersRes fromEntity(User user){
+    public static FindAllUsersRes fromEntity(User user){
         return FindAllUsersRes.builder()
+                .id(user.getId())
                 .name(user.getName())
                 .birth(user.getBirth())
                 .school(user.getDegree().getSchool())
