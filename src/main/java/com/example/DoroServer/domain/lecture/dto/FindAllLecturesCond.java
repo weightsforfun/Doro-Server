@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 public class FindAllLecturesCond {
     private String city;
-    private LocalDate date;
+    private LocalDate startDate;
+    private LocalDate endDate;
 
 }

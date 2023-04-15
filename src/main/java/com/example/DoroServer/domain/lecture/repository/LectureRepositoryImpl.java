@@ -4,9 +4,14 @@ import static com.example.DoroServer.domain.lecture.entity.QLecture.*;
 
 import com.example.DoroServer.domain.lecture.dto.FindAllLecturesCond;
 import com.example.DoroServer.domain.lecture.entity.Lecture;
+import com.example.DoroServer.domain.lecture.entity.QLectureDate;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.DatePath;
+import com.querydsl.core.types.dsl.ListPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,7 +29,8 @@ public class LectureRepositoryImpl implements LectureRepositoryCustom{
                 .select(lecture)
                 .from(lecture)
                 .where(
-                        containCity(condition.getCity())
+                        containCity(condition.getCity()),
+                        betweenDate(condition.getStartDate(),condition.getEndDate())
                 )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -36,6 +42,13 @@ public class LectureRepositoryImpl implements LectureRepositoryCustom{
     }
    private BooleanExpression containCity(String city){
         return StringUtils.hasText(city) ? lecture.city.contains(city) : null;
+   }
+   private BooleanExpression betweenDate(LocalDate startDate,LocalDate endDate){
+        if(startDate !=null && endDate != null){
+            return lecture.lectureDates.any().between(startDate,endDate);
+        }
+        return null;
+
    }
 
 

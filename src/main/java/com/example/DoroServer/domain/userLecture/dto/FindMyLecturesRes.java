@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FindMyLecturesRes {
+    private Long id;
     private String title;
     private LectureStatus lectureStatus;
     private LocalDateTime enrollEndDate;

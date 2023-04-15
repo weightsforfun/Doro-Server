@@ -1,6 +1,7 @@
 package com.example.DoroServer.domain.lecture.entity;
 
 import java.time.LocalDate;
+import javax.persistence.FetchType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,10 +22,7 @@ import java.util.List;
 @Getter
 public class LectureDate {
 
-    @ElementCollection
-    @CollectionTable(name = "lecture_date", joinColumns =
-    @JoinColumn(name = "lecture_id"))
-    private List<LocalDate> lectureDates = new ArrayList<>(); // 강의 날짜
+
 //
     private LocalDateTime enrollStartDate; // 강의 등록 시작 날짜
     //
