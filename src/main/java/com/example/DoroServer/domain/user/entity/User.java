@@ -107,4 +107,20 @@ public class User extends BaseEntity implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+
+    public void updateDegree(Degree degree) {
+        this.degree = degree;
+    }
+
+    public void updateGeneration(int generation) {
+        this.generation = generation;
+    }
+
+    public void updatePhone(String phone) {
+        this.phone = phone;
+    }
 }

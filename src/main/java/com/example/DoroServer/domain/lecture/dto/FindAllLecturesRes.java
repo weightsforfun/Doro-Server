@@ -16,7 +16,7 @@ import lombok.ToString;
 @Builder
 @AllArgsConstructor
 public class FindAllLecturesRes {
-
+    private Long id;
     private String title;
     private LectureStatus lectureStatus;
     private LocalDateTime enrollEndDate;
@@ -27,6 +27,7 @@ public class FindAllLecturesRes {
 
     public static FindAllLecturesRes fromEntity(Lecture lecture) {
         return FindAllLecturesRes.builder()
+                .id(lecture.getId())
                 .title(lecture.getTitle())
                 .lectureStatus(lecture.getStatus())
                 .enrollEndDate(lecture.getLectureDate().getEnrollEndDate())

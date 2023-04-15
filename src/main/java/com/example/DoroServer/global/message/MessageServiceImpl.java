@@ -60,7 +60,7 @@ public class MessageServiceImpl implements MessageService{
             message.setTo(sendAuthNumReq.getPhone());
             message.setKakaoOptions(kakaoOption);
 
-            redisService.setValues(sendAuthNumReq.getPhone(), authNum, Duration.ofSeconds(300));
+            redisService.setValues(sendAuthNumReq.getMessageType() + sendAuthNumReq.getPhone(), authNum, Duration.ofSeconds(300));
             log.info("Redis 저장 성공");
             defaultMessageService.sendOne(new SingleMessageSendingRequest(message));
             log.info("메시지 전송 성공");
@@ -74,12 +74,12 @@ public class MessageServiceImpl implements MessageService{
 
     @Override
     public void verifyAuthNum(VerifyAuthNumReq verifyAuthNumReq) {
-        String redisAuthNum = redisService.getValues(verifyAuthNumReq.getPhone());
+        String redisAuthNum = redisService.getValues(verifyAuthNumReq.getMessageType() + verifyAuthNumReq.getPhone());
         if(redisAuthNum == null || !redisAuthNum.equals(verifyAuthNumReq.getAuthNum())){
             throw new BaseException(Code.VERIFICATION_DID_NOT_MATCH);
         }
         redisService.deleteValues(verifyAuthNumReq.getPhone());
-        redisService.setValues(verifyAuthNumReq.getPhone(), "Verified", Duration.ofMinutes(30));
+        redisService.setValues(verifyAuthNumReq.getMessageType() + verifyAuthNumReq.getPhone(), "Verified", Duration.ofMinutes(30));
     }
 
     /**

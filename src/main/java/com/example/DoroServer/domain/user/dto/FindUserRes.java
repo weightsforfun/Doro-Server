@@ -4,6 +4,7 @@ import com.example.DoroServer.domain.user.entity.Degree;
 import com.example.DoroServer.domain.user.entity.Gender;
 import com.example.DoroServer.domain.user.entity.StudentStatus;
 import com.example.DoroServer.domain.user.entity.User;
+import com.example.DoroServer.domain.user.entity.UserRole;
 import java.time.LocalDate;
 import javax.persistence.Embedded;
 import javax.persistence.EnumType;
@@ -31,7 +32,7 @@ public class FindUserRes {
     private String studentId; // 학번
     private String major; // 전공
     private StudentStatus studentStatus; // 학생 재적 상태 [ATTENDING, ABSENCE, GRADUATION]
-    private static FindUserRes fromEntity(User user) {
+    public static FindUserRes fromEntity(User user) {
         return FindUserRes.builder()
                 .name(user.getName())
                 .birth(user.getBirth())

@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FindAllTutorsRes {
+    private Long id;
     private String name;
     private String major;
     private TutorRole tutorRole;

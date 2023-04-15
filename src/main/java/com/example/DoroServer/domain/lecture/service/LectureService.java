@@ -62,7 +62,7 @@ public class LectureService {
             return lecture.getId();
         }
 
-        throw new BaseException(Code.BAD_REQUEST);
+        throw new BaseException(Code.LECTURE_NOT_FOUND);
     }
 
     public FindLectureRes findLecture(Long id) {
@@ -78,7 +78,7 @@ public class LectureService {
                     .build();
             return findLectureRes;
         } else {
-            throw new BaseException(Code.BAD_REQUEST);
+            throw new BaseException(Code.LECTURE_NOT_FOUND);
         }
     }
 
@@ -90,7 +90,7 @@ public class LectureService {
             modelMapper.map(updateLectureReq, lecture);
             return id;
         } else {
-            throw new BaseException(Code.BAD_REQUEST);
+            throw new BaseException(Code.LECTURE_NOT_FOUND);
         }
     }
 

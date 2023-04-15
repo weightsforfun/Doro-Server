@@ -26,10 +26,16 @@ public enum Code {
     PASSWORD_DID_NOT_MATCH(HttpStatus.BAD_REQUEST, "AUTH010", "비밀번호가 일치하지 않습니다."),
     DORO_ADMIN_AUTH_FAILED(HttpStatus.UNAUTHORIZED, "AUTH011", "관리자 인증번호가 일치하지 않습니다."),
     DORO_USER_AUTH_FAILED(HttpStatus.UNAUTHORIZED, "AUTH012", "도로 인증번호가 일치하지 않습니다."),
+    ACCOUNT_NOT_FOUND(HttpStatus.NOT_FOUND, "AUTH013", "가입된 아이디가 없습니다."),
+    EXIST_PHONE(HttpStatus.CONFLICT, "AUTH014", "이미 존재하는 휴대폰 번호입니다."),
+    REFRESH_TOKEN_DID_NOT_MATCH(HttpStatus.BAD_REQUEST, "AUTH015", "RefreshToken 정보가 일치하지 않습니다."),
     //USER 관련 오류 U001,U002...
-
+    USER_NOT_FOUND(HttpStatus.BAD_REQUEST,"USER001","사용자가 존재하지 않습니다"),
     //강의 관련 오류 L001,L002..
-
+    LECTURE_NOT_FOUND(HttpStatus.BAD_REQUEST,"LEC001","강의가 존재하지 않습니다."),
+    LECTURE_CONTENT_NOT_FOUND(HttpStatus.BAD_REQUEST,"LEC002","강의 컨텐츠가 존재하지 않습니다."),
+    // 신청 강사 관련 오류
+    TUTOR_NOT_FOUND(HttpStatus.BAD_REQUEST,"TUTOR001","신청하지 않은 강사입니다."),
     // 알림톡 관련 오류 M001, M002...
     MESSAGE_SEND_FAILED(HttpStatus.BAD_REQUEST, "M001", "메시지 전송이 실패했습니다. 올바른 번호인지 확인하세요."),
     VERIFICATION_DID_NOT_MATCH(HttpStatus.BAD_REQUEST, "M002", "인증 번호가 일치하지 않습니다."),

@@ -65,9 +65,9 @@ public class CreateLectureReq {
                 .staff(staff)
                 .payment(payment)
                 .time(time)
+                .lectureDates(lectureDates)
                 .lectureDate(
                         LectureDate.builder()
-                                .lectureDates(lectureDates)
                                 .enrollStartDate(enrollStartDate)
                                 .enrollEndDate(enrollEndDate)
                                 .build()
