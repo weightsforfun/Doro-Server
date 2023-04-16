@@ -25,6 +25,7 @@ public class JwtLogoutHandler implements LogoutHandler {
     public void logout(HttpServletRequest request, HttpServletResponse response,
         Authentication authentication) {
         String bearerAccessToken = request.getHeader("Authorization");
+        String userAgent = request.getHeader("User-Agent");
         String accessToken = bearerAccessToken.substring(7);
 
         if(!tokenProvider.validateToken(accessToken)){
@@ -32,8 +33,8 @@ public class JwtLogoutHandler implements LogoutHandler {
         }
         Authentication providerAuthentication = tokenProvider.getAuthentication(accessToken);
         log.info("Argument Authentication={}", providerAuthentication);
-        if(redisService.getValues("RTK" + providerAuthentication.getName()) != null){
-            redisService.deleteValues("RTK" + providerAuthentication.getName());
+        if(redisService.getValues("RTK" + providerAuthentication.getName() + userAgent) != null){
+            redisService.deleteValues("RTK" + providerAuthentication.getName() + userAgent);
         }
         Long expiration = tokenProvider.getExpiration(accessToken);
         redisService.setValues(accessToken, "logout", Duration.ofMillis(expiration));

@@ -103,9 +103,6 @@ public class AuthServiceImpl implements AuthService{
     public void withdrawalUser(User user) {
         try {
             userRepository.deleteById(user.getId());
-            if(redisService.getValues("RTK" + user.getAccount()) != null){
-                redisService.deleteValues("RTK" + user.getAccount());
-            }
         } catch (Exception e){
             throw new BaseException(Code.WITHDRAWAL_FAILED);
         }

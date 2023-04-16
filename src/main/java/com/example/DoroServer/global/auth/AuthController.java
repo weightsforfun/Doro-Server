@@ -28,14 +28,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -70,11 +69,10 @@ public class AuthController {
 
     @Operation(summary = "001_02", description = "로그인")
     @PostMapping("/login")
-    public ResponseEntity<?> login (@RequestBody @Valid LoginReq loginReq){
+    public ResponseEntity<?> login (@RequestBody @Valid LoginReq loginReq,
+                                    @RequestHeader("User-Agent") String userAgent){
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
             loginReq.getAccount(), loginReq.getPassword());
-        log.info("AuthenticationToken.getName={}", authenticationToken.getName());
-        log.info("AuthenticationToken.getCredentials={}", authenticationToken.getCredentials());
         log.info("AuthenticationToken={}", authenticationToken);
         String accessToken = createAccessToken(authenticationToken);
         String refreshToken = createRefreshToken();
@@ -82,7 +80,7 @@ public class AuthController {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Authorization", accessToken);
 
-        redisService.setValues("RTK" + loginReq.getAccount(), refreshToken, Duration.ofDays(60));
+        redisService.setValues("RTK" + loginReq.getAccount() + userAgent, refreshToken, Duration.ofDays(60));
 
         return ResponseEntity.ok()
             .headers(httpHeaders)
@@ -126,13 +124,14 @@ public class AuthController {
 
     @Operation(summary = "001_", description = "토큰 재발급")
     @PostMapping("/reissue")
-    public ResponseEntity<?> reissue(@RequestBody ReissueReq reissueReq){
+    public ResponseEntity<?> reissue(@RequestBody ReissueReq reissueReq,
+                                    @RequestHeader("User-Agent") String userAgent){
         if(!tokenProvider.validateToken(reissueReq.getRefreshToken())){
             throw new JwtAuthenticationException(Code.JWT_BAD_REQUEST);
         }
         Authentication authentication = tokenProvider.getAuthentication(
             reissueReq.getAccessToken().substring(7));
-        String refreshToken = redisService.getValues("RTK" + authentication.getName());
+        String refreshToken = redisService.getValues("RTK" + authentication.getName() + userAgent);
 
         if(!reissueReq.getRefreshToken().equals(refreshToken)){
             throw new JwtAuthenticationException(Code.REFRESH_TOKEN_DID_NOT_MATCH);
@@ -156,8 +155,12 @@ public class AuthController {
     @Secured("ROLE_USER")
     @Operation(summary = "001_", description = "회원 탈퇴")
     @DeleteMapping("/withdrawal")
-    public SuccessResponse<String> withdrawalUser(@AuthenticationPrincipal User user){
+    public SuccessResponse<String> withdrawalUser(@AuthenticationPrincipal User user,
+                                            @RequestHeader("User-Agent") String userAgent){
         authService.withdrawalUser(user);
+        if(redisService.getValues("RTK" + user.getAccount() + userAgent) != null){
+            redisService.deleteValues("RTK" + user.getAccount() + userAgent);
+        }
         SecurityContextHolder.clearContext();
         return SuccessResponse.successResponse("회원 탈퇴 성공");
     }
