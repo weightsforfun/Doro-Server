@@ -151,26 +151,6 @@ public class AuthController {
             .headers(httpHeaders).build();
     }
 
-    @Operation(summary = "001_", description = "로그아웃")
-    @PostMapping("/logout")
-    public SuccessResponse<String> logout(@RequestHeader(value = "Authorization")
-                                            String bearerAccessToken){
-        String accessToken = bearerAccessToken.substring(7);
-        if(!tokenProvider.validateToken(accessToken)){
-            throw new JwtAuthenticationException(Code.BAD_REQUEST);
-        }
-        Authentication authentication = tokenProvider.getAuthentication(accessToken);
-        if(redisService.getValues("RTK" + authentication.getName()) != null){
-            redisService.deleteValues("RTK" + authentication.getName());
-        }
-        Long expiration = tokenProvider.getExpiration(accessToken);
-        redisService.setValues(accessToken, "logout", Duration.ofMillis(expiration));
-
-        SecurityContextHolder.clearContext();
-
-        return SuccessResponse.successResponse("로그아웃 완료");
-    }
-
     private String createReissueAccessToken(String account) {
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(account);
 
