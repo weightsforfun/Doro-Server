@@ -1,5 +1,6 @@
 package com.example.DoroServer.global.auth;
 
+import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.global.auth.dto.ChangePasswordReq;
 import com.example.DoroServer.global.auth.dto.JoinReq;
@@ -8,7 +9,6 @@ import com.example.DoroServer.global.auth.dto.ReissueReq;
 import com.example.DoroServer.global.auth.dto.SendAuthNumReq;
 import com.example.DoroServer.global.auth.dto.VerifyAuthNumReq;
 import com.example.DoroServer.global.common.SuccessResponse;
-import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
 import com.example.DoroServer.global.exception.JwtAuthenticationException;
 import com.example.DoroServer.global.jwt.CustomUserDetailsService;
@@ -18,22 +18,24 @@ import com.example.DoroServer.global.message.MessageService;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import java.time.Duration;
-import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -149,6 +151,15 @@ public class AuthController {
 
         return ResponseEntity.ok()
             .headers(httpHeaders).build();
+    }
+
+    @Secured("ROLE_USER")
+    @Operation(summary = "001_", description = "회원 탈퇴")
+    @DeleteMapping("/withdrawal")
+    public SuccessResponse<String> withdrawalUser(@AuthenticationPrincipal User user){
+        authService.withdrawalUser(user);
+        SecurityContextHolder.clearContext();
+        return SuccessResponse.successResponse("회원 탈퇴 성공");
     }
 
     private String createReissueAccessToken(String account) {

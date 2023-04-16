@@ -98,4 +98,16 @@ public class AuthServiceImpl implements AuthService{
             .orElseThrow(() -> new BaseException(Code.ACCOUNT_NOT_FOUND));
         user.updatePassword(passwordEncoder.encode(changePasswordReq.getNewPassword()));
     }
+
+    @Override
+    public void withdrawalUser(User user) {
+        try {
+            userRepository.deleteById(user.getId());
+            if(redisService.getValues("RTK" + user.getAccount()) != null){
+                redisService.deleteValues("RTK" + user.getAccount());
+            }
+        } catch (Exception e){
+            throw new BaseException(Code.WITHDRAWAL_FAILED);
+        }
+    }
 }
