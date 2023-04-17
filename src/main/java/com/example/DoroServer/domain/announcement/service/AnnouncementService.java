@@ -8,6 +8,7 @@ import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,9 @@ public class AnnouncementService {
 
     // AnnouncementRes Dto객체 전부 조회
     public List<AnnouncementRes> findAllAnnouncements() {
-        return announcementRepository.findAllRes();
+        return announcementRepository.findAll().stream()
+                .map(Announcement::toRes)
+                .collect(Collectors.toList());
     }
 
     // Announcement 생성 메소드
