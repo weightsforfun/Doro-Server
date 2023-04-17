@@ -4,6 +4,7 @@ import com.example.DoroServer.domain.user.dto.FindAllUsersRes;
 import com.example.DoroServer.domain.user.dto.FindUserRes;
 import com.example.DoroServer.domain.user.dto.UpdateUserReq;
 import com.example.DoroServer.domain.user.entity.Degree;
+import com.example.DoroServer.domain.user.entity.Degree.DegreeBuilder;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.global.exception.BaseException;
@@ -12,9 +13,12 @@ import com.example.DoroServer.global.jwt.RedisService;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import com.example.DoroServer.global.s3.AwsS3Service;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final RedisService redisService;
+    private final AwsS3Service awsS3Service;
 
     @Override
     public void updateUser(String id, UpdateUserReq updateUserReq) {
@@ -59,5 +64,14 @@ public class UserServiceImpl implements UserService{
         User user = userRepository.findById(id)
                 .orElseThrow(()-> new BaseException(Code.USER_NOT_FOUND));
         return FindUserRes.fromEntity(user);
+    }
+
+    @Override
+    public void updateUserProfile(User user, MultipartFile multipartFile) throws IOException {
+            if(user.getProfileImg() != null){
+                awsS3Service.deleteImage(user.getProfileImg());
+            }
+            String imgUrl = awsS3Service.upload(multipartFile,"profile");
+            userRepository.updateProfileImgById(user.getId(), imgUrl);
     }
 }

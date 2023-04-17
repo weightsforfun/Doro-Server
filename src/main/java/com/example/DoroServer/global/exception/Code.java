@@ -37,7 +37,13 @@ public enum Code {
     TUTOR_NOT_FOUND(HttpStatus.BAD_REQUEST,"TUTOR001","신청하지 않은 강사입니다."),
     // 알림톡 관련 오류 M001, M002...
     MESSAGE_SEND_FAILED(HttpStatus.BAD_REQUEST, "M001", "메시지 전송이 실패했습니다. 올바른 번호인지 확인하세요."),
-    VERIFICATION_DID_NOT_MATCH(HttpStatus.BAD_REQUEST, "M002", "인증 번호가 일치하지 않습니다.");
+    VERIFICATION_DID_NOT_MATCH(HttpStatus.BAD_REQUEST, "M002", "인증 번호가 일치하지 않습니다."),
+
+    // S3 관련 오류 S001, S002...
+    RESIZE_FAILED(HttpStatus.BAD_REQUEST, "S001", "파일 리사이징을 실패했습니다."),
+    EMPTY_FILE(HttpStatus.NO_CONTENT, "S002", "업로드 파일이 없습니다."),
+    UPLOAD_FAILED(HttpStatus.BAD_REQUEST, "S003", "업로드 중 오류가 발생했습니다."),
+    FILE_DELETE_FAILED(HttpStatus.BAD_REQUEST, "S004", "파일 삭제 중 오류가 발생했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
