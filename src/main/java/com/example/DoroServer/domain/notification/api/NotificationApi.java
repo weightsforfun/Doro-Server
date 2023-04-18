@@ -33,21 +33,14 @@ public class NotificationApi {
     }
 
     // FCM 서버에 알림 전송요청
-    //todo: sendMessageTo -> sendMessageToAll 함수 만들어서 교체
     @PostMapping
     public SuccessResponse pushNotification(
             @RequestBody NotificationContentReq notificationContentReq) {
-        // FCM토큰 가져오기위해 유저 조회
+        // FCMToken 가져오기위해 유저 조회
         List<User> users = userRepository.findAll();
+
         // FCM 서버에 메시지 전송
-        // todo: 유저에 토큰 생기면 아래거 이걸로 교체
-//        notificationService.sendMessageToAll(notificationContentReq);
-        notificationService.sendMessageTo(NotificationReq.builder()
-                .targetToken(
-                        "fkmvjInlTWOKaXDHUjXOI2:APA91bHhmhodpWb_P9u7i6_tghb4bVTg-L7dli3-tuFfBqT17YcJAy8wK-Eklhf1hPotzT_fR_0KGit4oc8h_b0Hkq56lU_wvLe4GsQ9f5IrOW1rlZ0-82vHaWeLFg0gUpUthYn5PlHS")
-                .title(notificationContentReq.getTitle())
-                .body(notificationContentReq.getBody())
-                .build());
+        notificationService.sendMessageToAll(notificationContentReq);
 
         // 푸쉬알림 저장
         notificationService.saveNotification(notificationContentReq);

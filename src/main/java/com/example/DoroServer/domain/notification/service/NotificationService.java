@@ -6,6 +6,9 @@ import com.example.DoroServer.domain.notification.dto.NotificationReq;
 import com.example.DoroServer.domain.notification.dto.NotificationDto;
 import com.example.DoroServer.domain.notification.entity.Notification;
 import com.example.DoroServer.domain.notification.repository.NotificationRepository;
+import com.example.DoroServer.domain.token.entity.Token;
+import com.example.DoroServer.domain.token.repository.TokenRepository;
+import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
@@ -35,6 +38,8 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
 
+    private final TokenRepository tokenRepository;
+
     private final UserRepository userRepository;
 
     private final ObjectMapper objectMapper;
@@ -45,11 +50,13 @@ public class NotificationService {
 
     public NotificationService(
             NotificationRepository notificationRepository,
+            TokenRepository tokenRepository,
             ObjectMapper objectMapper,
             UserRepository userRepository,
             @Value("${api.url}") String apiUrl,
             @Value("${project.id}") String projectId) {
         this.notificationRepository = notificationRepository;
+        this.tokenRepository = tokenRepository;
         this.objectMapper = objectMapper;
         this.userRepository = userRepository;
         this.API_URL = apiUrl;
@@ -78,14 +85,28 @@ public class NotificationService {
         return notification.getId();
     }
 
-    //todo: user전체 받아와서 user마다 토큰 조회해서 메세지 전송
-/*
+    // 모든 토큰으로 푸쉬알림 발송
     public void sendMessageToAll(NotificationContentReq notificationContentReq) {
-        List<User> users = userRepository.findAll();
-        users.stream().forEach(
-                user -> {
+        List<Token> tokens = tokenRepository.findAll();
+        tokens.stream().forEach(token -> {
+            NotificationReq notificationReq = NotificationReq.builder()
+                    .targetToken(token.getToken())
+                    .title(notificationContentReq.getTitle())
+                    .body(notificationContentReq.getBody())
+                    .build();
+            sendMessageTo(notificationReq);
+        });
+    }
+
+    public void sendToUser(Long userId, NotificationContentReq notificationContentReq) {
+        User user = userRepository.findById(userId).orElseThrow(() -> {
+            log.info("유저를 찾을 수 없습니다. id = {}", userId);
+            throw new BaseException(Code.USER_NOT_FOUND);
+        });
+        user.getTokens().stream().forEach(
+                token -> {
                     NotificationReq notificationReq = NotificationReq.builder()
-                            .targetToken(user.getTargetToken())
+                            .targetToken(token.getToken())
                             .title(notificationContentReq.getTitle())
                             .body(notificationContentReq.getBody())
                             .build();
@@ -93,7 +114,7 @@ public class NotificationService {
                 }
         );
     }
-*/
+
 
     // FCM 메시지를 보내는 메소드
     public void sendMessageTo(NotificationReq notificationReq) {
@@ -104,7 +125,7 @@ public class NotificationService {
                 MediaType.get("application/json; charset=utf-8"));
 
         try {
-        // HTTP 요청 생성
+            // HTTP 요청 생성
             Request request = new Request.Builder()
                     .url(API_URL.replace("{project-id}", PROJECT_ID))
                     .post(requestBody)
@@ -188,7 +209,7 @@ public class NotificationService {
 
         // 토큰 만료 확인
         googleCredentials.refreshIfExpired();
-        log.info("{}",googleCredentials.getAccessToken().getTokenValue());
+        log.info("{}", googleCredentials.getAccessToken().getTokenValue());
         return googleCredentials.getAccessToken().getTokenValue();
     }
 
