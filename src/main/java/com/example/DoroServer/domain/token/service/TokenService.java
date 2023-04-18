@@ -23,6 +23,7 @@ public class TokenService {
     private final TokenRepository tokenRepository;
     private final UserRepository userRepository;
 
+    // userId를 통해 해당 user가 가지고 있는 토큰들 조회
     public List<TokenDto> findUserTokens(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> {
             log.info("유저를 찾을 수 없습니다. id = {}", userId);
@@ -33,11 +34,13 @@ public class TokenService {
                 .collect(Collectors.toList());
     }
 
+    // 저장되어있는 모든 토큰 조회
     public List<TokenDto> findAllTokens() {
         return tokenRepository.findAll().stream()
                 .map(Token::toDto).collect(Collectors.toList());
     }
 
+    // id에 해당하는 user에 token 추가
     @Transactional
     public Long saveToken(Long userId, TokenDto tokenDto) {
         User user = userRepository.findById(userId).orElseThrow(() -> {
@@ -51,6 +54,7 @@ public class TokenService {
         return token.getId();
     }
 
+    // 토큰 삭제 메소드
     @Transactional
     public void deleteToken(Long userId,TokenDto tokenDto) {
         User user = userRepository.findById(userId).orElseThrow(() -> {
