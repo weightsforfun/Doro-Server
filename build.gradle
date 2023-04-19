@@ -64,6 +64,8 @@ dependencies {
 	// okhttp
 	implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.2.2'
 
+	// S3
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 }
 
 tasks.named('test') {
