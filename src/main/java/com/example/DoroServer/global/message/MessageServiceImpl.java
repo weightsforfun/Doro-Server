@@ -47,39 +47,44 @@ public class MessageServiceImpl implements MessageService{
     public void sendAuthNum(SendAuthNumReq sendAuthNumReq) {
         try{
             String authNum = numberGen(6);
-            KakaoOption kakaoOption = new KakaoOption();
-            kakaoOption.setPfId(pfId);
-            kakaoOption.setTemplateId(templateId);
-            // 알림톡 템플릿 내 #{변수} 관리
-            HashMap<String, String> variables = new HashMap<>();
-            variables.put("#{인증번호}", authNum);
-            kakaoOption.setVariables(variables);
+            Message message = makeKakaoMessage(sendAuthNumReq, authNum);
 
-            Message message = new Message();
-            message.setFrom(fromNumber);
-            message.setTo(sendAuthNumReq.getPhone());
-            message.setKakaoOptions(kakaoOption);
-
-            redisService.setValues(sendAuthNumReq.getMessageType() + sendAuthNumReq.getPhone(), authNum, Duration.ofSeconds(300));
+            redisService.setValues(sendAuthNumReq.getMessageType() + sendAuthNumReq.getPhone(),
+                authNum, Duration.ofSeconds(300));
             log.info("Redis 저장 성공");
             defaultMessageService.sendOne(new SingleMessageSendingRequest(message));
             log.info("메시지 전송 성공");
         }catch (Exception e){
             throw new MessageException(Code.MESSAGE_SEND_FAILED);
         }
+    }
 
+    private Message makeKakaoMessage(SendAuthNumReq sendAuthNumReq, String authNum) {
+        KakaoOption kakaoOption = new KakaoOption();
+        kakaoOption.setPfId(pfId);
+        kakaoOption.setTemplateId(templateId);
+        // 알림톡 템플릿 내 #{변수} 관리
+        HashMap<String, String> variables = new HashMap<>();
+        variables.put("#{인증번호}", authNum);
+        kakaoOption.setVariables(variables);
 
-
+        Message message = new Message();
+        message.setFrom(fromNumber);
+        message.setTo(sendAuthNumReq.getPhone());
+        message.setKakaoOptions(kakaoOption);
+        return message;
     }
 
     @Override
     public void verifyAuthNum(VerifyAuthNumReq verifyAuthNumReq) {
-        String redisAuthNum = redisService.getValues(verifyAuthNumReq.getMessageType() + verifyAuthNumReq.getPhone());
+        String redisAuthNum = redisService.getValues(verifyAuthNumReq.getMessageType() +
+            verifyAuthNumReq.getPhone());
         if(redisAuthNum == null || !redisAuthNum.equals(verifyAuthNumReq.getAuthNum())){
             throw new BaseException(Code.VERIFICATION_DID_NOT_MATCH);
         }
         redisService.deleteValues(verifyAuthNumReq.getPhone());
-        redisService.setValues(verifyAuthNumReq.getMessageType() + verifyAuthNumReq.getPhone(), "Verified", Duration.ofMinutes(30));
+        redisService.setValues(verifyAuthNumReq.getMessageType() +
+            verifyAuthNumReq.getPhone(), "Verified", Duration.ofMinutes(30));
     }
 
     /**
