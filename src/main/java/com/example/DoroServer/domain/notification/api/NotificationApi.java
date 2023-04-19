@@ -8,6 +8,7 @@ import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.global.common.SuccessResponse;
 import java.util.List;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,7 +35,7 @@ public class NotificationApi {
     // FCM 서버에 알림 전송요청
     @PostMapping
     public SuccessResponse pushNotification(
-            @RequestBody NotificationContentReq notificationContentReq) {
+            @RequestBody @Valid NotificationContentReq notificationContentReq) {
 
         // FCM 서버에 메시지 전송
         notificationService.sendMessageToAll(notificationContentReq);
