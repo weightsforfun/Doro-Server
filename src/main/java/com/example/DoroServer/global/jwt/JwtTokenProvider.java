@@ -1,5 +1,8 @@
 package com.example.DoroServer.global.jwt;
 
+import static com.example.DoroServer.global.common.Constants.ACCESS_TOKEN_PREFIX;
+import static com.example.DoroServer.global.common.Constants.AUTHORIZATION_HEADER;
+
 import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.global.exception.Code;
 import com.example.DoroServer.global.exception.JwtAuthenticationException;
@@ -28,7 +31,7 @@ import java.util.List;
 @Slf4j
 @PropertySource("classpath:/jwt.properties")
 public class JwtTokenProvider {
-    private static final String AUTHORIZATION_HEADER = "Authorization";
+
     private final CustomUserDetailsService customUserDetailsService;
     private final UserRepository userRepository;
     private String secretKey;
@@ -107,7 +110,7 @@ public class JwtTokenProvider {
 
     public String resolveToken(HttpServletRequest request){
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
-        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")){
+        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith(ACCESS_TOKEN_PREFIX)){
             return bearerToken.substring(7);
         }
         return null;

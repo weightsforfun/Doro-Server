@@ -1,5 +1,8 @@
 package com.example.DoroServer.domain.user.service;
 
+import static com.example.DoroServer.global.common.Constants.REDIS_MESSAGE_PREFIX.UPDATE;
+import static com.example.DoroServer.global.common.Constants.VERIFIED_CODE;
+
 import com.example.DoroServer.domain.user.dto.FindAllUsersRes;
 import com.example.DoroServer.domain.user.dto.FindUserRes;
 import com.example.DoroServer.domain.user.dto.UpdateUserReq;
@@ -7,6 +10,7 @@ import com.example.DoroServer.domain.user.entity.Degree;
 import com.example.DoroServer.domain.user.entity.Degree.DegreeBuilder;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.repository.UserRepository;
+import com.example.DoroServer.global.common.Constants.REDIS_MESSAGE_PREFIX;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
 import com.example.DoroServer.global.jwt.RedisService;
@@ -44,7 +48,7 @@ public class UserServiceImpl implements UserService{
         user.updateGeneration(updateUserReq.getGeneration());
 
         if(!user.getPhone().equals(updateUserReq.getPhone())){
-            if(!"Verified".equals(redisService.getValues("UPDATE" + updateUserReq.getPhone()))) {
+            if(!VERIFIED_CODE.equals(redisService.getValues(UPDATE + updateUserReq.getPhone()))) {
                 throw new BaseException(Code.UNAUTHORIZED_PHONE_NUMBER);
             }
             user.updatePhone(updateUserReq.getPhone());

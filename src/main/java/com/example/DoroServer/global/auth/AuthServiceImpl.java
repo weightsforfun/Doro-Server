@@ -1,10 +1,16 @@
 package com.example.DoroServer.global.auth;
 
+import static com.example.DoroServer.global.common.Constants.REDIS_MESSAGE_PREFIX.ACCOUNT;
+import static com.example.DoroServer.global.common.Constants.REDIS_MESSAGE_PREFIX.JOIN;
+import static com.example.DoroServer.global.common.Constants.REDIS_MESSAGE_PREFIX.PASSWORD;
+import static com.example.DoroServer.global.common.Constants.VERIFIED_CODE;
+
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.entity.UserRole;
 import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.global.auth.dto.ChangePasswordReq;
 import com.example.DoroServer.global.auth.dto.JoinReq;
+import com.example.DoroServer.global.common.Constants.REDIS_MESSAGE_PREFIX;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
 import com.example.DoroServer.global.jwt.RedisService;
@@ -42,7 +48,7 @@ public class AuthServiceImpl implements AuthService{
     @Override
     public void join(JoinReq joinReq) {
         // 레디스 인증된 번호 조회
-        if(!"Verified".equals(redisService.getValues("JOIN" + joinReq.getPhone()))) {
+        if(!VERIFIED_CODE.equals(redisService.getValues(JOIN + joinReq.getPhone()))) {
             throw new BaseException(Code.UNAUTHORIZED_PHONE_NUMBER);
         }
 //        // 휴대폰 번호 중복 체크
@@ -77,7 +83,7 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     public String findAccount(String phone) {
-        if(!"Verified".equals(redisService.getValues("ACCOUNT" + phone))) {
+        if(!VERIFIED_CODE.equals(redisService.getValues(ACCOUNT + phone))) {
             throw new BaseException(Code.UNAUTHORIZED_PHONE_NUMBER);
         }
         User user = userRepository.findByPhone(phone).orElseThrow(()
@@ -87,7 +93,7 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     public void changePassword(ChangePasswordReq changePasswordReq) {
-        if(!"Verified".equals(redisService.getValues("PASSWORD" + changePasswordReq.getPhone()))) {
+        if(!VERIFIED_CODE.equals(redisService.getValues(PASSWORD + changePasswordReq.getPhone()))) {
             throw new BaseException(Code.UNAUTHORIZED_PHONE_NUMBER);
         }
         if(!changePasswordReq.getNewPassword().equals(changePasswordReq.getNewPasswordCheck())){

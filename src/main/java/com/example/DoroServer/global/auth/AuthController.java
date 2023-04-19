@@ -1,5 +1,8 @@
 package com.example.DoroServer.global.auth;
 
+import static com.example.DoroServer.global.common.Constants.AUTHORIZATION_HEADER;
+import static com.example.DoroServer.global.common.Constants.REDIS_REFRESH_TOKEN_PREFIX;
+
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.global.auth.dto.ChangePasswordReq;
@@ -54,14 +57,6 @@ public class AuthController {
     @Operation(summary = "001_01", description = "회원가입")
     @PostMapping("/join")
     public SuccessResponse<String> join (@RequestBody @Valid JoinReq joinReq){
-        /**
-         * 인증 번호 저장
-         * 전화번호 인증을 클릭하면 레디스에 인증번호을 저장하고
-         * 인증번호 확인을 클릭하면 레디스에 저장한 인증번호와 비교해서
-         * 맞으면 그 인증된 전화번호를 테이블에 저장하고
-         * 회원가입을 할 때 RequestBody 값으로 들어온 phoneNumber가 인증된 전화번호 테이블에 존재하는
-         * 전화번호인지 확인한다.
-         */
         authService.checkAccount(joinReq.getAccount());
         authService.join(joinReq);
         return SuccessResponse.successResponse("회원가입 완료");
@@ -78,9 +73,9 @@ public class AuthController {
         String refreshToken = createRefreshToken();
 
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("Authorization", accessToken);
+        httpHeaders.add(AUTHORIZATION_HEADER, accessToken);
 
-        redisService.setValues("RTK" + loginReq.getAccount() + userAgent, refreshToken, Duration.ofDays(60));
+        redisService.setValues(REDIS_REFRESH_TOKEN_PREFIX + loginReq.getAccount() + userAgent, refreshToken, Duration.ofDays(60));
 
         return ResponseEntity.ok()
             .headers(httpHeaders)
@@ -131,7 +126,7 @@ public class AuthController {
         }
         Authentication authentication = tokenProvider.getAuthentication(
             reissueReq.getAccessToken().substring(7));
-        String refreshToken = redisService.getValues("RTK" + authentication.getName() + userAgent);
+        String refreshToken = redisService.getValues(REDIS_REFRESH_TOKEN_PREFIX + authentication.getName() + userAgent);
 
         if(!reissueReq.getRefreshToken().equals(refreshToken)){
             throw new JwtAuthenticationException(Code.REFRESH_TOKEN_DID_NOT_MATCH);
@@ -146,7 +141,7 @@ public class AuthController {
             usernamePasswordAuthenticationToken.getAuthorities());
 
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("Authorization", newAccessToken);
+        httpHeaders.add(AUTHORIZATION_HEADER, newAccessToken);
 
         return ResponseEntity.ok()
             .headers(httpHeaders).build();
@@ -158,8 +153,8 @@ public class AuthController {
     public SuccessResponse<String> withdrawalUser(@AuthenticationPrincipal User user,
                                             @RequestHeader("User-Agent") String userAgent){
         authService.withdrawalUser(user);
-        if(redisService.getValues("RTK" + user.getAccount() + userAgent) != null){
-            redisService.deleteValues("RTK" + user.getAccount() + userAgent);
+        if(redisService.getValues(REDIS_REFRESH_TOKEN_PREFIX + user.getAccount() + userAgent) != null){
+            redisService.deleteValues(REDIS_REFRESH_TOKEN_PREFIX + user.getAccount() + userAgent);
         }
         SecurityContextHolder.clearContext();
         return SuccessResponse.successResponse("회원 탈퇴 성공");
