@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class NotificationApi {
 
     private final NotificationService notificationService;
-    private final UserRepository userRepository;
 
     // 모든 Notification 조회 메소드
     @GetMapping
@@ -36,8 +35,6 @@ public class NotificationApi {
     @PostMapping
     public SuccessResponse pushNotification(
             @RequestBody NotificationContentReq notificationContentReq) {
-        // FCMToken 가져오기위해 유저 조회
-        List<User> users = userRepository.findAll();
 
         // FCM 서버에 메시지 전송
         notificationService.sendMessageToAll(notificationContentReq);

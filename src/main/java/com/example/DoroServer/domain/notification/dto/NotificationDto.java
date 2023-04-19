@@ -56,7 +56,7 @@ public class NotificationDto {  // Fcm 서버에 보낼 객체
 
         private String title;   // 알림 제목
         private String body;    // 알림 내용
-//        private String image; // 알림 표기 사진
+        private String image; // 알림 표기 사진
     }
 }
 

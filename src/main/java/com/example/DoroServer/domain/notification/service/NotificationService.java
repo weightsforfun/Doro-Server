@@ -135,26 +135,7 @@ public class NotificationService {
 
             // HTTP 요청 실행
             Response response = httpClient.newCall(request).execute();
-            if (response != null && response.body() != null) {
-
-                String responseBodyString = response.body().string();
-                JsonNode jsonNode = objectMapper.readTree(responseBodyString);
-
-                // 만료된 토큰이거나 잘못된 토큰 체크
-                String errorCode = null;
-                if (jsonNode.has("error")) {
-                    JsonNode detailsNode = jsonNode.get("error").get("details");
-                    if (detailsNode.isArray() && detailsNode.size() > 0) {
-                        errorCode = detailsNode.get(0).get("errorCode").asText();
-                        if (errorCode != null && (errorCode.equals("INVALID_ARGUMENT")
-                                || errorCode.equals("UNREGISTERED"))) {
-                            // todo: 만료되거나 잘못된 토큰 DB에 있는지 확인하고 삭제
-                            log.info("유효하지 않은 토큰 : ");
-                            log.info(responseBodyString);
-                        }
-                    }
-                }
-            }
+            log.info("response.body() = {}",response.body().string());
         } catch (IOException e) {
             throw new BaseException(Code.NOTIFICATION_PUSH_FAIL);
         }
@@ -172,6 +153,7 @@ public class NotificationService {
                                                 NotificationDto.Notification.builder()
                                                         .title(notificationReq.getTitle())
                                                         .body(notificationReq.getBody())
+                                                        .image(null)
                                                         .build())
                                         .apns(
                                                 NotificationDto.Apns.builder()
@@ -209,7 +191,7 @@ public class NotificationService {
 
         // 토큰 만료 확인
         googleCredentials.refreshIfExpired();
-        log.info("{}", googleCredentials.getAccessToken().getTokenValue());
+        log.info(" = {}",googleCredentials.getAccessToken().getTokenValue());
         return googleCredentials.getAccessToken().getTokenValue();
     }
 
