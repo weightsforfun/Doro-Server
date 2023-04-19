@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TokenDto {
 
-    @NotBlank
+    @NotBlank(message = "토큰이 필요합니다.")
     private String token;
 }

@@ -3,10 +3,12 @@ package com.example.DoroServer.domain.announcement.api;
 import com.example.DoroServer.domain.announcement.dto.AnnouncementReq;
 import com.example.DoroServer.domain.announcement.dto.AnnouncementRes;
 import com.example.DoroServer.domain.announcement.service.AnnouncementService;
+import com.example.DoroServer.domain.notification.dto.NotificationContentReq;
 import com.example.DoroServer.domain.notification.dto.NotificationReq;
 import com.example.DoroServer.domain.notification.service.NotificationService;
 import com.example.DoroServer.global.common.SuccessResponse;
 import java.util.List;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,16 +36,9 @@ public class AnnouncementApi {
 
     // 공지 생성 후 생성 확인 알림 전송
     @PostMapping
-    public SuccessResponse createAnnouncement(@RequestBody AnnouncementReq announcementReq) {
+    public SuccessResponse createAnnouncement(@RequestBody @Valid AnnouncementReq announcementReq) {
         Long announcementId = announcementService.createAnnouncement(announcementReq);
-        //todo: 사용자 토큰 멤버변수 생기면 아래거 이걸로 교체
-//        notificationService.sendMessageToAll(NotificationContentReq.builder()
-//                .title(announcementReq.getTitle())
-//                .body(announcementReq.getBody())
-//                .build());
-        // 생성된 공지 알림 전송
-        notificationService.sendMessageTo(NotificationReq.builder()
-                .targetToken("") // 임시 토큰 나중에 사용자들에게서 직접 받을 것
+        notificationService.sendMessageToAll(NotificationContentReq.builder()
                 .title(announcementReq.getTitle())
                 .body(announcementReq.getBody())
                 .build());
@@ -61,12 +56,12 @@ public class AnnouncementApi {
     // id에 해당하는 공지 수정
     @PatchMapping("/{id}")
     public SuccessResponse editAnnouncement(@PathVariable("id") Long id,
-            @RequestBody AnnouncementReq announcementReq) {
+            @RequestBody @Valid AnnouncementReq announcementReq) {
         announcementService.updateAnnouncement(id, announcementReq);
         return SuccessResponse.successResponse("update complete");
     }
 
-    // iddp 해당하는 공지 삭제
+    // id에 해당하는 공지 삭제
     @DeleteMapping("/{id}")
     public SuccessResponse deleteAnnouncement(@PathVariable("id") Long id) {
         announcementService.deleteAnnouncement(id);
