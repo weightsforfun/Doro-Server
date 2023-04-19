@@ -46,8 +46,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RequiredArgsConstructor
 public class AuthController {
-    private final UserRepository userRepository;
-    private final MessageService messageService;
     private final AuthService authService;
     private final JwtTokenProvider tokenProvider;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
@@ -80,20 +78,6 @@ public class AuthController {
         return ResponseEntity.ok()
             .headers(httpHeaders)
             .body(refreshToken);
-    }
-
-    @Operation(summary = "001_", description = "인증번호 전송")
-    @PostMapping("/message/send")
-    public SuccessResponse<String> sendAuthNum(@RequestBody @Valid SendAuthNumReq sendAuthNumReq){
-        messageService.sendAuthNum(sendAuthNumReq);
-        return SuccessResponse.successResponse("인증번호가 전송되었습니다.");
-    }
-
-    @Operation(summary = "001_", description = "인증번호 확인")
-    @PostMapping("/message/verify")
-    public SuccessResponse<String> verifyAuthNum(@RequestBody @Valid VerifyAuthNumReq verifyAuthNumReq){
-        messageService.verifyAuthNum(verifyAuthNumReq);
-        return SuccessResponse.successResponse("인증 성공");
     }
 
     @Operation(summary = "001_", description = "아이디 중복체크")
