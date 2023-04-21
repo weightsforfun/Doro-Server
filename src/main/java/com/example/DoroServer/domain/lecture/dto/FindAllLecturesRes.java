@@ -34,7 +34,7 @@ public class FindAllLecturesRes {
                 .city(lecture.getCity())
                 .mainTutor(lecture.getMainTutor())
                 .subTutor(lecture.getSubTutor())
-                .title(lecture.getTime())
+                .time(lecture.getTime())
                 .build();
     }
 
