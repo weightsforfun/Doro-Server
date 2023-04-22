@@ -30,6 +30,10 @@ public enum Code {
     EXIST_PHONE(HttpStatus.CONFLICT, "AUTH014", "이미 존재하는 휴대폰 번호입니다."),
     REFRESH_TOKEN_DID_NOT_MATCH(HttpStatus.BAD_REQUEST, "AUTH015", "RefreshToken 정보가 일치하지 않습니다."),
 
+
+
+    WITHDRAWAL_FAILED(HttpStatus.BAD_REQUEST, "AUTH016", "회원 탈퇴에 실패했습니다."),
+
     //USER 관련 오류 U001,U002...
     USER_NOT_FOUND(HttpStatus.BAD_REQUEST,"USER001","사용자가 존재하지 않습니다"),
 
