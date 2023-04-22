@@ -4,6 +4,7 @@ import com.example.DoroServer.global.jwt.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -16,6 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@EnableGlobalMethodSecurity(securedEnabled = true)
 public class SecurityConfig{
 
     private final JwtTokenProvider jwtTokenProvider;
@@ -23,6 +25,7 @@ public class SecurityConfig{
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final RedisService redisService;
+    private final JwtLogoutHandler jwtLogoutHandler;
 
     // Spring Security 내부에서 비밀번호를 암호화할 때 사용
     @Bean
@@ -52,7 +55,10 @@ public class SecurityConfig{
         http
                 // token을 사용하는 방식이기 때문에 csrf disable
                 .csrf().disable()
-                .logout().disable()
+                .logout()
+                .logoutUrl("/logout")
+                .addLogoutHandler(jwtLogoutHandler)
+                .and()
 
                 /**401, 403 Exception 핸들링 */
                 .exceptionHandling()
