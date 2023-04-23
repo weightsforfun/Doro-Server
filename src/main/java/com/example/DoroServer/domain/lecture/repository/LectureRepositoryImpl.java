@@ -5,6 +5,7 @@ import static com.example.DoroServer.domain.lecture.entity.QLecture.*;
 import com.example.DoroServer.domain.lecture.dto.FindAllLecturesCond;
 import com.example.DoroServer.domain.lecture.entity.Lecture;
 import com.example.DoroServer.domain.lecture.entity.QLectureDate;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.DatePath;
@@ -40,8 +41,15 @@ public class LectureRepositoryImpl implements LectureRepositoryCustom{
         return new PageImpl<>(content,pageable,total);
 
     }
-   private BooleanExpression containCity(String city){
-        return StringUtils.hasText(city) ? lecture.city.contains(city) : null;
+   private BooleanBuilder containCity(List<String> cities){
+        if(cities==null){
+            return null;
+        }
+       BooleanBuilder booleanBuilder = new BooleanBuilder();
+       for (String city: cities){
+            booleanBuilder.or(lecture.city.contains(city));
+        }
+        return booleanBuilder;
    }
    private BooleanExpression betweenDate(LocalDate startDate,LocalDate endDate){
         if(startDate !=null && endDate != null){
