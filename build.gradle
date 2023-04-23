@@ -58,6 +58,12 @@ dependencies {
 	implementation 'org.modelmapper:modelmapper:2.4.2'
 	// 알림톡 (Solapi)
 	implementation 'net.nurigo:sdk:4.2.9'
+
+	// firebase sdk
+	implementation 'com.google.firebase:firebase-admin:6.8.1'
+	// okhttp
+	implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.2.2'
+
 	// S3
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 }
