@@ -2,7 +2,9 @@ package com.example.DoroServer.domain.lecture.dto;
 
 import com.example.DoroServer.domain.lecture.entity.Lecture;
 import com.example.DoroServer.domain.lecture.entity.LectureStatus;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import javax.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +26,7 @@ public class FindAllLecturesRes {
     private String mainTutor;
     private String subTutor;
     private String time;
+    private List<LocalDate> lectureDates;
 
     public static FindAllLecturesRes fromEntity(Lecture lecture) {
         return FindAllLecturesRes.builder()
@@ -35,6 +38,7 @@ public class FindAllLecturesRes {
                 .mainTutor(lecture.getMainTutor())
                 .subTutor(lecture.getSubTutor())
                 .time(lecture.getTime())
+                .lectureDates(lecture.getLectureDates())
                 .build();
     }
 

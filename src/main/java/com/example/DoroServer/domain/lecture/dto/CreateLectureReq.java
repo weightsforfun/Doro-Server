@@ -2,6 +2,7 @@ package com.example.DoroServer.domain.lecture.dto;
 
 import com.example.DoroServer.domain.lecture.entity.Lecture;
 import com.example.DoroServer.domain.lecture.entity.LectureDate;
+import com.example.DoroServer.domain.lecture.entity.LectureStatus;
 import com.example.DoroServer.domain.lectureContent.dto.LectureContentDto;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,7 +41,11 @@ public class CreateLectureReq {
     @NotBlank
     private String staff; // 강의 스태프 수
     @NotBlank
-    private String payment; //강사 급여
+    private String mainPayment; //강사 급여
+    @NotBlank
+    private String subPayment;
+    @NotBlank
+    private String staffPayment;
     @NotBlank
     private String time; // 시간
     @NotBlank
@@ -63,7 +68,9 @@ public class CreateLectureReq {
                 .mainTutor(mainTutor)
                 .subTutor(subTutor)
                 .staff(staff)
-                .payment(payment)
+                .MainPayment(mainPayment)
+                .SubPayment(subPayment)
+                .StaffPayment(staffPayment)
                 .time(time)
                 .lectureDates(lectureDates)
                 .lectureDate(
@@ -72,6 +79,7 @@ public class CreateLectureReq {
                                 .enrollEndDate(enrollEndDate)
                                 .build()
                 )
+                .status(LectureStatus.RECRUITING)
                 .build();
     }
 }

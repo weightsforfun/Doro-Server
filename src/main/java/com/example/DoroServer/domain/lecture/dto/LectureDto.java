@@ -26,7 +26,9 @@ public class LectureDto {
     private String  mainTutor; // 강의 메인 강사 수
     private String  subTutor; // 강의 서브 강사 수
     private String  staff; // 강의 스태프 수
-    private String payment; //강사 급여
+    private String mainPayment; //강사 급여
+    private String subPayment;
+    private String staffPayment;
     private String time; // 시간
     private List<LocalDate> lectureDates = new ArrayList<>(); // 강의 날짜
     private LocalDateTime enrollStartDate; // 강의 등록 시작 날짜
@@ -42,7 +44,9 @@ public class LectureDto {
                 .mainTutor(lecture.getMainTutor())
                 .subTutor(lecture.getSubTutor())
                 .staff(lecture.getStaff())
-                .payment(lecture.getPayment())
+                .mainPayment(lecture.getMainPayment())
+                .subPayment(lecture.getSubPayment())
+                .staffPayment(lecture.getStaffPayment())
                 .time(lecture.getTime())
                 .lectureDates(lecture.getLectureDates())
                 .enrollStartDate(lecture.getLectureDate().getEnrollStartDate())
