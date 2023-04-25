@@ -47,7 +47,9 @@ public class Lecture extends BaseEntity {
 
     private String  staff; // 강의 스태프 수
 
-    private String payment; //강사 급여
+    private String MainPayment; //강사 급여
+    private String SubPayment;
+    private String StaffPayment;
 
     private String time; // 시간
     @ElementCollection()
