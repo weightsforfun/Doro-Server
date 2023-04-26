@@ -5,6 +5,7 @@ import com.example.DoroServer.domain.lecture.dto.FindAllLecturesCond;
 import com.example.DoroServer.domain.lecture.dto.FindAllLecturesRes;
 import com.example.DoroServer.domain.lecture.dto.FindLectureRes;
 import com.example.DoroServer.domain.lecture.dto.LectureDto;
+import com.example.DoroServer.domain.lecture.dto.LectureMapper;
 import com.example.DoroServer.domain.lecture.dto.UpdateLectureReq;
 import com.example.DoroServer.domain.lecture.entity.Lecture;
 import com.example.DoroServer.domain.lecture.repository.LectureRepository;
@@ -35,6 +36,7 @@ public class LectureService {
     private final LectureRepository lectureRepository;
     private final LectureContentRepository lectureContentRepository;
     private final ModelMapper modelMapper;
+    private final LectureMapper lectureMapper;
 
     public List<FindAllLecturesRes> findAllLectures(FindAllLecturesCond findAllLecturesCond,
             Pageable pageable) {
@@ -44,7 +46,7 @@ public class LectureService {
         List<Lecture> content = allLecturesWithFilter.getContent();
 
         List<FindAllLecturesRes> lectureResList = content.stream()
-                .map(FindAllLecturesRes::fromEntity)
+                .map(res -> lectureMapper.toFindAllLecturesRes(res,res.getLectureDate()))
                 .collect(Collectors.toList());
 
         return lectureResList;
