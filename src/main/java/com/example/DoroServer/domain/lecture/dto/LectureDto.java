@@ -1,6 +1,7 @@
 package com.example.DoroServer.domain.lecture.dto;
 
 import com.example.DoroServer.domain.lecture.entity.Lecture;
+import com.example.DoroServer.domain.lecture.entity.LectureDate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -31,26 +32,7 @@ public class LectureDto {
     private String staffPayment;
     private String time; // 시간
     private List<LocalDate> lectureDates = new ArrayList<>(); // 강의 날짜
-    private LocalDateTime enrollStartDate; // 강의 등록 시작 날짜
-    private LocalDateTime enrollEndDate; // 강의 등록 종료 날짜
+    private LectureDate lectureDate;
 
-    public static LectureDto fromEntity(Lecture lecture) {
-        return LectureDto.builder()
-                .title(lecture.getTitle())
-                .institution(lecture.getInstitution())
-                .city(lecture.getCity())
-                .studentGrade(lecture.getStudentGrade())
-                .studentNumber(lecture.getStudentNumber())
-                .mainTutor(lecture.getMainTutor())
-                .subTutor(lecture.getSubTutor())
-                .staff(lecture.getStaff())
-                .mainPayment(lecture.getMainPayment())
-                .subPayment(lecture.getSubPayment())
-                .staffPayment(lecture.getStaffPayment())
-                .time(lecture.getTime())
-                .lectureDates(lecture.getLectureDates())
-                .enrollStartDate(lecture.getLectureDate().getEnrollStartDate())
-                .enrollEndDate(lecture.getLectureDate().getEnrollEndDate())
-                .build();
-    }
+
 }

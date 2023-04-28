@@ -51,35 +51,8 @@ public class CreateLectureReq {
     @NotBlank
     private List<LocalDate> lectureDates = new ArrayList<>(); // 강의 날짜
     @NotBlank
-    private LocalDateTime enrollStartDate; // 강의 등록 시작 날짜
-    @NotBlank
-    private LocalDateTime enrollEndDate; // 강의 등록 종료 날짜
+    private LectureDate lectureDate;
 
     @NotBlank
     private Long lectureContentId;
-
-
-    public Lecture toEntity(){
-        return Lecture.builder()
-                .institution(institution)
-                .city(city)
-                .studentGrade(studentGrade)
-                .studentNumber(studentNumber)
-                .mainTutor(mainTutor)
-                .subTutor(subTutor)
-                .staff(staff)
-                .MainPayment(mainPayment)
-                .SubPayment(subPayment)
-                .StaffPayment(staffPayment)
-                .time(time)
-                .lectureDates(lectureDates)
-                .lectureDate(
-                        LectureDate.builder()
-                                .enrollStartDate(enrollStartDate)
-                                .enrollEndDate(enrollEndDate)
-                                .build()
-                )
-                .status(LectureStatus.RECRUITING)
-                .build();
-    }
 }
