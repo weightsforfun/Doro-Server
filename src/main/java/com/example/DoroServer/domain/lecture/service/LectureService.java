@@ -84,7 +84,7 @@ public class LectureService {
 
     public Long updateLecture(Long id, UpdateLectureReq updateLectureReq) {
         Lecture lecture = lectureRepository.findById(id).orElseThrow(() -> new BaseException(Code.LECTURE_NOT_FOUND));
-        lectureMapper.updateLecture(updateLectureReq,lecture);
+        modelMapper.map(updateLectureReq,lecture);
         return id;
     }
 

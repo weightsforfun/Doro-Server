@@ -4,12 +4,10 @@ package com.example.DoroServer.domain.lecture.dto;
 import com.example.DoroServer.domain.lecture.entity.Lecture;
 import com.example.DoroServer.domain.lecture.entity.LectureDate;
 import com.example.DoroServer.domain.lectureContent.dto.LectureContentDto;
-import com.example.DoroServer.domain.lectureContent.entity.LectureContent;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+
 import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
-import org.mapstruct.factory.Mappers;
+
 
 @Mapper(componentModel = "spring")
 public interface LectureMapper {
@@ -24,9 +22,9 @@ public interface LectureMapper {
     //Lecture -> LectureDto
     LectureDto toLectureDto(Lecture lecture);
 
-   //LectureDto,LectureContentDto -> FindLectureRes
-   FindLectureRes toFindLectureRes(LectureDto lectureDto, LectureContentDto lectureContentDto);
+    //LectureDto,LectureContentDto -> FindLectureRes
+    FindLectureRes toFindLectureRes(LectureDto lectureDto, LectureContentDto lectureContentDto);
 
-   void updateLecture(UpdateLectureReq updateLectureReq,@MappingTarget Lecture lecture);
+    void updateLecture(UpdateLectureReq updateLectureReq, @MappingTarget Lecture lecture);
 
 }
