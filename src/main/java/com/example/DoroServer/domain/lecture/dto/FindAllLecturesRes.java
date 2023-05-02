@@ -21,7 +21,7 @@ public class FindAllLecturesRes {
     private Long id;
     private String mainTitle;
     private String subTitle;
-    private LectureStatus lectureStatus;
+    private LectureStatus status;
     private LocalDateTime enrollEndDate;
     private String city;
     private String place;
