@@ -1,5 +1,6 @@
 package com.example.DoroServer.domain.userLecture.service;
 
+import com.example.DoroServer.domain.lecture.dto.LectureMapper;
 import com.example.DoroServer.domain.lecture.entity.Lecture;
 import com.example.DoroServer.domain.lecture.repository.LectureRepository;
 import com.example.DoroServer.domain.user.entity.User;
@@ -8,6 +9,7 @@ import com.example.DoroServer.domain.userLecture.dto.CreateTutorReq;
 import com.example.DoroServer.domain.userLecture.dto.FindAllTutorsRes;
 import com.example.DoroServer.domain.userLecture.dto.FindMyLecturesRes;
 import com.example.DoroServer.domain.userLecture.dto.SelectTutorReq;
+import com.example.DoroServer.domain.userLecture.dto.UserLectureMapper;
 import com.example.DoroServer.domain.userLecture.entity.TutorStatus;
 import com.example.DoroServer.domain.userLecture.entity.UserLecture;
 import com.example.DoroServer.domain.userLecture.repository.UserLectureRepository;
@@ -30,11 +32,12 @@ public class UserLectureService {
     private final UserLectureRepository userLectureRepository;
     private final UserRepository userRepository;
     private final LectureRepository lectureRepository;
+    private final UserLectureMapper userLectureMapper;
 
     public List<FindAllTutorsRes> findAllTutors(Long id) {
         List<UserLecture> allTutors = userLectureRepository.findAllTutors(id);
         List<FindAllTutorsRes> allTutorsResList = allTutors.stream()
-                .map(FindAllTutorsRes::fromEntity)
+                .map(userLecture -> userLectureMapper.toFindAllTutorsRes(userLecture,userLecture.getUser()))
                 .collect(Collectors.toList());
         return allTutorsResList;
     }
@@ -42,7 +45,7 @@ public class UserLectureService {
     public List<FindMyLecturesRes> findMyLectures(Long id) {
         List<UserLecture> myLectures = userLectureRepository.findMyLectures(id);
         List<FindMyLecturesRes> findMyLecturesResList = myLectures.stream()
-                .map(FindMyLecturesRes::fromEntity)
+                .map(userLecture -> userLectureMapper.toFindMyLecturesRes(userLecture.getLecture(),userLecture))
                 .collect(Collectors.toList());
         return findMyLecturesResList;
     }
