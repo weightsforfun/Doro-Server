@@ -20,12 +20,19 @@ import lombok.ToString;
 public class CreateLectureReq {
 
     @NotBlank
-    private String title; // 강의 제목
+    private String mainTitle; // 강의 제목
+
+    @NotBlank
+    private String subTitle; // 강의 제목
+
     @NotBlank
     private String institution; // 강의 기관
 
     @NotBlank
     private String city; // 강의 도시
+
+    @NotBlank
+    private String place; // 강의 도시
 
     @NotBlank
     private String studentGrade; // 강의 대상
@@ -49,7 +56,7 @@ public class CreateLectureReq {
     @NotBlank
     private String time; // 시간
     @NotBlank
-    private List<LocalDate> lectureDates = new ArrayList<>(); // 강의 날짜
+    private List<LocalDateTime> lectureDates = new ArrayList<>(); // 강의 날짜
     @NotBlank
     private LectureDate lectureDate;
 

@@ -19,19 +19,21 @@ import lombok.ToString;
 @AllArgsConstructor
 public class LectureDto {
 
-    private String title; // 강의 제목
+    private String mainTitle; // 강의 제목
+    private String subTitle; // 강의 제목
     private String institution; // 강의 기관
     private String city; // 강의 도시
+    private String place;
     private String studentGrade; // 강의 대상
     private String studentNumber; // 인원수
-    private String  mainTutor; // 강의 메인 강사 수
-    private String  subTutor; // 강의 서브 강사 수
-    private String  staff; // 강의 스태프 수
+    private String mainTutor; // 강의 메인 강사 수
+    private String subTutor; // 강의 서브 강사 수
+    private String staff; // 강의 스태프 수
     private String mainPayment; //강사 급여
     private String subPayment;
     private String staffPayment;
     private String time; // 시간
-    private List<LocalDate> lectureDates = new ArrayList<>(); // 강의 날짜
+    private List<LocalDateTime> lectureDates = new ArrayList<>(); // 강의 날짜
     private LectureDate lectureDate;
 
 

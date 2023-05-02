@@ -19,28 +19,18 @@ import lombok.ToString;
 @AllArgsConstructor
 public class FindAllLecturesRes {
     private Long id;
-    private String title;
+    private String mainTitle;
+    private String subTitle;
     private LectureStatus lectureStatus;
     private LocalDateTime enrollEndDate;
     private String city;
+    private String place;
     private String mainTutor;
     private String subTutor;
     private String time;
-    private List<LocalDate> lectureDates;
+    private List<LocalDateTime> lectureDates;
 
-    public static FindAllLecturesRes fromEntity(Lecture lecture) {
-        return FindAllLecturesRes.builder()
-                .id(lecture.getId())
-                .title(lecture.getTitle())
-                .lectureStatus(lecture.getStatus())
-                .enrollEndDate(lecture.getLectureDate().getEnrollEndDate())
-                .city(lecture.getCity())
-                .mainTutor(lecture.getMainTutor())
-                .subTutor(lecture.getSubTutor())
-                .time(lecture.getTime())
-                .lectureDates(lecture.getLectureDates())
-                .build();
-    }
+
 
 
 
