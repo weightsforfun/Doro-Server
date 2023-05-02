@@ -60,6 +60,7 @@ public class CreateLectureReq {
     @NotBlank
     private LectureDate lectureDate;
 
+    @NotBlank LectureStatus lectureStatus;
     @NotBlank
     private Long lectureContentId;
 }
