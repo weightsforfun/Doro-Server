@@ -7,4 +7,5 @@ import org.mapstruct.Mapper;
 public interface LectureContentMapper {
     //LectureContent -> LectureContentDto
     LectureContentDto toLectureContentDto(LectureContent lectureContent);
+    LectureContent toLectureContent(LectureContentDto lectureContentDto);
 }
