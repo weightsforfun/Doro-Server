@@ -4,9 +4,10 @@ import com.example.DoroServer.domain.announcement.dto.AnnouncementReq;
 import com.example.DoroServer.domain.announcement.dto.AnnouncementRes;
 import com.example.DoroServer.domain.announcement.service.AnnouncementService;
 import com.example.DoroServer.domain.notification.dto.NotificationContentReq;
-import com.example.DoroServer.domain.notification.dto.NotificationReq;
 import com.example.DoroServer.domain.notification.service.NotificationService;
 import com.example.DoroServer.global.common.SuccessResponse;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Api(tags = "공지📋")
 @RestController
 @RequestMapping("/announcements")
 @RequiredArgsConstructor
@@ -28,6 +30,7 @@ public class AnnouncementApi {
     private final NotificationService notificationService;
 
     // 모든 공지를 찾아 반환
+    @ApiOperation(value = "공지 글 전체 조회", notes = "생성되어있는 모든 공지를 조회한다.")
     @GetMapping
     public SuccessResponse findAllAnnouncement() {
         List<AnnouncementRes> announcements = announcementService.findAllAnnouncements();
@@ -35,6 +38,7 @@ public class AnnouncementApi {
     }
 
     // 공지 생성 후 생성 확인 알림 전송
+    @ApiOperation(value = "공지 글 생성", notes = "공지 제목(title), 내용(body), 이미지(image)를 입력받아 공지를 생성한다.")
     @PostMapping
     public SuccessResponse createAnnouncement(@RequestBody @Valid AnnouncementReq announcementReq) {
         Long announcementId = announcementService.createAnnouncement(announcementReq);
@@ -47,6 +51,7 @@ public class AnnouncementApi {
     }
 
     // id에 해당하는 공지 하나 조회
+    @ApiOperation(value = "공지 글 단일 조회", notes = "id에 해당하는 공지 글을 조회한다.")
     @GetMapping("/{id}")
     public SuccessResponse findAnnouncement(@PathVariable("id") Long id) {
         AnnouncementRes announcementRes = announcementService.findById(id);
@@ -54,6 +59,7 @@ public class AnnouncementApi {
     }
 
     // id에 해당하는 공지 수정
+    @ApiOperation(value = "공지 글 수정", notes = "id에 해당하는 공지 글을 수정한다.")
     @PatchMapping("/{id}")
     public SuccessResponse editAnnouncement(@PathVariable("id") Long id,
             @RequestBody @Valid AnnouncementReq announcementReq) {
@@ -62,6 +68,7 @@ public class AnnouncementApi {
     }
 
     // id에 해당하는 공지 삭제
+    @ApiOperation(value = "공지 글 삭제", notes = "id에 해당하는 공지글을 삭제한다.")
     @DeleteMapping("/{id}")
     public SuccessResponse deleteAnnouncement(@PathVariable("id") Long id) {
         announcementService.deleteAnnouncement(id);
