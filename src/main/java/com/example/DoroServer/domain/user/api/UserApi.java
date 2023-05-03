@@ -42,9 +42,18 @@ public class UserApi {
         return SuccessResponse.successResponse(findAllUserResList);
     }
     @GetMapping("/{id}")
-    public SuccessResponse findUser(@PathVariable("id") Long id){
-        FindUserRes findUserRes = userService.findUser(id);
-        return SuccessResponse.successResponse(findUserRes);
+    public SuccessResponse findUser(@PathVariable(value = "id",required = false) Long id,@AuthenticationPrincipal User user){
+        if(id==null){
+            Long userId = user.getId();
+            FindUserRes findUserRes = userService.findUser(userId);
+            return SuccessResponse.successResponse(findUserRes);
+        }
+        else{
+            //매니저 아닐지 block 로직 추가
+            FindUserRes findUserRes = userService.findUser(id);
+            return SuccessResponse.successResponse(findUserRes);
+        }
+
     }
     @PatchMapping("/{id}")
     public SuccessResponse updateUser(
