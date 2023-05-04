@@ -31,29 +31,34 @@ public class Lecture extends BaseEntity {
     @Column(name = "lecture_id")
     private Long id; // PK
 
-    private String title; // 강의 제목
+    private String mainTitle; // 강의 제목
+    private String subTitle; // 강의 제목
 
     private String institution; // 강의 기관
 
     private String city; // 강의 도시
 
+    private String place; // 강의 도시
+
     private String studentGrade; // 강의 대상
 
     private String studentNumber; // 인원수
 
-    private String  mainTutor; // 강의 메인 강사 수
+    private String mainTutor; // 강의 메인 강사 수
 
-    private String  subTutor; // 강의 서브 강사 수
+    private String subTutor; // 강의 서브 강사 수
 
-    private String  staff; // 강의 스태프 수
+    private String staff; // 강의 스태프 수
 
-    private String payment; //강사 급여
+    private String mainPayment; //강사 급여
+    private String subPayment;
+    private String staffPayment;
 
     private String time; // 시간
     @ElementCollection()
     @CollectionTable(name = "lecture_date", joinColumns =
     @JoinColumn(name = "lecture_id"))
-    private List<LocalDate> lectureDates = new ArrayList<>(); // 강의 날짜
+    private List<LocalDateTime> lectureDates = new ArrayList<>(); // 강의 날짜
 
     @Enumerated(EnumType.STRING)
     private LectureStatus status; // 강의 상태 [RECRUITING, ALLOCATION_COMP,FINISH]
@@ -70,11 +75,11 @@ public class Lecture extends BaseEntity {
 
     // Lecture와 Chat은 일대일(One-to-One) 관계
     @OneToOne(fetch = LAZY)
-    @JoinColumn(name ="chat_id")
+    @JoinColumn(name = "chat_id")
     private Chat chat; // 강의 채팅
 
-    public void setLectureContent(LectureContent lectureContent){
-        this.lectureContent=lectureContent;
+    public void setLectureContent(LectureContent lectureContent) {
+        this.lectureContent = lectureContent;
     }
 
 

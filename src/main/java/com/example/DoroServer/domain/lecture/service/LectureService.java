@@ -5,10 +5,12 @@ import com.example.DoroServer.domain.lecture.dto.FindAllLecturesCond;
 import com.example.DoroServer.domain.lecture.dto.FindAllLecturesRes;
 import com.example.DoroServer.domain.lecture.dto.FindLectureRes;
 import com.example.DoroServer.domain.lecture.dto.LectureDto;
+import com.example.DoroServer.domain.lecture.dto.LectureMapper;
 import com.example.DoroServer.domain.lecture.dto.UpdateLectureReq;
 import com.example.DoroServer.domain.lecture.entity.Lecture;
 import com.example.DoroServer.domain.lecture.repository.LectureRepository;
 import com.example.DoroServer.domain.lectureContent.dto.LectureContentDto;
+import com.example.DoroServer.domain.lectureContent.dto.LectureContentMapper;
 import com.example.DoroServer.domain.lectureContent.entity.LectureContent;
 import com.example.DoroServer.domain.lectureContent.repository.LectureContentRepository;
 import com.example.DoroServer.global.common.ErrorResponse;
@@ -35,6 +37,8 @@ public class LectureService {
     private final LectureRepository lectureRepository;
     private final LectureContentRepository lectureContentRepository;
     private final ModelMapper modelMapper;
+    private final LectureMapper lectureMapper;
+    private final LectureContentMapper lectureContentMapper;
 
     public List<FindAllLecturesRes> findAllLectures(FindAllLecturesCond findAllLecturesCond,
             Pageable pageable) {
@@ -44,7 +48,7 @@ public class LectureService {
         List<Lecture> content = allLecturesWithFilter.getContent();
 
         List<FindAllLecturesRes> lectureResList = content.stream()
-                .map(FindAllLecturesRes::fromEntity)
+                .map(res -> lectureMapper.toFindAllLecturesRes(res,res.getLectureDate()))
                 .collect(Collectors.toList());
 
         return lectureResList;
@@ -52,7 +56,7 @@ public class LectureService {
 
     public Long createLecture(CreateLectureReq createLectureReq) {
 
-        Lecture lecture = createLectureReq.toEntity();
+        Lecture lecture = lectureMapper.toLecture(createLectureReq);
         Optional<LectureContent> optionalLectureContent = lectureContentRepository.findById(
                 createLectureReq.getLectureContentId());
 
@@ -69,13 +73,9 @@ public class LectureService {
         Optional<Lecture> optionalLecture = lectureRepository.findLectureById(id);
         if (optionalLecture.isPresent()) {
             Lecture lecture = optionalLecture.get();
-            LectureDto lectureDto = LectureDto.fromEntity(lecture);
-            LectureContentDto lectureContentDto = LectureContentDto.fromEntity(
-                    lecture.getLectureContent());
-            FindLectureRes findLectureRes = FindLectureRes.builder()
-                    .lectureDto(lectureDto)
-                    .lectureContentDto(lectureContentDto)
-                    .build();
+            LectureDto lectureDto = lectureMapper.toLectureDto(lecture);
+            LectureContentDto lectureContentDto = lectureContentMapper.toLectureContentDto(lecture.getLectureContent());
+            FindLectureRes findLectureRes = lectureMapper.toFindLectureRes(lectureDto,lectureContentDto);
             return findLectureRes;
         } else {
             throw new BaseException(Code.LECTURE_NOT_FOUND);
@@ -83,15 +83,9 @@ public class LectureService {
     }
 
     public Long updateLecture(Long id, UpdateLectureReq updateLectureReq) {
-        Optional<Lecture> optionalLecture = lectureRepository.findById(id);
-        if (optionalLecture.isPresent()) {
-            Lecture lecture = optionalLecture.get();
-            log.info(updateLectureReq.toString());
-            modelMapper.map(updateLectureReq, lecture);
-            return id;
-        } else {
-            throw new BaseException(Code.LECTURE_NOT_FOUND);
-        }
+        Lecture lecture = lectureRepository.findById(id).orElseThrow(() -> new BaseException(Code.LECTURE_NOT_FOUND));
+        modelMapper.map(updateLectureReq,lecture);
+        return id;
     }
 
     public String deleteLecture(Long id) {
