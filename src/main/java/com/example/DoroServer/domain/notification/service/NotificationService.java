@@ -11,6 +11,7 @@ import com.example.DoroServer.domain.token.repository.TokenRepository;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.entity.UserRole;
 import com.example.DoroServer.domain.user.repository.UserRepository;
+import com.example.DoroServer.domain.userNotification.entity.UserNotification;
 import com.example.DoroServer.domain.userNotification.repository.UserNotificationRepository;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
@@ -20,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,6 +35,8 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -81,10 +85,16 @@ public class NotificationService {
 
     // 유저 개인의 알림 조회하는 메소드
     public List<NotificationRes> findUserNotifications(Long userId) {
-        return userNotificationRepository.findUserNotificationsByUserId(
-                        userId)
-                .stream().map(un -> un.getNotification().toRes())
+        List<UserNotification> userNotifications = userNotificationRepository
+                .findUserNotificationsByUserId(userId);
+
+        // 알림 만료일 검증
+//        isNotificationValid(userNotifications);
+
+        return userNotifications.stream().map(un -> un.getNotification().toRes())
                 .collect(Collectors.toList());
+
+
     }
 
     // id에 해당하는 알림을 조회하는 메소드
@@ -107,7 +117,7 @@ public class NotificationService {
     // 모든 토큰으로 푸쉬알림 발송
     public void sendNotificationToAll(NotificationContentReq notificationContentReq) {
         List<User> users = userRepository.findAll();
-        if(!users.isEmpty()) {
+        if (!users.isEmpty()) {
             users.stream().forEach(user -> {
                 // 유저별로 알림 수신 동의 여부 체크
                 if (user.getNotificationAgreement()) {
@@ -160,7 +170,6 @@ public class NotificationService {
 
             // HTTP 요청 실행
             Response response = httpClient.newCall(request).execute();
-            log.info("response.body() = {}", response.body().string());
         } catch (IOException e) {
             throw new BaseException(Code.NOTIFICATION_PUSH_FAIL);
         }
@@ -216,8 +225,15 @@ public class NotificationService {
 
         // 토큰 만료 확인
         googleCredentials.refreshIfExpired();
-        log.info(" = {}", googleCredentials.getAccessToken().getTokenValue());
         return googleCredentials.getAccessToken().getTokenValue();
+    }
+    @Transactional
+    public void isNotificationValid(List<UserNotification> userNotifications) {
+        userNotifications.stream().forEach(un -> {
+            if (un.getExpirationPeriod().isBefore(LocalDateTime.now())) {
+                userNotificationRepository.deleteById(un.getId());
+            }
+        });
     }
 }
 
