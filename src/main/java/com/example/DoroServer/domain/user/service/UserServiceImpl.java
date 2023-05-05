@@ -10,7 +10,6 @@ import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
 import com.example.DoroServer.global.jwt.RedisService;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import com.example.DoroServer.global.s3.AwsS3Service;
 import java.io.IOException;
