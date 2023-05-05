@@ -42,13 +42,13 @@ public class TokenService {
 
     // id에 해당하는 user에 token 추가
     @Transactional
-    public Long saveToken(Long userId, TokenDto tokenDto) {
+    public Long saveToken(Long userId, String tokenValue) {
         User user = userRepository.findById(userId).orElseThrow(() -> {
             log.info("유저를 찾을 수 없습니다. id = {}", userId);
             throw new BaseException(Code.USER_NOT_FOUND);
         });
         Token token = Token.builder()
-                .token(tokenDto.getToken())
+                .token(tokenValue)
                 .build();
         user.addToken(token);
         return token.getId();
@@ -56,11 +56,11 @@ public class TokenService {
 
     // 토큰 삭제 메소드
     @Transactional
-    public void deleteToken(Long userId,TokenDto tokenDto) {
+    public void deleteToken(Long userId,String tokenValue) {
         User user = userRepository.findById(userId).orElseThrow(() -> {
             log.info("유저를 찾을 수 없습니다. id = {}", userId);
             throw new BaseException(Code.USER_NOT_FOUND);
         });
-        user.getTokens().removeIf(token -> token.getToken().equals(tokenDto.getToken()));
+        user.getTokens().removeIf(token -> token.getToken().equals(tokenValue));
     }
 }
