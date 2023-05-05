@@ -52,14 +52,17 @@ public enum Code {
     NOTIFICATION_PUSH_FAIL(HttpStatus.BAD_REQUEST,"NOTI001","FCM 알림 푸쉬에 실패했습니다."),
     NOTIFICATION_NOT_FOUND(HttpStatus.BAD_REQUEST, "NOTI002", "알림을 찾을 수 없습니다."),
 
-    //공지 관련 오류
+    // 공지 관련 오류
     ANNOUNCEMENT_NOT_FOUND(HttpStatus.BAD_REQUEST,"ANNO001","공지를 찾을 수 없습니다."),
 
     // S3 관련 오류 S001, S002...
     RESIZE_FAILED(HttpStatus.BAD_REQUEST, "S001", "파일 리사이징을 실패했습니다."),
     EMPTY_FILE(HttpStatus.NO_CONTENT, "S002", "업로드 파일이 없습니다."),
     UPLOAD_FAILED(HttpStatus.BAD_REQUEST, "S003", "업로드 중 오류가 발생했습니다."),
-    FILE_DELETE_FAILED(HttpStatus.BAD_REQUEST, "S004", "파일 삭제 중 오류가 발생했습니다.");
+    FILE_DELETE_FAILED(HttpStatus.BAD_REQUEST, "S004", "파일 삭제 중 오류가 발생했습니다."),
+
+    // UserNotification 관련 오류
+    USERNOTIFICATION_NOT_FOUND(HttpStatus.BAD_REQUEST,"USERNOTI001","UserNotification을 찾을 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
