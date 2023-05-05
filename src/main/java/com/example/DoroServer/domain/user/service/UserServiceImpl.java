@@ -4,7 +4,6 @@ import com.example.DoroServer.domain.user.dto.FindAllUsersRes;
 import com.example.DoroServer.domain.user.dto.FindUserRes;
 import com.example.DoroServer.domain.user.dto.UpdateUserReq;
 import com.example.DoroServer.domain.user.entity.Degree;
-import com.example.DoroServer.domain.user.entity.Degree.DegreeBuilder;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.global.exception.BaseException;
