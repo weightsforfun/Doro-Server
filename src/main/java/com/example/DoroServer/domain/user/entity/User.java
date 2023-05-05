@@ -72,7 +72,9 @@ public class User extends BaseEntity implements UserDetails {
     private String profileImg; // 사용자 이미
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Token> tokens = new ArrayList<>();
+    private List<Token> tokens = new ArrayList<>(); // 사용자 보유 FCM 토큰
+
+    private Boolean notificationAgreement; // 사용자 알림 동의 여부
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
