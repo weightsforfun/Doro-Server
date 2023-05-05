@@ -42,9 +42,9 @@ public class AnnouncementApi {
     @PostMapping
     public SuccessResponse createAnnouncement(@RequestBody @Valid AnnouncementReq announcementReq) {
         Long announcementId = announcementService.createAnnouncement(announcementReq);
-        notificationService.sendMessageToAll(NotificationContentReq.builder()
-                .title(announcementReq.getTitle())
-                .body(announcementReq.getBody())
+        notificationService.sendNotificationToAll(NotificationContentReq.builder()
+                .title("새로운 공지가 있습니다.")
+                .body(announcementReq.getTitle())
                 .build());
 
         return SuccessResponse.successResponse("announcement created " + announcementId);
