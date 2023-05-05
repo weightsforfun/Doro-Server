@@ -59,7 +59,7 @@ public class UserNotificationService {
         Optional<UserNotification> userNotification = userNotificationRepository.findById(id);
         userNotification.orElseThrow(() -> {
             log.info("delete 하려는 UserNotification 찾을 수 없습니다. id = {}", id);
-            return new BaseException(Code.USERNOTIFICATION_NOT_FOUND);
+            return new BaseException(Code.USER_NOTIFICATION_NOT_FOUND);
         });
         userNotificationRepository.deleteById(id);
     }
