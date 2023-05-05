@@ -34,7 +34,7 @@ public class AnnouncementApi {
     private final NotificationService notificationService;
 
     // 모든 공지를 찾아 반환
-    @ApiOperation(value = "공지 글 전체 조회", notes = "생성되어있는 모든 공지를 조회합니다.")
+    @ApiOperation(value = "공지 글 전체 조회", notes = "생성되어있는 모든 공지를 조회합니다. 파라미터로 page랑 size 전달하시면 페이징 됩니다. 이게 Swagger가 잘 안돼서 Postman으로 테스트 해보시는게 나을거에요 Swagger는 이상하게 page랑 size를 인식못하네요")
     @GetMapping
     public SuccessResponse findAllAnnouncement(
             @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
