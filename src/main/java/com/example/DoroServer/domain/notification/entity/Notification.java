@@ -2,6 +2,7 @@ package com.example.DoroServer.domain.notification.entity;
 
 import com.example.DoroServer.domain.base.BaseEntity;
 import com.example.DoroServer.domain.notification.dto.NotificationRes;
+import javax.validation.constraints.NotNull;
 import lombok.*;
 
 import javax.persistence.*;
@@ -24,6 +25,9 @@ public class Notification extends BaseEntity {
 
     @NotBlank(message = "알림 내용을 입력하세요")
     private String body; // 알림 내용
+
+    @NotNull
+    private Boolean isPublic; // 전체 전송 메세지
 
     private Boolean isRead; // 알림 읽음 유무
 
