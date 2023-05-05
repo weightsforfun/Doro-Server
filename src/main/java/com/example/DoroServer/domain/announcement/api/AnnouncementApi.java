@@ -11,6 +11,9 @@ import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Api(tags = "공지📋")
@@ -30,20 +34,21 @@ public class AnnouncementApi {
     private final NotificationService notificationService;
 
     // 모든 공지를 찾아 반환
-    @ApiOperation(value = "공지 글 전체 조회", notes = "생성되어있는 모든 공지를 조회한다.")
+    @ApiOperation(value = "공지 글 전체 조회", notes = "생성되어있는 모든 공지를 조회합니다.")
     @GetMapping
-    public SuccessResponse findAllAnnouncement() {
-        List<AnnouncementRes> announcements = announcementService.findAllAnnouncements();
+    public SuccessResponse findAllAnnouncement(
+            @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
+        List<AnnouncementRes> announcements = announcementService.findAllAnnouncements(pageable);
         return SuccessResponse.successResponse(announcements);
     }
 
     // 공지 생성 후 생성 확인 알림 전송
-    @ApiOperation(value = "공지 글 생성", notes = "공지 제목(title), 내용(body), 이미지(image)를 입력받아 공지를 생성한다.")
+    @ApiOperation(value = "공지 글 생성", notes = "공지 제목(title), 내용(body), 이미지(image)를 입력받아 공지를 생성합니다.")
     @PostMapping
     public SuccessResponse createAnnouncement(@RequestBody @Valid AnnouncementReq announcementReq) {
         Long announcementId = announcementService.createAnnouncement(announcementReq);
         notificationService.sendNotificationToAll(NotificationContentReq.builder()
-                .title("새로운 공지가 있습니다.")
+                .title("새로운 공지가 올라왔습니다!")
                 .body(announcementReq.getTitle())
                 .build());
 
@@ -51,7 +56,7 @@ public class AnnouncementApi {
     }
 
     // id에 해당하는 공지 하나 조회
-    @ApiOperation(value = "공지 글 단일 조회", notes = "id에 해당하는 공지 글을 조회한다.")
+    @ApiOperation(value = "공지 글 단일 조회", notes = "id에 해당하는 공지 글을 조회합니다.")
     @GetMapping("/{id}")
     public SuccessResponse findAnnouncement(@PathVariable("id") Long id) {
         AnnouncementRes announcementRes = announcementService.findById(id);
@@ -59,7 +64,7 @@ public class AnnouncementApi {
     }
 
     // id에 해당하는 공지 수정
-    @ApiOperation(value = "공지 글 수정", notes = "id에 해당하는 공지 글을 수정한다.")
+    @ApiOperation(value = "공지 글 수정", notes = "id에 해당하는 공지 글을 수정합니다.")
     @PatchMapping("/{id}")
     public SuccessResponse editAnnouncement(@PathVariable("id") Long id,
             @RequestBody @Valid AnnouncementReq announcementReq) {
@@ -68,7 +73,7 @@ public class AnnouncementApi {
     }
 
     // id에 해당하는 공지 삭제
-    @ApiOperation(value = "공지 글 삭제", notes = "id에 해당하는 공지글을 삭제한다.")
+    @ApiOperation(value = "공지 글 삭제", notes = "id에 해당하는 공지글을 삭제합니다.")
     @DeleteMapping("/{id}")
     public SuccessResponse deleteAnnouncement(@PathVariable("id") Long id) {
         announcementService.deleteAnnouncement(id);
