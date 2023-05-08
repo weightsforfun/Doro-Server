@@ -11,6 +11,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,8 +35,8 @@ public class AnnouncementService {
     }
 
     // AnnouncementRes Dto객체 전부 조회
-    public List<AnnouncementRes> findAllAnnouncements() {
-        return announcementRepository.findAll().stream()
+    public List<AnnouncementRes> findAllAnnouncements(Pageable pageable) {
+        return announcementRepository.findAll(pageable).stream()
                 .map(Announcement::toRes)
                 .collect(Collectors.toList());
     }
