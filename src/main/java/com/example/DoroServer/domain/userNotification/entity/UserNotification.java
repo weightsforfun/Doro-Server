@@ -22,15 +22,14 @@ public class UserNotification {
 
     private LocalDateTime expirationPeriod; // 만료 기간
 
-    //== 연관관계 매핑 ==//
-
     // UserNotification과 User는 다대일(Many-to-One) 관계
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
     // UserNotification과 Notification은 다대일(Many-to-One) 관계
-    @ManyToOne
+    // UserNotification이 만료되어 삭제되면 Notification도 삭제됨
+    @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "notification_id")
     private Notification notification;
 

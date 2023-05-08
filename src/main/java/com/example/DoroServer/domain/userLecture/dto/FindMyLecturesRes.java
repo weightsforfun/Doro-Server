@@ -2,6 +2,7 @@ package com.example.DoroServer.domain.userLecture.dto;
 
 
 import com.example.DoroServer.domain.lecture.entity.Lecture;
+import com.example.DoroServer.domain.lecture.entity.LectureDate;
 import com.example.DoroServer.domain.lecture.entity.LectureStatus;
 import com.example.DoroServer.domain.userLecture.entity.TutorRole;
 import com.example.DoroServer.domain.userLecture.entity.UserLecture;
@@ -18,24 +19,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class FindMyLecturesRes {
     private Long id;
-    private String title;
-    private LectureStatus lectureStatus;
-    private LocalDateTime enrollEndDate;
+    private String mainTitle;
+    private String subTitle;
+    private LectureStatus status;
+    private LectureDate lectureDate;
     private String city;
+    private String place;
     private String time;
     private TutorRole tutorRole;
 
-    public static FindMyLecturesRes fromEntity(UserLecture userLecture){
-        Lecture lecture=userLecture.getLecture();
-        return FindMyLecturesRes.builder()
-                .title(lecture.getTitle())
-                .lectureStatus(lecture.getStatus())
-                .enrollEndDate(lecture.getLectureDate().getEnrollEndDate())
-                .city(lecture.getCity())
-                .time(lecture.getTime())
-                .tutorRole(userLecture.getTutorRole())
-                .build();
 
-    }
 
 }

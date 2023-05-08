@@ -9,22 +9,26 @@ import com.example.DoroServer.domain.lecture.service.LectureService;
 import com.example.DoroServer.global.common.SuccessResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/lectures")
 @RequiredArgsConstructor
+@Slf4j
 public class LectureApi {
 
     private final LectureService lectureService;
 
     @GetMapping()
     public SuccessResponse findAllLectures(
-            @RequestBody FindAllLecturesCond findAllLecturesCond,
+            @ModelAttribute("findAllLecturesCond") FindAllLecturesCond findAllLecturesCond,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
     ) {
+
+
         PageRequest pageRequest = PageRequest.of(page,size);
         List<FindAllLecturesRes> allLectures = lectureService.findAllLectures(findAllLecturesCond,
                 pageRequest);

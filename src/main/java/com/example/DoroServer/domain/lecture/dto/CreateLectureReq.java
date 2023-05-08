@@ -2,6 +2,7 @@ package com.example.DoroServer.domain.lecture.dto;
 
 import com.example.DoroServer.domain.lecture.entity.Lecture;
 import com.example.DoroServer.domain.lecture.entity.LectureDate;
+import com.example.DoroServer.domain.lecture.entity.LectureStatus;
 import com.example.DoroServer.domain.lectureContent.dto.LectureContentDto;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,12 +20,19 @@ import lombok.ToString;
 public class CreateLectureReq {
 
     @NotBlank
-    private String title; // 강의 제목
+    private String mainTitle; // 강의 제목
+
+    @NotBlank
+    private String subTitle; // 강의 제목
+
     @NotBlank
     private String institution; // 강의 기관
 
     @NotBlank
     private String city; // 강의 도시
+
+    @NotBlank
+    private String place; // 강의 도시
 
     @NotBlank
     private String studentGrade; // 강의 대상
@@ -40,38 +48,21 @@ public class CreateLectureReq {
     @NotBlank
     private String staff; // 강의 스태프 수
     @NotBlank
-    private String payment; //강사 급여
+    private String mainPayment; //강사 급여
+    @NotBlank
+    private String subPayment;
+    @NotBlank
+    private String staffPayment;
     @NotBlank
     private String time; // 시간
     @NotBlank
-    private List<LocalDate> lectureDates = new ArrayList<>(); // 강의 날짜
+    private List<LocalDateTime> lectureDates = new ArrayList<>(); // 강의 날짜
     @NotBlank
-    private LocalDateTime enrollStartDate; // 강의 등록 시작 날짜
+    private LectureDate lectureDate;
+
     @NotBlank
-    private LocalDateTime enrollEndDate; // 강의 등록 종료 날짜
+    private LectureStatus status;
 
     @NotBlank
     private Long lectureContentId;
-
-
-    public Lecture toEntity(){
-        return Lecture.builder()
-                .institution(institution)
-                .city(city)
-                .studentGrade(studentGrade)
-                .studentNumber(studentNumber)
-                .mainTutor(mainTutor)
-                .subTutor(subTutor)
-                .staff(staff)
-                .payment(payment)
-                .time(time)
-                .lectureDates(lectureDates)
-                .lectureDate(
-                        LectureDate.builder()
-                                .enrollStartDate(enrollStartDate)
-                                .enrollEndDate(enrollEndDate)
-                                .build()
-                )
-                .build();
-    }
 }
