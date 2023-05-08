@@ -80,28 +80,29 @@ public class AuthController {
             .body(refreshToken);
     }
 
-    @Operation(summary = "001_", description = "아이디 중복체크")
+    @Operation(summary = "001_03", description = "아이디 중복체크")
     @GetMapping("/check/account")
     public SuccessResponse<String> checkAccount(@RequestParam String account){
         authService.checkAccount(account);
         return SuccessResponse.successResponse("사용 가능한 아이디입니다.");
     }
 
-    @Operation(summary = "001_", description = "아이디 찾기")
+    @Operation(summary = "001_04", description = "아이디 찾기")
     @GetMapping("/find/account")
     public SuccessResponse<String> findAccount(@RequestParam String phone){
         String account = authService.findAccount(phone);
         return SuccessResponse.successResponse(account);
     }
 
-    @Operation(summary = "001_", description = "비밀번호 변경")
+    @Operation(summary = "001_05", description = "비밀번호 변경")
     @PostMapping("/change/password")
     public SuccessResponse<String> changePassword(@RequestBody ChangePasswordReq changePasswordReq){
         authService.changePassword(changePasswordReq);
         return SuccessResponse.successResponse("비밀번호가 변경되었습니다.");
     }
 
-    @Operation(summary = "001_", description = "토큰 재발급")
+    @Secured({"ROLE_USER", "ROLE_ADMIN"})
+    @Operation(summary = "001_06", description = "토큰 재발급")
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(@RequestBody ReissueReq reissueReq,
                                     @RequestHeader("User-Agent") String userAgent){
@@ -132,7 +133,7 @@ public class AuthController {
     }
 
     @Secured("ROLE_USER")
-    @Operation(summary = "001_", description = "회원 탈퇴")
+    @Operation(summary = "001_07", description = "회원 탈퇴")
     @DeleteMapping("/withdrawal")
     public SuccessResponse<String> withdrawalUser(@AuthenticationPrincipal User user,
                                             @RequestHeader("User-Agent") String userAgent){
@@ -143,20 +144,6 @@ public class AuthController {
         SecurityContextHolder.clearContext();
         return SuccessResponse.successResponse("회원 탈퇴 성공");
     }
-
-    private String createReissueAccessToken(String account) {
-        UserDetails userDetails = customUserDetailsService.loadUserByUsername(account);
-
-        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
-            = new UsernamePasswordAuthenticationToken(userDetails.getUsername(),
-            null, userDetails.getAuthorities());
-
-        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-        log.info("AuthenticationToken={}", usernamePasswordAuthenticationToken);
-        return tokenProvider.createAccessToken(usernamePasswordAuthenticationToken.getName(),
-            usernamePasswordAuthenticationToken.getAuthorities());
-    }
-
 
     private String createAccessToken(UsernamePasswordAuthenticationToken authenticationToken) {
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
