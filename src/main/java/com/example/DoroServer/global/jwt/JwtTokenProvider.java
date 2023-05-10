@@ -58,8 +58,9 @@ public class JwtTokenProvider {
     }
 
 
-    public String createAccessToken(String account, Collection<? extends GrantedAuthority> roles) {
+    public String createAccessToken(String account, long idx, Collection<? extends GrantedAuthority> roles) {
         Claims claims = Jwts.claims().setSubject(account); // sub: account 형태로 저장
+        claims.put("id", idx);
         claims.put("roles", roles);
         Date now = new Date();
         return Jwts.builder()

@@ -116,14 +116,8 @@ public class AuthController {
         if(!reissueReq.getRefreshToken().equals(refreshToken)){
             throw new JwtAuthenticationException(Code.REFRESH_TOKEN_DID_NOT_MATCH);
         }
-        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
-            = new UsernamePasswordAuthenticationToken(authentication.getName(), null,
-                                            authentication.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-
         String newAccessToken = tokenProvider.createAccessToken(
-            usernamePasswordAuthenticationToken.getName(),
-            usernamePasswordAuthenticationToken.getAuthorities());
+            authentication.getName(), ((User)authentication.getPrincipal()).getId(), authentication.getAuthorities());
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(AUTHORIZATION_HEADER, newAccessToken);
@@ -149,7 +143,7 @@ public class AuthController {
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         log.info("AccessToken 생성 준비 끝");
-        return tokenProvider.createAccessToken(authentication.getName(), authentication.getAuthorities());
+        return tokenProvider.createAccessToken(authentication.getName(), ((User)authentication.getPrincipal()).getId(), authentication.getAuthorities());
     }
 
     private String createRefreshToken() {
