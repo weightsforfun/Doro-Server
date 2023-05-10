@@ -48,18 +48,21 @@ public class AnnouncementService {
     // Announcement 생성 메소드
     @Transactional
     public Long createAnnouncement(AnnouncementReq announcementReq, MultipartFile picture) {
+        String imgUrl = null;
         try {
-            String imgUrl = awsS3Service.upload(picture,"announcement");
-            Announcement announcement = Announcement.builder()
-                .title(announcementReq.getTitle())
-                .body(announcementReq.getBody())
-                .picture(imgUrl)
-                .build();
-            announcementRepository.save(announcement);
-            return announcement.getId();
+            if (!picture.isEmpty()) {
+                imgUrl = awsS3Service.upload(picture, "announcement");
+            }
         } catch (IOException e) {
             throw new BaseException(Code.UPLOAD_FAILED);
         }
+        Announcement announcement = Announcement.builder()
+            .title(announcementReq.getTitle())
+            .body(announcementReq.getBody())
+            .picture(imgUrl)
+            .build();
+        announcementRepository.save(announcement);
+        return announcement.getId();
     }
 
     // Announcement 수정 메소드
@@ -73,13 +76,16 @@ public class AnnouncementService {
         if(updateAnnouncement.getPicture() != null){
             awsS3Service.deleteImage(updateAnnouncement.getPicture());
         }
+        String imgUrl = null;
         try {
-            String imgUrl = awsS3Service.upload(picture,"announcement");
-            announcementRepository.updateAnnouncementImgById(id, imgUrl);
-            updateAnnouncement.update(announcementReq);
+            if (!picture.isEmpty()) {
+                imgUrl = awsS3Service.upload(picture, "announcement");
+            }
         } catch (IOException e) {
             throw new BaseException(Code.UPLOAD_FAILED);
         }
+        announcementRepository.updateAnnouncementImgById(id, imgUrl);
+        updateAnnouncement.update(announcementReq);
     }
 
     // Announcement 수정 메서드
