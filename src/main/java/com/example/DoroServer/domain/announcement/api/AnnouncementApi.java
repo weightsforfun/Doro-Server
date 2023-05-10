@@ -16,13 +16,16 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @Api(tags = "공지📋")
 @RestController
@@ -45,8 +48,10 @@ public class AnnouncementApi {
     // 공지 생성 후 생성 확인 알림 전송
     @ApiOperation(value = "공지 글 생성", notes = "공지 제목(title), 내용(body), 이미지(image)를 입력받아 공지를 생성합니다.")
     @PostMapping
-    public SuccessResponse createAnnouncement(@RequestBody @Valid AnnouncementReq announcementReq) {
-        Long announcementId = announcementService.createAnnouncement(announcementReq);
+    public SuccessResponse createAnnouncement(
+        @RequestPart(value = "announcementReq") @Valid AnnouncementReq announcementReq,
+        @RequestPart(value = "picture", required = false) MultipartFile picture) {
+        Long announcementId = announcementService.createAnnouncement(announcementReq, picture);
         notificationService.sendNotificationToAll(NotificationContentReq.builder()
                 .title("새로운 공지가 올라왔습니다!")
                 .body(announcementReq.getTitle())

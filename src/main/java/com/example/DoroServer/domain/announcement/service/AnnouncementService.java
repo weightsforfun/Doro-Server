@@ -6,6 +6,8 @@ import com.example.DoroServer.domain.announcement.entity.Announcement;
 import com.example.DoroServer.domain.announcement.repository.AnnouncementRepository;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
+import com.example.DoroServer.global.s3.AwsS3Service;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -16,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AnnouncementService {
 
     private final AnnouncementRepository announcementRepository;
+    private final AwsS3Service awsS3Service;
 
     // AnnouncementRes Dto객체 단일 조회
     public AnnouncementRes findById(Long id) {
@@ -43,10 +47,19 @@ public class AnnouncementService {
 
     // Announcement 생성 메소드
     @Transactional
-    public Long createAnnouncement(AnnouncementReq announcementReq) {
-        Announcement announcement = announcementReq.toEntity();
-        announcementRepository.save(announcement);
-        return announcement.getId();
+    public Long createAnnouncement(AnnouncementReq announcementReq, MultipartFile picture) {
+        try {
+            String imgUrl = awsS3Service.upload(picture,"announcement");
+            Announcement announcement = Announcement.builder()
+                .title(announcementReq.getTitle())
+                .body(announcementReq.getBody())
+                .picture(imgUrl)
+                .build();
+            announcementRepository.save(announcement);
+            return announcement.getId();
+        } catch (IOException e) {
+            throw new BaseException(Code.UPLOAD_FAILED);
+        }
     }
 
     // Announcement 수정 메소드
