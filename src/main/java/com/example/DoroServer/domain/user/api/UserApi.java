@@ -13,6 +13,7 @@ import com.example.DoroServer.global.exception.Code;
 import io.swagger.annotations.Api;
 import java.util.List;
 import java.io.IOException;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -59,7 +60,7 @@ public class UserApi {
     public SuccessResponse updateUser(
             @PathVariable("id") String id,
             @AuthenticationPrincipal User user,
-            @RequestBody UpdateUserReq updateUserReq){
+            @RequestBody @Valid UpdateUserReq updateUserReq){
         UserRole role = user.getRole();
         if(role.equals(UserRole.ROLE_USER) && !Long.valueOf(id).equals(user.getId())){
             throw new BaseException(Code.FORBIDDEN);
