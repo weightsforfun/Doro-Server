@@ -64,13 +64,22 @@ public class AnnouncementService {
 
     // Announcement 수정 메소드
     @Transactional
-    public void updateAnnouncement(Long id, AnnouncementReq announcementReq) {
+    public void updateAnnouncement(Long id, AnnouncementReq announcementReq, MultipartFile picture) {
         Optional<Announcement> announcement = announcementRepository.findById(id);
         Announcement updateAnnouncement = announcement.orElseThrow(() -> {
             log.info("update 하려는 Announcement를 찾을 수 없습니다. id = {}", id);
             return new BaseException(Code.ANNOUNCEMENT_NOT_FOUND);
         });
-        updateAnnouncement.update(announcementReq);
+        if(updateAnnouncement.getPicture() != null){
+            awsS3Service.deleteImage(updateAnnouncement.getPicture());
+        }
+        try {
+            String imgUrl = awsS3Service.upload(picture,"announcement");
+            announcementRepository.updateAnnouncementImgById(id, imgUrl);
+            updateAnnouncement.update(announcementReq);
+        } catch (IOException e) {
+            throw new BaseException(Code.UPLOAD_FAILED);
+        }
     }
 
     // Announcement 수정 메서드

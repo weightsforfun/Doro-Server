@@ -72,8 +72,9 @@ public class AnnouncementApi {
     @ApiOperation(value = "공지 글 수정", notes = "id에 해당하는 공지 글을 수정합니다.")
     @PatchMapping("/{id}")
     public SuccessResponse editAnnouncement(@PathVariable("id") Long id,
-            @RequestBody @Valid AnnouncementReq announcementReq) {
-        announcementService.updateAnnouncement(id, announcementReq);
+        @RequestPart(value = "announcementReq") @Valid AnnouncementReq announcementReq,
+        @RequestPart(value = "picture", required = false) MultipartFile picture) {
+        announcementService.updateAnnouncement(id, announcementReq, picture);
         return SuccessResponse.successResponse("update complete");
     }
 
