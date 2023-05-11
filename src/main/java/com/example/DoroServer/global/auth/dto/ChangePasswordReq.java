@@ -14,7 +14,8 @@ public class ChangePasswordReq {
     private String phone;
 
     @NotBlank
-    @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$", message = "영문, 숫자 포함 8자 이상으로 입력해주세요.")
+    @Pattern(regexp = "^((?=.*\\d)(?=.*[a-zA-Z])(?=.*[\\W]).{8,20})$",
+        message = "영문, 숫자, 특수문자 포함 8~20자로 입력해주세요.")
     private String newPassword;
 
     @NotBlank

@@ -22,6 +22,8 @@ import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import java.time.Duration;
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -82,21 +84,23 @@ public class AuthController {
 
     @Operation(summary = "001_03", description = "아이디 중복체크")
     @GetMapping("/check/account")
-    public SuccessResponse<String> checkAccount(@RequestParam String account){
+    public SuccessResponse<String> checkAccount(@RequestParam @NotBlank
+            @Pattern(regexp = "^[A-Za-z0-9]{4,20}$", message = "영문, 숫자 포함 4~20자로 입력해주세요") String account){
         authService.checkAccount(account);
         return SuccessResponse.successResponse("사용 가능한 아이디입니다.");
     }
 
     @Operation(summary = "001_04", description = "아이디 찾기")
     @GetMapping("/find/account")
-    public SuccessResponse<String> findAccount(@RequestParam String phone){
+    public SuccessResponse<String> findAccount(@RequestParam
+            @Pattern(regexp = "^01([016789])([0-9]{3,4})([0-9]{4})$", message = "올바른 휴대폰 번호 형식이 아닙니다.") String phone){
         String account = authService.findAccount(phone);
         return SuccessResponse.successResponse(account);
     }
 
     @Operation(summary = "001_05", description = "비밀번호 변경")
     @PostMapping("/change/password")
-    public SuccessResponse<String> changePassword(@RequestBody ChangePasswordReq changePasswordReq){
+    public SuccessResponse<String> changePassword(@RequestBody @Valid ChangePasswordReq changePasswordReq){
         authService.changePassword(changePasswordReq);
         return SuccessResponse.successResponse("비밀번호가 변경되었습니다.");
     }
@@ -104,7 +108,7 @@ public class AuthController {
     @Secured({"ROLE_USER", "ROLE_ADMIN"})
     @Operation(summary = "001_06", description = "토큰 재발급")
     @PostMapping("/reissue")
-    public ResponseEntity<?> reissue(@RequestBody ReissueReq reissueReq,
+    public ResponseEntity<?> reissue(@RequestBody @Valid ReissueReq reissueReq,
                                     @RequestHeader("User-Agent") String userAgent){
         if(!tokenProvider.validateToken(reissueReq.getRefreshToken())){
             throw new JwtAuthenticationException(Code.JWT_BAD_REQUEST);
