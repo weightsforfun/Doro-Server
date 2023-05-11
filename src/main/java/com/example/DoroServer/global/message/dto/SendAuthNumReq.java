@@ -1,4 +1,4 @@
-package com.example.DoroServer.global.auth.dto;
+package com.example.DoroServer.global.message.dto;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;

@@ -4,20 +4,16 @@ import static com.example.DoroServer.global.common.Constants.AUTHORIZATION_HEADE
 import static com.example.DoroServer.global.common.Constants.REDIS_REFRESH_TOKEN_PREFIX;
 
 import com.example.DoroServer.domain.user.entity.User;
-import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.global.auth.dto.ChangePasswordReq;
 import com.example.DoroServer.global.auth.dto.JoinReq;
 import com.example.DoroServer.global.auth.dto.LoginReq;
 import com.example.DoroServer.global.auth.dto.ReissueReq;
-import com.example.DoroServer.global.auth.dto.SendAuthNumReq;
-import com.example.DoroServer.global.auth.dto.VerifyAuthNumReq;
 import com.example.DoroServer.global.common.SuccessResponse;
 import com.example.DoroServer.global.exception.Code;
 import com.example.DoroServer.global.exception.JwtAuthenticationException;
 import com.example.DoroServer.global.jwt.CustomUserDetailsService;
 import com.example.DoroServer.global.jwt.JwtTokenProvider;
 import com.example.DoroServer.global.jwt.RedisService;
-import com.example.DoroServer.global.message.MessageService;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import java.time.Duration;
@@ -34,7 +30,6 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;

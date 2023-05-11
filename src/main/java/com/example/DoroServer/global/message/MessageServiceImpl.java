@@ -1,11 +1,11 @@
 package com.example.DoroServer.global.message;
 
-import com.example.DoroServer.global.auth.dto.SendAuthNumReq;
-import com.example.DoroServer.global.auth.dto.VerifyAuthNumReq;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
 import com.example.DoroServer.global.exception.MessageException;
 import com.example.DoroServer.global.jwt.RedisService;
+import com.example.DoroServer.global.message.dto.SendAuthNumReq;
+import com.example.DoroServer.global.message.dto.VerifyAuthNumReq;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Random;

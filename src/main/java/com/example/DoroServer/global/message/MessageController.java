@@ -1,8 +1,8 @@
 package com.example.DoroServer.global.message;
 
-import com.example.DoroServer.global.auth.dto.SendAuthNumReq;
-import com.example.DoroServer.global.auth.dto.VerifyAuthNumReq;
 import com.example.DoroServer.global.common.SuccessResponse;
+import com.example.DoroServer.global.message.dto.SendAuthNumReq;
+import com.example.DoroServer.global.message.dto.VerifyAuthNumReq;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import javax.validation.Valid;

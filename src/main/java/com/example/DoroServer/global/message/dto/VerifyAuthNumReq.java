@@ -1,6 +1,6 @@
-package com.example.DoroServer.global.auth.dto;
+package com.example.DoroServer.global.message.dto;
 
-import com.example.DoroServer.global.auth.dto.SendAuthNumReq.MessageType;
+import com.example.DoroServer.global.message.dto.SendAuthNumReq.MessageType;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
