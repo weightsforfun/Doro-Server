@@ -149,6 +149,19 @@ public class NotificationService {
                     });
         }
     }
+    public void sendFixedMessageToUser(User user, String title,String body) {
+        if (user.getNotificationAgreement()) {
+            user.getTokens().stream()
+                    .forEach(token -> {
+                        NotificationReq notificationReq = NotificationReq.builder()
+                                .targetToken(token.getToken())
+                                .title(title)
+                                .body(body)
+                                .build();
+                        sendMessageTo(notificationReq);
+                    });
+        }
+    }
 
 
     // FCM 메시지를 보내는 메소드
