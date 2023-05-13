@@ -28,22 +28,7 @@ public class FindUserRes {
     private String phone; // 사용자 전화번호
     private int generation; // 사용자 기수
     private String profileImg; // 사용자 이미
-    private String school; // 학교 정보
-    private String studentId; // 학번
-    private String major; // 전공
-    private StudentStatus studentStatus; // 학생 재적 상태 [ATTENDING, ABSENCE, GRADUATION]
-    public static FindUserRes fromEntity(User user) {
-        return FindUserRes.builder()
-                .name(user.getName())
-                .birth(user.getBirth())
-                .gender(user.getGender())
-                .phone(user.getPhone())
-                .generation(user.getGeneration())
-                .profileImg(user.getProfileImg())
-                .school(user.getDegree().getSchool())
-                .studentId(user.getDegree().getStudentId())
-                .major(user.getDegree().getMajor())
-                .studentStatus(user.getDegree().getStudentStatus())
-                .build();
-    }
+    private Degree degree; // 전공
+
+
 }

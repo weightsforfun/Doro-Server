@@ -3,6 +3,7 @@ package com.example.DoroServer.domain.user.service;
 import com.example.DoroServer.domain.user.dto.FindAllUsersRes;
 import com.example.DoroServer.domain.user.dto.FindUserRes;
 import com.example.DoroServer.domain.user.dto.UpdateUserReq;
+import com.example.DoroServer.domain.user.dto.UserMapper;
 import com.example.DoroServer.domain.user.entity.Degree;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.repository.UserRepository;
@@ -25,6 +26,7 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final RedisService redisService;
     private final AwsS3Service awsS3Service;
+    private final UserMapper userMapper;
 
     @Override
     public void updateUser(String id, UpdateUserReq updateUserReq) {
@@ -52,7 +54,8 @@ public class UserServiceImpl implements UserService{
     @Override
     public List<FindAllUsersRes> findAllUsers() {
         List<User> userList = userRepository.findAll();
-        List<FindAllUsersRes> findAllUsersResList = userList.stream().map(FindAllUsersRes::fromEntity)
+        List<FindAllUsersRes> findAllUsersResList = userList.stream()
+                .map(user -> userMapper.toFindAllUsersRes(user))
                 .collect(Collectors.toList());
         return findAllUsersResList;
     }
@@ -61,7 +64,7 @@ public class UserServiceImpl implements UserService{
     public FindUserRes findUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(()-> new BaseException(Code.USER_NOT_FOUND));
-        return FindUserRes.fromEntity(user);
+        return userMapper.toFindUserRes(user);
     }
 
     @Override

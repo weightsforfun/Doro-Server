@@ -43,15 +43,17 @@ public class UserApi {
     }
     @GetMapping("/{id}")
     public SuccessResponse findUser(@PathVariable(value = "id",required = false) Long id,@AuthenticationPrincipal User user){
-        if(id==null){
-            Long userId = user.getId();
-            FindUserRes findUserRes = userService.findUser(userId);
+        //payload 에 id 추가되면 수정
+        if(user.getId()==id ){
+            FindUserRes findUserRes = userService.findUser(id);
+            return SuccessResponse.successResponse(findUserRes);
+        }
+        else if(user.getRole() == UserRole.ROLE_ADMIN) {
+            FindUserRes findUserRes = userService.findUser(id);
             return SuccessResponse.successResponse(findUserRes);
         }
         else{
-            //매니저 아닐지 block 로직 추가
-            FindUserRes findUserRes = userService.findUser(id);
-            return SuccessResponse.successResponse(findUserRes);
+            throw new BaseException(Code.FORBIDDEN);
         }
 
     }
