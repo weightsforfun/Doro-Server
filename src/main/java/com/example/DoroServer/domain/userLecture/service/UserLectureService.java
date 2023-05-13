@@ -3,6 +3,7 @@ package com.example.DoroServer.domain.userLecture.service;
 import com.example.DoroServer.domain.lecture.dto.LectureMapper;
 import com.example.DoroServer.domain.lecture.entity.Lecture;
 import com.example.DoroServer.domain.lecture.repository.LectureRepository;
+import com.example.DoroServer.domain.notification.service.NotificationService;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.domain.userLecture.dto.CreateTutorReq;
@@ -33,6 +34,7 @@ public class UserLectureService {
     private final UserRepository userRepository;
     private final LectureRepository lectureRepository;
     private final UserLectureMapper userLectureMapper;
+    private final NotificationService notificationService;
 
     public List<FindAllTutorsRes> findAllTutors(Long id) {
         List<UserLecture> allTutors = userLectureRepository.findAllTutors(id);
@@ -71,7 +73,15 @@ public class UserLectureService {
         UserLecture userLecture = userLectureRepository.findUerLecture(lectureId,
                         selectTutorReq.getUserId(), selectTutorReq.getTutorRole())
                 .orElseThrow(() -> new BaseException(Code.TUTOR_NOT_FOUND));
-
+        User user = userRepository.findById(selectTutorReq.getUserId()).orElseThrow(()->new BaseException(Code.USER_NOT_FOUND));
+        Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(()-> new BaseException(Code.LECTURE_NOT_FOUND));
+        if(userLecture.getTutorStatus()==TutorStatus.WAITING){
+            notificationService.sendFixedMessageToUser(user,"강사 배정 완료",lecture.getSubTitle()+"강의에 배정되셨습니다");
+        }
+        else {
+            notificationService.sendFixedMessageToUser(user, "강사 배정 취소",
+                    lecture.getSubTitle() + "강의에 배정이 취소되었습니다.");
+        }
         userLecture.changeTutorStatus();
         return String.valueOf(userLecture.getTutorStatus());
     }
