@@ -15,14 +15,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Getter
 public class JoinReq {
     @NotBlank
+    @Pattern(regexp = "^[A-Za-z0-9]{4,20}$", message = "영문, 숫자 포함 4~20자로 입력해주세요")
     private String account;
 
     @NotBlank
-    @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$", message = "영문, 숫자 포함 8자 이상으로 입력해주세요.")
+    @Pattern(regexp = "^((?=.*\\d)(?=.*[a-zA-Z])(?=.*[\\W]).{8,20})$", message = "영문, 숫자, 특수문자 포함 8~20자로 입력해주세요.")
     private String password;
 
     @NotBlank
-    @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$", message = "영문, 숫자 포함 8자 이상으로 입력해주세요.")
+    @Pattern(regexp = "^((?=.*\\d)(?=.*[a-zA-Z])(?=.*[\\W]).{8,20})$", message = "영문, 숫자, 특수문자 포함 8~20자로 입력해주세요.")
     private String passwordCheck;
 
     @NotBlank
@@ -35,7 +36,7 @@ public class JoinReq {
     private Gender gender;
 
     @NotBlank
-    @Pattern(regexp = "^01([016789])-?([0-9]{3,4})-?([0-9]{4})$", message = "올바른 휴대폰 번호 형식이 아닙니다.")
+    @Pattern(regexp = "^01([016789])([0-9]{3,4})([0-9]{4})$", message = "올바른 휴대폰 번호 형식이 아닙니다.")
     private String phone;
 
     @NotBlank

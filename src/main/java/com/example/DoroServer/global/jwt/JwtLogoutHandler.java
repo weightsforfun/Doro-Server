@@ -1,5 +1,8 @@
 package com.example.DoroServer.global.jwt;
 
+import static com.example.DoroServer.global.common.Constants.AUTHORIZATION_HEADER;
+import static com.example.DoroServer.global.common.Constants.REDIS_REFRESH_TOKEN_PREFIX;
+
 import com.example.DoroServer.global.common.SuccessResponse;
 import com.example.DoroServer.global.exception.Code;
 import com.example.DoroServer.global.exception.JwtAuthenticationException;
@@ -24,7 +27,7 @@ public class JwtLogoutHandler implements LogoutHandler {
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response,
         Authentication authentication) {
-        String bearerAccessToken = request.getHeader("Authorization");
+        String bearerAccessToken = request.getHeader(AUTHORIZATION_HEADER);
         String userAgent = request.getHeader("User-Agent");
         String accessToken = bearerAccessToken.substring(7);
 
@@ -33,8 +36,8 @@ public class JwtLogoutHandler implements LogoutHandler {
         }
         Authentication providerAuthentication = tokenProvider.getAuthentication(accessToken);
         log.info("Argument Authentication={}", providerAuthentication);
-        if(redisService.getValues("RTK" + providerAuthentication.getName() + userAgent) != null){
-            redisService.deleteValues("RTK" + providerAuthentication.getName() + userAgent);
+        if(redisService.getValues(REDIS_REFRESH_TOKEN_PREFIX + providerAuthentication.getName() + userAgent) != null){
+            redisService.deleteValues(REDIS_REFRESH_TOKEN_PREFIX + providerAuthentication.getName() + userAgent);
         }
         Long expiration = tokenProvider.getExpiration(accessToken);
         redisService.setValues(accessToken, "logout", Duration.ofMillis(expiration));
