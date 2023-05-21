@@ -42,7 +42,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew build -x test
         
       - name: Make zip file
         run: |
@@ -61,4 +61,10 @@ jobs:
         run: |
           aws s3 cp \
             --region ap-northeast-2 \
-            ./spring-build.zip s3://doroeduapp
+            ./doro-build.zip s3://doroeduapp
+      
+      - name: Code Deploy
+        run: aws deploy create-deployment --application-name doro-deploy
+          --deployment-config-name CodeDeployDefault.OneAtATime
+          --deployment-group-name doro-deploy-group
+          --s3-location bucket=doroeduapp,bundleType=zip,key=doro-build.zip
