@@ -7,6 +7,7 @@ import com.example.DoroServer.global.exception.Code;
 import com.example.DoroServer.global.exception.JwtAuthenticationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -23,7 +24,7 @@ public class JwtAuthenticationExceptionHandler extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try{
             filterChain.doFilter(request,response);
-        } catch (JwtAuthenticationException authException) {
+        } catch (AuthenticationException authException) {
             response.setContentType("application/json; charset=UTF-8");
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
 
