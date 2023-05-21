@@ -21,6 +21,13 @@ jobs:
         with:
           java-version: '11'
           distribution: 'temurin'
+        
+      - name: Setup MySQL
+        uses: mirromutth/mysql-action@v1.1
+        with:
+          mysql database: 'dev' 
+          mysql user: 'test'
+          mysql password: ${{ secrets.MYSQL_PWD }}
 
       - name: Make application.properties
         run: |
