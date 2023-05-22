@@ -1,7 +1,7 @@
 #green
 version: '3'
 services:
-  tcat-api:
+  doro-api:
     build: .
     ports:
       - "8082:8080"
