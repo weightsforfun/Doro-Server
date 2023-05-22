@@ -1,7 +1,7 @@
 #blue
 version: '3'
 services:
-  tcat-api:
+  doro-api:
     build: .
     ports:
       - "8081:8080"
