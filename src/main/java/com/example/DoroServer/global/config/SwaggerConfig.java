@@ -27,8 +27,8 @@ public class SwaggerConfig {
     public Docket api() {
         Server serverLocal = new Server("local", "http://localhost:8088", "for local usages", Collections.emptyList(), Collections.emptyList());
         return new Docket(DocumentationType.OAS_30)
-                .securityContexts(Collections.singletonList(securityContext())) // 추가
-                .securitySchemes(List.of(apiKey())) // 추가
+                .securityContexts(Collections.singletonList(securityContext()))
+                .securitySchemes(List.of(apiKey()))
                 .ignoredParameterTypes(AuthenticationPrincipal.class)
                 .select()
                 .apis(RequestHandlerSelectors.withClassAnnotation(RestController.class))
@@ -56,13 +56,16 @@ public class SwaggerConfig {
 
 
     private List<SecurityReference> defaultAuth() {
+        // 권한 범위 설정
         AuthorizationScope authorizationScope = new AuthorizationScope("global", "accessEverything");
-        AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
-        authorizationScopes[0] = authorizationScope;
+        AuthorizationScope[] authorizationScopes = { authorizationScope };
         return List.of(new SecurityReference("Authorization", authorizationScopes));
     }
 
-
+    /**
+     * Swagger에서 사용할 인증 정보
+     * Bearer {accessToken}
+     */
     private ApiKey apiKey() {
         return new ApiKey("Authorization", "Bearer", "header");
     }

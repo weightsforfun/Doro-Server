@@ -45,6 +45,31 @@ dependencies {
 	// swagger dependency
 	implementation "io.springfox:springfox-boot-starter:3.0.0"
 	implementation "io.springfox:springfox-swagger-ui:3.0.0"
+
+	// jwt
+	implementation 'io.jsonwebtoken:jjwt:0.9.1'
+	// .Decoders, .Keys 메서드
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	// Redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'io.lettuce:lettuce-core'
+
+	//ModelMapper
+	implementation 'org.modelmapper:modelmapper:2.4.2'
+	// 알림톡 (Solapi)
+	implementation 'net.nurigo:sdk:4.2.9'
+
+	// firebase sdk
+	implementation 'com.google.firebase:firebase-admin:6.8.1'
+	// okhttp
+	implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.2.2'
+
+	// S3
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
+	//MapStruct
+	implementation 'org.mapstruct:mapstruct:1.5.3.Final'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
 }
 
 //querydsl 추가 시작
