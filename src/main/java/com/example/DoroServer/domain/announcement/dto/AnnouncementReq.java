@@ -13,4 +13,6 @@ public class AnnouncementReq {  // 공지 생성 시 전달 받는 객체
 
     @NotBlank(message = "공지 내용이 비어있습니다.")
     private String body; // 공지 내용
+
+    private String writer; // 공지 작성자 이름
 }
