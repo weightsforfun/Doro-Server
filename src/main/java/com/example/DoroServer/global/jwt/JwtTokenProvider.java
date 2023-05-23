@@ -7,6 +7,7 @@ import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.global.exception.Code;
 import com.example.DoroServer.global.exception.JwtAuthenticationException;
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.SecurityException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -90,7 +91,13 @@ public class JwtTokenProvider {
 
     //토큰에서 회원 정보 추출
     private String getAccount(String token) {
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
+        try {
+            return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody()
+                .getSubject();
+        }catch (ExpiredJwtException e){
+            log.info("AccessToken 만료 시 재발급 = {}", e.getClaims().toString());
+            return e.getClaims().getSubject();
+        }
     }
 
     // 토큰의 유효성, 만료일자 확인
@@ -98,14 +105,12 @@ public class JwtTokenProvider {
         try {
             Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
             return !claims.getBody().getExpiration().before(new Date());
-        }catch(io.jsonwebtoken.security.SecurityException | MalformedJwtException e){
+        }catch(SecurityException | MalformedJwtException | IllegalArgumentException e){
             throw new JwtAuthenticationException(Code.JWT_BAD_REQUEST);
         }catch(ExpiredJwtException e){
             throw new JwtAuthenticationException(Code.JWT_TOKEN_EXPIRED);
         }catch(UnsupportedJwtException e){
             throw new JwtAuthenticationException(Code.JWT_UNSUPPORTED_TOKEN);
-        }catch(IllegalArgumentException e){
-            throw new JwtAuthenticationException(Code.JWT_BAD_REQUEST);
         }
     }
 

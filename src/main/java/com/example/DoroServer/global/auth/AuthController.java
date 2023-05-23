@@ -100,7 +100,6 @@ public class AuthController {
         return SuccessResponse.successResponse("비밀번호가 변경되었습니다.");
     }
 
-    @Secured({"ROLE_USER", "ROLE_ADMIN"})
     @Operation(summary = "001_06", description = "토큰 재발급")
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(@RequestBody @Valid ReissueReq reissueReq,
