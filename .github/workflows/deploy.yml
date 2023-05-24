@@ -40,9 +40,7 @@ jobs:
       
       - name: Make jwt.properties
         run: |
-          cd ./src/main
-          mkdir resources
-          cd ./resources
+          cd ./src/main/resources
           touch ./jwt.properties
           echo "${{ secrets.JWT_PROPERTIES }}" > ./jwt.properties
         shell: bash
