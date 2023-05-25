@@ -43,6 +43,7 @@ public enum Code {
 
     // 신청 강사 관련 오류
     TUTOR_NOT_FOUND(HttpStatus.BAD_REQUEST,"TUTOR001","신청하지 않은 강사입니다."),
+    ALREADY_EXIST(HttpStatus.BAD_REQUEST,"TUTOR002","이미 신청하셨습니다"),
 
     // 알림톡 관련 오류 M001, M002...
     MESSAGE_SEND_FAILED(HttpStatus.BAD_REQUEST, "M001", "메시지 전송이 실패했습니다. 올바른 번호인지 확인하세요."),
