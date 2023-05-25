@@ -53,20 +53,28 @@ public class UserLectureService {
     }
 
     public Long createTutor(Long id, CreateTutorReq createTutorReq) {
-        Lecture lecture = lectureRepository.findById(id).
-                orElseThrow(() -> new BaseException(Code.LECTURE_NOT_FOUND));
-        User user = userRepository.findById(createTutorReq.getUserId())
-                .orElseThrow(() -> new BaseException(Code.USER_NOT_FOUND));
-        UserLecture userLecture = UserLecture.builder()
-                .tutorRole(createTutorReq.getTutorRole())
-                .user(user)
-                .lecture(lecture)
-                .tutorStatus(TutorStatus.WAITING)
-                .build();
-        UserLecture savedUserLecture = userLectureRepository.save(userLecture);
-        return savedUserLecture.getId();
+        //중복방지
+        Optional<UserLecture> optionalUserLecture = userLectureRepository.findUerLecture(id,
+                createTutorReq.getUserId(), createTutorReq.getTutorRole());
 
+        if(optionalUserLecture.isPresent()){
+            throw new BaseException(Code.ALREADY_EXIST);
+        }
+        else{
+            Lecture lecture = lectureRepository.findById(id).
+                    orElseThrow(() -> new BaseException(Code.LECTURE_NOT_FOUND));
+            User user = userRepository.findById(createTutorReq.getUserId())
+                    .orElseThrow(() -> new BaseException(Code.USER_NOT_FOUND));
 
+            UserLecture userLecture = UserLecture.builder()
+                    .tutorRole(createTutorReq.getTutorRole())
+                    .user(user)
+                    .lecture(lecture)
+                    .tutorStatus(TutorStatus.WAITING)
+                    .build();
+            UserLecture savedUserLecture = userLectureRepository.save(userLecture);
+            return savedUserLecture.getId();
+        }
     }
 
     public String selectTutor(Long lectureId, SelectTutorReq selectTutorReq) {
@@ -84,5 +92,9 @@ public class UserLectureService {
         }
         userLecture.changeTutorStatus();
         return String.valueOf(userLecture.getTutorStatus());
+    }
+    public Long deleteLecture(Long lectureId){
+        userRepository.deleteById(lectureId);
+        return lectureId;
     }
 }
