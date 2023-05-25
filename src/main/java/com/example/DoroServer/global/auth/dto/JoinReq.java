@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Getter
 public class JoinReq {
+
     @NotBlank
     private String account;
 
@@ -60,26 +61,28 @@ public class JoinReq {
     private String doroAuth;
 
     private String profileImg;
+    private Boolean notificationAgreement;
 
-    public User toUserEntity(){
+    public User toUserEntity() {
         return User.builder()
-            .account(account)
-            .password(password)
-            .name(name)
-            .birth(birth)
-            .gender(gender)
-            .phone(phone)
-            .degree(
-                Degree.builder()
-                    .school(school)
-                    .studentId(studentId)
-                    .major(major)
-                    .studentStatus(studentStatus)
-                    .build()
-            )
-            .generation(generation)
-            .role(role)
-            .profileImg(profileImg)
-            .build();
+                .account(account)
+                .password(password)
+                .name(name)
+                .birth(birth)
+                .gender(gender)
+                .phone(phone)
+                .degree(
+                        Degree.builder()
+                                .school(school)
+                                .studentId(studentId)
+                                .major(major)
+                                .studentStatus(studentStatus)
+                                .build()
+                )
+                .generation(generation)
+                .role(role)
+                .profileImg(profileImg)
+                .notificationAgreement(notificationAgreement)
+                .build();
     }
 }
