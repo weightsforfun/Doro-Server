@@ -1,13 +1,10 @@
 package com.example.DoroServer.domain.userLecture.dto;
 
 
-import com.example.DoroServer.domain.lecture.entity.Lecture;
 import com.example.DoroServer.domain.lecture.entity.LectureDate;
 import com.example.DoroServer.domain.lecture.entity.LectureStatus;
 import com.example.DoroServer.domain.userLecture.entity.TutorRole;
-import com.example.DoroServer.domain.userLecture.entity.UserLecture;
-import java.time.LocalDateTime;
-import javax.validation.constraints.NotEmpty;
+import com.example.DoroServer.domain.userLecture.entity.TutorStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,6 +24,7 @@ public class FindMyLecturesRes {
     private String place;
     private String time;
     private TutorRole tutorRole;
+    private TutorStatus tutorStatus;
 
 
 

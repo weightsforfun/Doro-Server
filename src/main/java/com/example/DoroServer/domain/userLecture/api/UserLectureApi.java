@@ -50,4 +50,10 @@ public class UserLectureApi {
         return SuccessResponse.successResponse("change to"+result);
     }
 
+    @DeleteMapping("/lectures/{id}")
+    public SuccessResponse deleteLecture(@PathVariable("id") Long id){
+        Long deleteLectureID = userLectureService.deleteLecture(id);
+        return SuccessResponse.successResponse("deleted"+deleteLectureID);
+    }
+
 }
