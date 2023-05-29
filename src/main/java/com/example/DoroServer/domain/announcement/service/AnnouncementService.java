@@ -59,6 +59,7 @@ public class AnnouncementService {
         Announcement announcement = Announcement.builder()
             .title(announcementReq.getTitle())
             .body(announcementReq.getBody())
+            .writer(announcementReq.getWriter())
             .picture(imgUrl)
             .build();
         announcementRepository.save(announcement);
