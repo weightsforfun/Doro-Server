@@ -26,9 +26,6 @@ public class Notification extends BaseEntity {
     @NotBlank(message = "알림 내용을 입력하세요")
     private String body; // 알림 내용
 
-    @NotNull
-    private Boolean isPublic; // 전체 전송 메세지
-
     private Boolean isRead; // 알림 읽음 유무
 
     // Notification을 NotificationRes객체로 변환해주는 메소드
