@@ -33,7 +33,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 public class UserApi {
 
-    private final UserRepository userRepository;
     private final UserService userService;
     @GetMapping()
     //매니저만
