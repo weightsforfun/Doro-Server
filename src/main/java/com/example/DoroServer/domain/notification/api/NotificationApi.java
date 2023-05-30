@@ -3,18 +3,12 @@ package com.example.DoroServer.domain.notification.api;
 import com.example.DoroServer.domain.notification.dto.NotificationContentReq;
 import com.example.DoroServer.domain.notification.dto.NotificationRes;
 import com.example.DoroServer.domain.notification.service.NotificationService;
-import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.domain.userNotification.service.UserNotificationService;
 import com.example.DoroServer.global.common.SuccessResponse;
-import com.example.DoroServer.global.exception.BaseException;
-import com.example.DoroServer.global.exception.Code;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +20,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Api(tags = "알림📢")
@@ -45,23 +38,16 @@ public class NotificationApi {
     private final UserRepository userRepository;
 
     // 모든 Notification 조회 메소드
-    @ApiOperation(value = "유저의 알림 전체 조회", notes = "userId를 전달해서 해당 유저의 알림 전체를 조회합니다. 파라미터로 page랑 size 전달하시면 페이징 됩니다. 이게 Swagger가 잘 안돼서 Postman으로 테스트 해보시는게 나을거에요 Swagger는 이상하게 page랑 size를 인식못하네요")
+    @ApiOperation(value = "유저의 전체 알림 조회", notes = "userId를 전달해서 해당 유저의 알림 전체를 조회합니다. 파라미터로 page랑 size 전달하시면 페이징 됩니다. 이게 Swagger가 잘 안돼서 Postman으로 테스트 해보시는게 나을거에요 Swagger는 이상하게 page랑 size를 인식못하네요")
     @GetMapping("/{userId}")
     public SuccessResponse findUserNotifications(@PathVariable("userId") Long userId,
-            @PageableDefault(page = 0,size = 10,sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
-        // 공용 알림만 전체 조회
-        List<NotificationRes> publicNotifications = notificationService.findPublicNotifications();
+            @PageableDefault(page = 0,size = 10,sort = "id", direction = Direction.DESC) Pageable pageable) {
 
         // 유저별 알림 조희
-        List<NotificationRes> userNotifications = notificationService.findUserNotifications(userId);
+        List<NotificationRes> userNotifications = notificationService.findUserNotifications(userId, pageable);
 
         // 병합 후 조회된 전체 알림 페이징 후반환
-        publicNotifications.addAll(userNotifications);
-        Collections.sort(publicNotifications, Comparator.comparing(NotificationRes::getCreatedAt, Comparator.reverseOrder()));
-            List<NotificationRes> notifications = publicNotifications.stream()
-                    .skip((long) pageable.getPageNumber() * pageable.getPageSize()).limit(pageable.getPageSize())
-                    .collect(Collectors.toList());
-            return SuccessResponse.successResponse(notifications);
+            return SuccessResponse.successResponse(userNotifications);
     }
 
     // FCM 서버에 알림 전송요청
@@ -74,25 +60,17 @@ public class NotificationApi {
         if (notificationContentReq.getUserIds() == null || notificationContentReq.getUserIds().isEmpty()) {
             // 유저 ID 리스트가 비어 있으면 모든 사용자에게 알림 전송
             notificationService.sendNotificationToAll(notificationContentReq);
-
-            //공용 알림 저장
-            notificationService.saveNotification(notificationContentReq,true);
         } else {
             // 유저 ID 리스트에 있는 사용자에게만 알림 전송
-            notificationContentReq.getUserIds().forEach(id ->
-            {
-                User user = userRepository.findById(id).orElseThrow(() -> {
-                            log.info("유저를 찾을 수 없습니다. id = {}", id);
-                            throw new BaseException(Code.USER_NOT_FOUND);
-                        }
-                );
-                notificationService.sendMessageToUser(user,notificationContentReq);
-
-                // 개인 알림 저장
-                Long notificationId = notificationService.saveNotification(notificationContentReq, false);
-                userNotificationService.saveUserNotification(user.getId(), notificationId);
-            });
+            notificationService.sendNotificationsToSelectedUsers(notificationContentReq);
         }
-        return SuccessResponse.successResponse("push complete");
+        return SuccessResponse.successResponse("Notification push complete");
     }
+    @ApiOperation(value = "유저의 알림 읽음 처리", notes = "notificationId를 전달해서 해당 알림을 읽음처리 합니다.")
+    @PostMapping("/{notificationId}/read")
+    public SuccessResponse findUserNotifications(@PathVariable("notificationId") Long notificationId) {
+        notificationService.readNotification(notificationId);
+        return SuccessResponse.successResponse("read Notification complete");
+    }
+
 }
