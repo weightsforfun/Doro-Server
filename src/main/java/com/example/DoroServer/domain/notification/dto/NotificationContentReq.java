@@ -23,11 +23,10 @@ public class NotificationContentReq {   // 알림이 생성될 때, 토큰 없�
     private String body;
 
     private List<Long> userIds = new ArrayList<>();
-    public Notification toEntity(Boolean isPublic) {
+    public Notification toEntity() {
         return Notification.builder()
                 .title(title)
                 .body(body)
-                .isPublic(isPublic)
                 .isRead(false)
                 .build();
     }
