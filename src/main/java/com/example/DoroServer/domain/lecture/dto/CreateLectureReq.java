@@ -54,6 +54,8 @@ public class CreateLectureReq {
     @NotBlank
     private String staffPayment;
     @NotBlank
+    private String transportCost;
+    @NotBlank
     private String time; // 시간
     @NotBlank
     private List<LocalDateTime> lectureDates = new ArrayList<>(); // 강의 날짜

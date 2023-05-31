@@ -30,6 +30,7 @@ public class UpdateLectureReq {
     private String mainPayment; //강사 급여
     private String subPayment;
     private String staffPayment;
+    private String transportCost;
     private String time; // 시간
     private List<LocalDateTime> lectureDates = new ArrayList<>(); // 강의 날짜
     private LectureDate lectureDate;
