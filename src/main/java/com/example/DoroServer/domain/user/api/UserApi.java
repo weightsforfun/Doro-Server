@@ -14,12 +14,16 @@ import io.swagger.annotations.Api;
 import java.util.List;
 import java.io.IOException;
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -75,5 +79,14 @@ public class UserApi {
             @AuthenticationPrincipal User user) throws IOException {
         userService.updateUserProfile(user, multipartFile);
         return SuccessResponse.successResponse("프로필 이미지 변경 성공");
+    }
+
+    @Secured("ROLE_ADMIN")
+    @PostMapping("/{id}/generation")
+    public SuccessResponse<String> updateGeneration(
+        @PathVariable("id") Long id,
+        @RequestParam @NotNull int generation){
+        String userName = userService.updateGeneration(id, generation);
+        return SuccessResponse.successResponse(userName+"님 기수가 변경되었습니다.");
     }
 }

@@ -72,6 +72,14 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public String updateGeneration(Long id, int generation) {
+        User user = userRepository.findById(id)
+            .orElseThrow(()-> new BaseException(Code.USER_NOT_FOUND));
+        user.updateGeneration(generation);
+        return user.getName();
+    }
+
+    @Override
     public void updateUserProfile(User user, MultipartFile multipartFile) throws IOException {
             if(user.getProfileImg() != null){
                 awsS3Service.deleteImage(user.getProfileImg());
