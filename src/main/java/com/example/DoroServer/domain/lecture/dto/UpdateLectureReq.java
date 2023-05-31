@@ -34,6 +34,6 @@ public class UpdateLectureReq {
     private String time; // 시간
     private List<LocalDateTime> lectureDates = new ArrayList<>(); // 강의 날짜
     private LectureDate lectureDate;
-    private LectureStatus lectureStatus;
+    private LectureStatus status;
 
 }

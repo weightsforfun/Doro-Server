@@ -22,7 +22,6 @@ import static javax.persistence.FetchType.*;
 @Entity
 @Getter
 @Builder
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Lecture extends BaseEntity {
