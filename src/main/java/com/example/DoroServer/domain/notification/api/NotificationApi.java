@@ -2,6 +2,7 @@ package com.example.DoroServer.domain.notification.api;
 
 import com.example.DoroServer.domain.notification.dto.NotificationContentReq;
 import com.example.DoroServer.domain.notification.dto.NotificationRes;
+import com.example.DoroServer.domain.notification.entity.NotificationType;
 import com.example.DoroServer.domain.notification.service.NotificationService;
 import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.domain.userNotification.service.UserNotificationService;
@@ -47,7 +48,7 @@ public class NotificationApi {
         List<NotificationRes> userNotifications = notificationService.findUserNotifications(userId, pageable);
 
         // 병합 후 조회된 전체 알림 페이징 후반환
-            return SuccessResponse.successResponse(userNotifications);
+        return SuccessResponse.successResponse(userNotifications);
     }
 
     // FCM 서버에 알림 전송요청
@@ -59,10 +60,10 @@ public class NotificationApi {
             ) {
         if (notificationContentReq.getUserIds() == null || notificationContentReq.getUserIds().isEmpty()) {
             // 유저 ID 리스트가 비어 있으면 모든 사용자에게 알림 전송
-            notificationService.sendNotificationToAll(notificationContentReq);
+            notificationService.sendNotificationToAll(notificationContentReq, NotificationType.NOTIFICATION);
         } else {
             // 유저 ID 리스트에 있는 사용자에게만 알림 전송
-            notificationService.sendNotificationsToSelectedUsers(notificationContentReq);
+            notificationService.sendNotificationsToSelectedUsers(notificationContentReq, NotificationType.NOTIFICATION);
         }
         return SuccessResponse.successResponse("Notification push complete");
     }

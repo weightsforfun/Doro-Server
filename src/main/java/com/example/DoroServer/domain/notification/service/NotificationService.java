@@ -5,6 +5,7 @@ import com.example.DoroServer.domain.notification.dto.NotificationRes;
 import com.example.DoroServer.domain.notification.dto.NotificationReq;
 import com.example.DoroServer.domain.notification.dto.NotificationDto;
 import com.example.DoroServer.domain.notification.entity.Notification;
+import com.example.DoroServer.domain.notification.entity.NotificationType;
 import com.example.DoroServer.domain.notification.repository.NotificationRepository;
 import com.example.DoroServer.domain.token.repository.TokenRepository;
 import com.example.DoroServer.domain.user.entity.User;
@@ -90,15 +91,15 @@ public class NotificationService {
 
     // 전달받은 title과 body로 알림을 저장하는 메소드
     @Transactional
-    public Long saveNotification(NotificationContentReq notificationContentReq) {
-        Notification notification = notificationContentReq.toEntity();
+    public Long saveNotification(NotificationContentReq notificationContentReq,NotificationType notificationType) {
+        Notification notification = notificationContentReq.toEntity(notificationType);
         notificationRepository.save(notification);
         return notification.getId();
     }
 
     // 모든 유저에게 푸쉬알림 발송 후 저장
     @Transactional
-    public void sendNotificationToAll(NotificationContentReq notificationContentReq) {
+    public void sendNotificationToAll(NotificationContentReq notificationContentReq, NotificationType notificationType) {
         List<User> users = userRepository.findAll();
         if (!users.isEmpty()) {
             users.stream().forEach(user -> {
@@ -115,7 +116,7 @@ public class NotificationService {
                     });
 
                     // 알림 저장
-                    Long notificationId = saveNotification(notificationContentReq);
+                    Long notificationId = saveNotification(notificationContentReq,notificationType);
                     userNotificationService.saveUserNotification(user.getId(), notificationId);
                 }
             });
@@ -124,7 +125,7 @@ public class NotificationService {
 
     // 선택한 유저에게 알림 전송
     @Transactional
-    public void sendNotificationsToSelectedUsers(NotificationContentReq notificationContentReq) {
+    public void sendNotificationsToSelectedUsers(NotificationContentReq notificationContentReq, NotificationType notificationType) {
         notificationContentReq.getUserIds().forEach(id ->
         {
             User user = userRepository.findById(id).orElseThrow(() -> {
@@ -143,7 +144,7 @@ public class NotificationService {
                             sendMessageTo(notificationReq);
                         });
                 // 알림 저장
-                Long notificationId = saveNotification(notificationContentReq);
+                Long notificationId = saveNotification(notificationContentReq, NotificationType.NOTIFICATION);
                 userNotificationService.saveUserNotification(id, notificationId);
             }
         });

@@ -4,6 +4,7 @@ import com.example.DoroServer.domain.announcement.dto.AnnouncementReq;
 import com.example.DoroServer.domain.announcement.dto.AnnouncementRes;
 import com.example.DoroServer.domain.announcement.service.AnnouncementService;
 import com.example.DoroServer.domain.notification.dto.NotificationContentReq;
+import com.example.DoroServer.domain.notification.entity.NotificationType;
 import com.example.DoroServer.domain.notification.service.NotificationService;
 import com.example.DoroServer.global.common.SuccessResponse;
 import io.swagger.annotations.Api;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -49,14 +51,20 @@ public class AnnouncementApi {
     @ApiOperation(value = "공지 글 생성", notes = "공지 제목(title), 내용(body), 이미지(image)를 입력받아 공지를 생성합니다.")
     @PostMapping
     public SuccessResponse createAnnouncement(
-        @RequestPart(value = "announcementReq") @Valid AnnouncementReq announcementReq,
-        @RequestPart(value = "picture", required = false) MultipartFile picture) {
-        Long announcementId = announcementService.createAnnouncement(announcementReq, picture);
+            @RequestPart(value = "announcementReq") @Valid AnnouncementReq announcementReq,
+            @RequestPart(value = "picture", required = false) MultipartFile picture) {
+        Long announcementId;
+        if (picture != null) {
+            announcementId = announcementService.createAnnouncement(announcementReq, picture);
+
+        } else {
+            announcementId = announcementService.createAnnouncement(announcementReq);
+
+        }
         notificationService.sendNotificationToAll(NotificationContentReq.builder()
                 .title("새로운 공지가 올라왔습니다!")
                 .body(announcementReq.getTitle())
-                .build());
-
+                .build(), NotificationType.ANNOUNCEMENT);
         return SuccessResponse.successResponse("announcement created " + announcementId);
     }
 
@@ -72,9 +80,13 @@ public class AnnouncementApi {
     @ApiOperation(value = "공지 글 수정", notes = "id에 해당하는 공지 글을 수정합니다.")
     @PatchMapping("/{id}")
     public SuccessResponse editAnnouncement(@PathVariable("id") Long id,
-        @RequestPart(value = "announcementReq") @Valid AnnouncementReq announcementReq,
-        @RequestPart(value = "picture", required = false) MultipartFile picture) {
-        announcementService.updateAnnouncement(id, announcementReq, picture);
+            @RequestPart(value = "announcementReq") @Valid AnnouncementReq announcementReq,
+            @RequestPart(value = "picture", required = false) MultipartFile picture) {
+        if (picture != null) {
+            announcementService.updateAnnouncement(id, announcementReq, picture);
+        } else {
+            announcementService.updateAnnouncement(id, announcementReq);
+        }
         return SuccessResponse.successResponse("update complete");
     }
 
