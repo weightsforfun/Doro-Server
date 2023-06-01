@@ -68,7 +68,7 @@ public class NotificationApi {
         return SuccessResponse.successResponse("Notification push complete");
     }
     @ApiOperation(value = "유저의 알림 읽음 처리", notes = "notificationId를 전달해서 해당 알림을 읽음처리 합니다.")
-    @PostMapping("/{notificationId}/read")
+    @PostMapping("/{notificationId}/doRead")
     public SuccessResponse findUserNotifications(@PathVariable("notificationId") Long notificationId) {
         notificationService.readNotification(notificationId);
         return SuccessResponse.successResponse("read Notification complete");
