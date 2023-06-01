@@ -7,6 +7,7 @@ import com.example.DoroServer.domain.notification.dto.NotificationDto;
 import com.example.DoroServer.domain.notification.entity.Notification;
 import com.example.DoroServer.domain.notification.entity.NotificationType;
 import com.example.DoroServer.domain.notification.repository.NotificationRepository;
+import com.example.DoroServer.domain.token.entity.Token;
 import com.example.DoroServer.domain.token.repository.TokenRepository;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.repository.UserRepository;
@@ -31,6 +32,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -100,13 +102,17 @@ public class NotificationService {
     // 모든 유저에게 푸쉬알림 발송 후 저장
     @Transactional
     public void sendNotificationToAll(NotificationContentReq notificationContentReq, NotificationType notificationType) {
-        List<User> users = userRepository.findAll();
+        List<User> users = userRepository.findAllWithTokens();
         if (!users.isEmpty()) {
             users.stream().forEach(user -> {
+                // 알림 저장
+                Long notificationId = saveNotification(notificationContentReq,notificationType);
+                userNotificationService.saveUserNotification(user.getId(), notificationId);
+
                 // 유저별로 알림 수신 동의 여부 체크
                 if (user.getNotificationAgreement()) {
                     // 동의했을 경우 보유한 모든 토큰에 알림 발송
-                    user.getTokens().stream().forEach(token -> {
+                    user.getTokens().forEach(token -> {
                         NotificationReq notificationReq = NotificationReq.builder()
                                 .targetToken(token.getToken())
                                 .title(notificationContentReq.getTitle())
@@ -114,10 +120,6 @@ public class NotificationService {
                                 .build();
                         sendMessageTo(notificationReq);
                     });
-
-                    // 알림 저장
-                    Long notificationId = saveNotification(notificationContentReq,notificationType);
-                    userNotificationService.saveUserNotification(user.getId(), notificationId);
                 }
             });
         }
@@ -128,12 +130,18 @@ public class NotificationService {
     public void sendNotificationsToSelectedUsers(NotificationContentReq notificationContentReq, NotificationType notificationType) {
         notificationContentReq.getUserIds().forEach(id ->
         {
-            User user = userRepository.findById(id).orElseThrow(() -> {
+            User user = userRepository.findByIdWithTokens(id).orElseThrow(() -> {
                         log.info("유저를 찾을 수 없습니다. id = {}", id);
                         throw new BaseException(Code.USER_NOT_FOUND);
                     }
             );
+            // 알림 저장
+            Long notificationId = saveNotification(notificationContentReq, NotificationType.NOTIFICATION);
+            userNotificationService.saveUserNotification(id, notificationId);
+
+            // 유저별로 알림 수신 동의 여부 체크
             if (user.getNotificationAgreement()) {
+                // 동의했을 경우 보유한 모든 토큰에 알림 발송
                 user.getTokens().stream()
                         .forEach(token -> {
                             NotificationReq notificationReq = NotificationReq.builder()
@@ -143,9 +151,6 @@ public class NotificationService {
                                     .build();
                             sendMessageTo(notificationReq);
                         });
-                // 알림 저장
-                Long notificationId = saveNotification(notificationContentReq, NotificationType.NOTIFICATION);
-                userNotificationService.saveUserNotification(id, notificationId);
             }
         });
     }
