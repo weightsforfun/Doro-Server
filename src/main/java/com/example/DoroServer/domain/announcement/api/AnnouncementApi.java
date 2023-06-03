@@ -59,12 +59,11 @@ public class AnnouncementApi {
 
         } else {
             announcementId = announcementService.createAnnouncement(announcementReq);
-
         }
         notificationService.sendNotificationToAll(NotificationContentReq.builder()
                 .title("새로운 공지가 올라왔습니다!")
                 .body(announcementReq.getTitle())
-                .build(), NotificationType.ANNOUNCEMENT);
+                .build(), NotificationType.ANNOUNCEMENT,announcementId);
         return SuccessResponse.successResponse("announcement created " + announcementId);
     }
 

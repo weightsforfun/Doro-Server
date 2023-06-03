@@ -1,6 +1,11 @@
 package com.example.DoroServer.domain.notification.service;
 
 import com.example.DoroServer.domain.notification.dto.NotificationContentReq;
+import com.example.DoroServer.domain.notification.dto.NotificationDto.Apns;
+import com.example.DoroServer.domain.notification.dto.NotificationDto.Aps;
+import com.example.DoroServer.domain.notification.dto.NotificationDto.Data;
+import com.example.DoroServer.domain.notification.dto.NotificationDto.Message;
+import com.example.DoroServer.domain.notification.dto.NotificationDto.Payload;
 import com.example.DoroServer.domain.notification.dto.NotificationRes;
 import com.example.DoroServer.domain.notification.dto.NotificationReq;
 import com.example.DoroServer.domain.notification.dto.NotificationDto;
@@ -23,6 +28,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -93,7 +100,8 @@ public class NotificationService {
 
     // 전달받은 title과 body로 알림을 저장하는 메소드
     @Transactional
-    public Long saveNotification(NotificationContentReq notificationContentReq,NotificationType notificationType) {
+    public Long saveNotification(NotificationContentReq notificationContentReq,
+            NotificationType notificationType) {
         Notification notification = notificationContentReq.toEntity(notificationType);
         notificationRepository.save(notification);
         return notification.getId();
@@ -101,25 +109,40 @@ public class NotificationService {
 
     // 모든 유저에게 푸쉬알림 발송 후 저장
     @Transactional
-    public void sendNotificationToAll(NotificationContentReq notificationContentReq, NotificationType notificationType) {
+    public void sendNotificationToAll(NotificationContentReq notificationContentReq,
+            NotificationType notificationType,Long announcementId) {
         List<User> users = userRepository.findAllWithTokens();
         if (!users.isEmpty()) {
             users.stream().forEach(user -> {
                 // 알림 저장
-                Long notificationId = saveNotification(notificationContentReq,notificationType);
+                Long notificationId = saveNotification(notificationContentReq, notificationType);
                 userNotificationService.saveUserNotification(user.getId(), notificationId);
 
                 // 유저별로 알림 수신 동의 여부 체크
                 if (user.getNotificationAgreement()) {
                     // 동의했을 경우 보유한 모든 토큰에 알림 발송
-                    user.getTokens().forEach(token -> {
-                        NotificationReq notificationReq = NotificationReq.builder()
-                                .targetToken(token.getToken())
-                                .title(notificationContentReq.getTitle())
-                                .body(notificationContentReq.getBody())
-                                .build();
-                        sendMessageTo(notificationReq);
-                    });
+                    if(notificationType == NotificationType.ANNOUNCEMENT){
+                        user.getTokens().stream().forEach(token -> {
+                            NotificationReq notificationReq = NotificationReq.builder()
+                                    .targetToken(token.getToken())
+                                    .title(notificationContentReq.getTitle())
+                                    .body(notificationContentReq.getBody())
+                                    .id(announcementId)
+                                    .build();
+                            sendMessageTo(notificationReq,notificationType);
+                        });
+                    } else if(notificationType == NotificationType.NOTIFICATION) {
+                        user.getTokens().stream().forEach(token -> {
+                            NotificationReq notificationReq = NotificationReq.builder()
+                                    .targetToken(token.getToken())
+                                    .title(notificationContentReq.getTitle())
+                                    .body(notificationContentReq.getBody())
+                                    .id(notificationId)
+                                    .build();
+                            sendMessageTo(notificationReq,notificationType);
+                        });
+                    }
+
                 }
             });
         }
@@ -127,7 +150,8 @@ public class NotificationService {
 
     // 선택한 유저에게 알림 전송
     @Transactional
-    public void sendNotificationsToSelectedUsers(NotificationContentReq notificationContentReq, NotificationType notificationType) {
+    public void sendNotificationsToSelectedUsers(NotificationContentReq notificationContentReq,
+            NotificationType notificationType) {
         notificationContentReq.getUserIds().forEach(id ->
         {
             User user = userRepository.findByIdWithTokens(id).orElseThrow(() -> {
@@ -136,7 +160,8 @@ public class NotificationService {
                     }
             );
             // 알림 저장
-            Long notificationId = saveNotification(notificationContentReq, NotificationType.NOTIFICATION);
+            Long notificationId = saveNotification(notificationContentReq,
+                    NotificationType.NOTIFICATION);
             userNotificationService.saveUserNotification(id, notificationId);
 
             // 유저별로 알림 수신 동의 여부 체크
@@ -148,8 +173,9 @@ public class NotificationService {
                                     .targetToken(token.getToken())
                                     .title(notificationContentReq.getTitle())
                                     .body(notificationContentReq.getBody())
+                                    .id(notificationId)
                                     .build();
-                            sendMessageTo(notificationReq);
+                            sendMessageTo(notificationReq,notificationType);
                         });
             }
         });
@@ -163,18 +189,22 @@ public class NotificationService {
                                 .targetToken(token.getToken())
                                 .title(title)
                                 .body(body)
+//                                .id(notificationId)
                                 .build();
-                        sendMessageTo(notificationReq);
+                        sendMessageTo(notificationReq,NotificationType.NOTIFICATION);
                     });
         }
     }
 
 
     // FCM 메시지를 보내는 메소드
-    public void sendMessageTo(NotificationReq notificationReq) {
+    public void sendMessageTo(NotificationReq notificationReq, NotificationType notificationType) {
         // FCM 메시지 생성
-        String message = makeMessage(notificationReq);
+        String message = makeMessage(notificationReq,notificationType);
+
+
         OkHttpClient httpClient = new OkHttpClient();
+
         RequestBody requestBody = RequestBody.create(message,
                 MediaType.get("application/json; charset=utf-8"));
 
@@ -187,20 +217,47 @@ public class NotificationService {
                     .addHeader(HttpHeaders.CONTENT_TYPE, "application/json; UTF-8")
                     .build();
 
-            // HTTP 요청 실행
-            httpClient.newCall(request).execute();
+            Response response = httpClient.newCall(request).execute();
+
+            // HTTP 요청 비동기 실행
+//            httpClient.newCall(request).enqueue(new Callback() {
+//                @Override
+//                public void onResponse(Call call, Response response) throws IOException {
+//                    // 응답을 받았을 때 처리 로직
+//                    int statusCode = response.code();
+//                    String responseData = response.body().string();
+////                    log.info("fcm response: {}",responseData);
+//
+//                    if(statusCode == 400 || statusCode == 404){
+//                        // todo : 만료된 토큰 삭제 하는데 기기가 꺼져있어 안보내질 경우 고려해야함
+//                    }
+//                    response.close();
+//                }
+//
+//                @Override
+//                public void onFailure(Call call, IOException e) {
+//                    // 요청이 실패했을 때 처리 로직
+//                    throw new BaseException(Code.FCM_NOTIFICATION_PUSH_FAIL);
+//                }
+//            });
+
         } catch (IOException e) {
             throw new BaseException(Code.NOTIFICATION_PUSH_FAIL);
         }
+
+        // 프로그램 종료 시에 httpClient 정리
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            httpClient.dispatcher().executorService().shutdown();
+        }));
     }
 
 
     // FCM 메시지를 생성하는 메소드
-    private String makeMessage(NotificationReq notificationReq) {
+    private String makeMessage(NotificationReq notificationReq,NotificationType notificationType) {
         NotificationDto fcmMessage =
                 NotificationDto.builder()
                         .message(
-                                NotificationDto.Message.builder()
+                                Message.builder()
                                         .token(notificationReq.getTargetToken())
                                         .notification(
                                                 NotificationDto.Notification.builder()
@@ -209,14 +266,18 @@ public class NotificationService {
                                                         .image(null)
                                                         .build())
                                         .apns(
-                                                NotificationDto.Apns.builder()
+                                                Apns.builder()
                                                         .payload(
-                                                                NotificationDto.Payload.builder()
-                                                                        .aps(NotificationDto.Aps.builder()
+                                                                Payload.builder()
+                                                                        .aps(Aps.builder()
                                                                                 .sound("default")
                                                                                 .build())
                                                                         .build())
                                                         .build())
+                                        .data(Data.builder()
+                                                .id(notificationReq.getId())
+                                                .notiType(notificationType.name())
+                                                .build())
                                         .build())
                         .validateOnly(false)
                         .build();
@@ -225,6 +286,7 @@ public class NotificationService {
 
         try {
             fcmMessageString = objectMapper.writeValueAsString(fcmMessage);
+            log.info("{}",fcmMessageString);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

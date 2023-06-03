@@ -60,7 +60,7 @@ public class NotificationApi {
             ) {
         if (notificationContentReq.getUserIds() == null || notificationContentReq.getUserIds().isEmpty()) {
             // 유저 ID 리스트가 비어 있으면 모든 사용자에게 알림 전송
-            notificationService.sendNotificationToAll(notificationContentReq, NotificationType.NOTIFICATION);
+            notificationService.sendNotificationToAll(notificationContentReq, NotificationType.NOTIFICATION,null);
         } else {
             // 유저 ID 리스트에 있는 사용자에게만 알림 전송
             notificationService.sendNotificationsToSelectedUsers(notificationContentReq, NotificationType.NOTIFICATION);

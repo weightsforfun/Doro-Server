@@ -46,6 +46,7 @@ public class NotificationDto {  // Fcm 서버에 보낼 객체
 
         private Notification notification;
         private String token;   // 전송할 대상 토큰
+        private Data data;
         private Apns apns;
     }
 
@@ -57,6 +58,14 @@ public class NotificationDto {  // Fcm 서버에 보낼 객체
         private String title;   // 알림 제목
         private String body;    // 알림 내용
         private String image; // 알림 표기 사진
+    }
+
+    @Builder
+    @AllArgsConstructor
+    @Getter
+    public static class Data {
+        private Long id;
+        private String notiType;
     }
 }
 
