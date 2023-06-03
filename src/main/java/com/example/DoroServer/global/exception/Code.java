@@ -63,7 +63,10 @@ public enum Code {
     FILE_DELETE_FAILED(HttpStatus.BAD_REQUEST, "S004", "파일 삭제 중 오류가 발생했습니다."),
 
     // UserNotification 관련 오류
-    USER_NOTIFICATION_NOT_FOUND(HttpStatus.BAD_REQUEST,"USERNOTI001","UserNotification을 찾을 수 없습니다.");
+    USER_NOTIFICATION_NOT_FOUND(HttpStatus.BAD_REQUEST,"USERNOTI001","UserNotification을 찾을 수 없습니다."),
+
+    // fcm 관련 오류
+    FCM_NOTIFICATION_PUSH_FAIL(HttpStatus.BAD_REQUEST,"FCM001","FCM 알림 전송에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
