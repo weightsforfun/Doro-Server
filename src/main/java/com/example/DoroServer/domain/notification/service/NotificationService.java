@@ -217,29 +217,27 @@ public class NotificationService {
                     .addHeader(HttpHeaders.CONTENT_TYPE, "application/json; UTF-8")
                     .build();
 
-            Response response = httpClient.newCall(request).execute();
-
             // HTTP 요청 비동기 실행
-//            httpClient.newCall(request).enqueue(new Callback() {
-//                @Override
-//                public void onResponse(Call call, Response response) throws IOException {
-//                    // 응답을 받았을 때 처리 로직
-//                    int statusCode = response.code();
-//                    String responseData = response.body().string();
-////                    log.info("fcm response: {}",responseData);
-//
-//                    if(statusCode == 400 || statusCode == 404){
-//                        // todo : 만료된 토큰 삭제 하는데 기기가 꺼져있어 안보내질 경우 고려해야함
-//                    }
-//                    response.close();
-//                }
-//
-//                @Override
-//                public void onFailure(Call call, IOException e) {
-//                    // 요청이 실패했을 때 처리 로직
-//                    throw new BaseException(Code.FCM_NOTIFICATION_PUSH_FAIL);
-//                }
-//            });
+            httpClient.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    // 응답을 받았을 때 처리 로직
+                    int statusCode = response.code();
+                    String responseData = response.body().string();
+                    log.info("fcm response: {}",responseData);
+
+                    if(statusCode == 400 || statusCode == 404){
+                        // todo : 만료된 토큰 삭제 하는데 기기가 꺼져있어 안보내질 경우 고려해야함
+                    }
+                    response.close();
+                }
+
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    // 요청이 실패했을 때 처리 로직
+                    throw new BaseException(Code.FCM_NOTIFICATION_PUSH_FAIL);
+                }
+            });
 
         } catch (IOException e) {
             throw new BaseException(Code.NOTIFICATION_PUSH_FAIL);
