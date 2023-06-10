@@ -5,7 +5,6 @@ import com.example.DoroServer.domain.user.dto.FindUserRes;
 import com.example.DoroServer.domain.user.dto.UpdateUserReq;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.entity.UserRole;
-import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.domain.user.service.UserService;
 import com.example.DoroServer.global.common.SuccessResponse;
 import com.example.DoroServer.global.exception.BaseException;
@@ -14,10 +13,10 @@ import io.swagger.annotations.Api;
 import java.util.List;
 import java.io.IOException;
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -88,5 +87,10 @@ public class UserApi {
         @RequestParam @NotNull int generation){
         String userName = userService.updateGeneration(id, generation);
         return SuccessResponse.successResponse(userName+"님 기수가 변경되었습니다.");
+    }
+
+    @Scheduled(cron = "0 0 0 * * *")
+    public void updateInActiveUser(){
+        userService.updateInactiveUser();
     }
 }
