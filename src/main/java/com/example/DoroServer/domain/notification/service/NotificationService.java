@@ -1,33 +1,35 @@
 package com.example.DoroServer.domain.notification.service;
 
 import com.example.DoroServer.domain.notification.dto.NotificationContentReq;
+import com.example.DoroServer.domain.notification.dto.NotificationDto.Apns;
+import com.example.DoroServer.domain.notification.dto.NotificationDto.Aps;
+import com.example.DoroServer.domain.notification.dto.NotificationDto.Data;
+import com.example.DoroServer.domain.notification.dto.NotificationDto.Message;
+import com.example.DoroServer.domain.notification.dto.NotificationDto.Payload;
 import com.example.DoroServer.domain.notification.dto.NotificationRes;
 import com.example.DoroServer.domain.notification.dto.NotificationReq;
 import com.example.DoroServer.domain.notification.dto.NotificationDto;
 import com.example.DoroServer.domain.notification.entity.Notification;
+import com.example.DoroServer.domain.notification.entity.NotificationType;
 import com.example.DoroServer.domain.notification.repository.NotificationRepository;
 import com.example.DoroServer.domain.token.entity.Token;
 import com.example.DoroServer.domain.token.repository.TokenRepository;
 import com.example.DoroServer.domain.user.entity.User;
-import com.example.DoroServer.domain.user.entity.UserRole;
 import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.domain.userNotification.entity.UserNotification;
-import com.example.DoroServer.domain.userNotification.repository.UserNotificationRepository;
+import com.example.DoroServer.domain.userNotification.service.UserNotificationService;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -35,9 +37,9 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,7 +54,7 @@ public class NotificationService {
 
     private final UserRepository userRepository;
 
-    private final UserNotificationRepository userNotificationRepository;
+    private final UserNotificationService userNotificationService;
 
     private final ObjectMapper objectMapper;
 
@@ -65,40 +67,30 @@ public class NotificationService {
             TokenRepository tokenRepository,
             ObjectMapper objectMapper,
             UserRepository userRepository,
-            UserNotificationRepository userNotificationRepository,
+            UserNotificationService userNotificationService,
             @Value("${api.url}") String apiUrl,
             @Value("${project.id}") String projectId) {
         this.notificationRepository = notificationRepository;
         this.tokenRepository = tokenRepository;
         this.objectMapper = objectMapper;
         this.userRepository = userRepository;
-        this.userNotificationRepository = userNotificationRepository;
+        this.userNotificationService = userNotificationService;
         this.API_URL = apiUrl;
         this.PROJECT_ID = projectId;
     }
 
-    // 공용 알림 전부를 조회하는 메소드
-    public List<NotificationRes> findPublicNotifications() {
-        List<NotificationRes> allNotification = notificationRepository.findAllPublicRes(true);
-        return allNotification;
-    }
-
     // 유저 개인의 알림 조회하는 메소드
-    public List<NotificationRes> findUserNotifications(Long userId) {
-        List<UserNotification> userNotifications = userNotificationRepository
-                .findUserNotificationsByUserId(userId);
+    public List<NotificationRes> findUserNotifications(Long userId, Pageable pageable) {
+        List<UserNotification> userNotifications = userNotificationService
+                .findUserNotificationsByUserId(userId, pageable);
 
-        // 알림 만료일 검증
-//        isNotificationValid(userNotifications);
-
-        return userNotifications.stream().map(un -> un.getNotification().toRes())
+        return userNotifications.stream()
+                .map(un -> un.getNotification().toRes())
                 .collect(Collectors.toList());
-
-
     }
 
     // id에 해당하는 알림을 조회하는 메소드
-    public NotificationRes findNotification(Long id) {
+    public NotificationRes findNotificationById(Long id) {
         Optional<Notification> notification = notificationRepository.findById(id);
         return notification.orElseThrow(() -> {
             log.info("Notification을 찾을 수 없습니다. id = {}", id);
@@ -106,50 +98,90 @@ public class NotificationService {
         }).toRes();
     }
 
-    // 전달받은 title과 body로 알림을 저장하는 메소드, isPublic을 통해 공용알림,개인알림 구분
+    // 전달받은 title과 body로 알림을 저장하는 메소드
     @Transactional
-    public Long saveNotification(NotificationContentReq notificationContentReq, Boolean isPublic) {
-        Notification notification = notificationContentReq.toEntity(isPublic);
+    public Long saveNotification(NotificationContentReq notificationContentReq,
+            NotificationType notificationType) {
+        Notification notification = notificationContentReq.toEntity(notificationType);
         notificationRepository.save(notification);
         return notification.getId();
     }
 
-    // 모든 토큰으로 푸쉬알림 발송
-    public void sendNotificationToAll(NotificationContentReq notificationContentReq) {
-        List<User> users = userRepository.findAll();
+    // 모든 유저에게 푸쉬알림 발송 후 저장
+    @Transactional
+    public void sendNotificationToAll(NotificationContentReq notificationContentReq,
+            NotificationType notificationType,Long announcementId) {
+        List<User> users = userRepository.findAllWithTokens();
         if (!users.isEmpty()) {
             users.stream().forEach(user -> {
+                // 알림 저장
+                Long notificationId = saveNotification(notificationContentReq, notificationType);
+                userNotificationService.saveUserNotification(user.getId(), notificationId);
+
                 // 유저별로 알림 수신 동의 여부 체크
                 if (user.getNotificationAgreement()) {
                     // 동의했을 경우 보유한 모든 토큰에 알림 발송
-                    user.getTokens().stream().forEach(token -> {
-                        NotificationReq notificationReq = NotificationReq.builder()
-                                .targetToken(token.getToken())
-                                .title(notificationContentReq.getTitle())
-                                .body(notificationContentReq.getBody())
-                                .build();
-                        sendMessageTo(notificationReq);
-                    });
+                    if(notificationType == NotificationType.ANNOUNCEMENT){
+                        user.getTokens().stream().forEach(token -> {
+                            NotificationReq notificationReq = NotificationReq.builder()
+                                    .targetToken(token.getToken())
+                                    .title(notificationContentReq.getTitle())
+                                    .body(notificationContentReq.getBody())
+                                    .id(announcementId)
+                                    .build();
+                            sendMessageTo(notificationReq,notificationType);
+                        });
+                    } else if(notificationType == NotificationType.NOTIFICATION) {
+                        user.getTokens().stream().forEach(token -> {
+                            NotificationReq notificationReq = NotificationReq.builder()
+                                    .targetToken(token.getToken())
+                                    .title(notificationContentReq.getTitle())
+                                    .body(notificationContentReq.getBody())
+                                    .id(notificationId)
+                                    .build();
+                            sendMessageTo(notificationReq,notificationType);
+                        });
+                    }
+
                 }
             });
         }
     }
 
-    // 유저에게 알림 전송
-    public void sendMessageToUser(User user, NotificationContentReq notificationContentReq) {
-        if (user.getNotificationAgreement()) {
-            user.getTokens().stream()
-                    .forEach(token -> {
-                        NotificationReq notificationReq = NotificationReq.builder()
-                                .targetToken(token.getToken())
-                                .title(notificationContentReq.getTitle())
-                                .body(notificationContentReq.getBody())
-                                .build();
-                        sendMessageTo(notificationReq);
-                    });
-        }
+    // 선택한 유저에게 알림 전송
+    @Transactional
+    public void sendNotificationsToSelectedUsers(NotificationContentReq notificationContentReq,
+            NotificationType notificationType) {
+        notificationContentReq.getUserIds().forEach(id ->
+        {
+            User user = userRepository.findByIdWithTokens(id).orElseThrow(() -> {
+                        log.info("유저를 찾을 수 없습니다. id = {}", id);
+                        throw new BaseException(Code.USER_NOT_FOUND);
+                    }
+            );
+            // 알림 저장
+            Long notificationId = saveNotification(notificationContentReq,
+                    NotificationType.NOTIFICATION);
+            userNotificationService.saveUserNotification(id, notificationId);
+
+            // 유저별로 알림 수신 동의 여부 체크
+            if (user.getNotificationAgreement()) {
+                // 동의했을 경우 보유한 모든 토큰에 알림 발송
+                user.getTokens().stream()
+                        .forEach(token -> {
+                            NotificationReq notificationReq = NotificationReq.builder()
+                                    .targetToken(token.getToken())
+                                    .title(notificationContentReq.getTitle())
+                                    .body(notificationContentReq.getBody())
+                                    .id(notificationId)
+                                    .build();
+                            sendMessageTo(notificationReq,notificationType);
+                        });
+            }
+        });
     }
-    public void sendFixedMessageToUser(User user, String title,String body) {
+
+    public void sendFixedMessageToUser(User user, String title, String body) {
         if (user.getNotificationAgreement()) {
             user.getTokens().stream()
                     .forEach(token -> {
@@ -157,18 +189,22 @@ public class NotificationService {
                                 .targetToken(token.getToken())
                                 .title(title)
                                 .body(body)
+//                                .id(notificationId)
                                 .build();
-                        sendMessageTo(notificationReq);
+                        sendMessageTo(notificationReq,NotificationType.NOTIFICATION);
                     });
         }
     }
 
 
     // FCM 메시지를 보내는 메소드
-    public void sendMessageTo(NotificationReq notificationReq) {
+    public void sendMessageTo(NotificationReq notificationReq, NotificationType notificationType) {
         // FCM 메시지 생성
-        String message = makeMessage(notificationReq);
+        String message = makeMessage(notificationReq,notificationType);
+
+
         OkHttpClient httpClient = new OkHttpClient();
+
         RequestBody requestBody = RequestBody.create(message,
                 MediaType.get("application/json; charset=utf-8"));
 
@@ -181,20 +217,45 @@ public class NotificationService {
                     .addHeader(HttpHeaders.CONTENT_TYPE, "application/json; UTF-8")
                     .build();
 
-            // HTTP 요청 실행
-            Response response = httpClient.newCall(request).execute();
+            // HTTP 요청 비동기 실행
+            httpClient.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    // 응답을 받았을 때 처리 로직
+                    int statusCode = response.code();
+                    String responseData = response.body().string();
+                    log.info("fcm response: {}",responseData);
+
+                    if(statusCode == 400 || statusCode == 404){
+                        // todo : 만료된 토큰 삭제 하는데 기기가 꺼져있어 안보내질 경우 고려해야함
+                    }
+                    response.close();
+                }
+
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    // 요청이 실패했을 때 처리 로직
+                    throw new BaseException(Code.FCM_NOTIFICATION_PUSH_FAIL);
+                }
+            });
+
         } catch (IOException e) {
             throw new BaseException(Code.NOTIFICATION_PUSH_FAIL);
         }
+
+        // 프로그램 종료 시에 httpClient 정리
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            httpClient.dispatcher().executorService().shutdown();
+        }));
     }
 
 
     // FCM 메시지를 생성하는 메소드
-    private String makeMessage(NotificationReq notificationReq) {
+    private String makeMessage(NotificationReq notificationReq,NotificationType notificationType) {
         NotificationDto fcmMessage =
                 NotificationDto.builder()
                         .message(
-                                NotificationDto.Message.builder()
+                                Message.builder()
                                         .token(notificationReq.getTargetToken())
                                         .notification(
                                                 NotificationDto.Notification.builder()
@@ -203,14 +264,18 @@ public class NotificationService {
                                                         .image(null)
                                                         .build())
                                         .apns(
-                                                NotificationDto.Apns.builder()
+                                                Apns.builder()
                                                         .payload(
-                                                                NotificationDto.Payload.builder()
-                                                                        .aps(NotificationDto.Aps.builder()
+                                                                Payload.builder()
+                                                                        .aps(Aps.builder()
                                                                                 .sound("default")
                                                                                 .build())
                                                                         .build())
                                                         .build())
+                                        .data(Data.builder()
+                                                .id(notificationReq.getId())
+                                                .notiType(notificationType.name())
+                                                .build())
                                         .build())
                         .validateOnly(false)
                         .build();
@@ -219,6 +284,7 @@ public class NotificationService {
 
         try {
             fcmMessageString = objectMapper.writeValueAsString(fcmMessage);
+            log.info("{}",fcmMessageString);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -240,13 +306,17 @@ public class NotificationService {
         googleCredentials.refreshIfExpired();
         return googleCredentials.getAccessToken().getTokenValue();
     }
+
+    // 확인한 알림 읽음 처리
     @Transactional
-    public void isNotificationValid(List<UserNotification> userNotifications) {
-        userNotifications.stream().forEach(un -> {
-            if (un.getExpirationPeriod().isBefore(LocalDateTime.now())) {
-                userNotificationRepository.deleteById(un.getId());
-            }
+    public void readNotification(Long id) {
+        Optional<Notification> findNotification = notificationRepository.findById(id);
+        Notification notification = findNotification.orElseThrow(() -> {
+            log.info("Notification을 찾을 수 없습니다. id = {}", id);
+            throw new BaseException(Code.NOTIFICATION_NOT_FOUND);
         });
+        notification.isReadTrue();
     }
+
 }
 
