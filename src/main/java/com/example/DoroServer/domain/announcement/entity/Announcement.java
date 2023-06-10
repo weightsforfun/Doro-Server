@@ -30,6 +30,9 @@ public class Announcement extends BaseEntity {
     @NotBlank
     private String body; // 공지 내용
 
+    @NotBlank
+    private String writer; // 공지 작성자 이름
+
     private String picture; // 공지 첨부 사진 - 업로드 사이즈 제한 추가 필요
 
     // Announcement를 AnnouncementRes 객체로 변환하는 메소드
@@ -38,6 +41,7 @@ public class Announcement extends BaseEntity {
                 .id(id)
                 .title(title)
                 .body(body)
+                .writer(writer)
                 .picture(picture)
                 .createdAt(getCreatedAt())
                 .lastModifiedAt(getLastModifiedAt())

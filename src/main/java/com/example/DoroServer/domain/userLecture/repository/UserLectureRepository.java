@@ -48,4 +48,5 @@ public interface UserLectureRepository extends JpaRepository<UserLecture, Long> 
     );
 
 
+
 }

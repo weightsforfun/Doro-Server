@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -59,8 +60,19 @@ public class AnnouncementService {
         Announcement announcement = Announcement.builder()
             .title(announcementReq.getTitle())
             .body(announcementReq.getBody())
+            .writer(announcementReq.getWriter())
             .picture(imgUrl)
             .build();
+        announcementRepository.save(announcement);
+        return announcement.getId();
+    }
+    @Transactional
+    public Long createAnnouncement(AnnouncementReq announcementReq) {
+        Announcement announcement = Announcement.builder()
+                .title(announcementReq.getTitle())
+                .body(announcementReq.getBody())
+                .writer(announcementReq.getWriter())
+                .build();
         announcementRepository.save(announcement);
         return announcement.getId();
     }
@@ -84,6 +96,20 @@ public class AnnouncementService {
         } catch (IOException e) {
             throw new BaseException(Code.UPLOAD_FAILED);
         }
+        announcementRepository.updateAnnouncementImgById(id, imgUrl);
+        updateAnnouncement.update(announcementReq);
+    }
+    @Transactional
+    public void updateAnnouncement(Long id, AnnouncementReq announcementReq) {
+        Optional<Announcement> announcement = announcementRepository.findById(id);
+        Announcement updateAnnouncement = announcement.orElseThrow(() -> {
+            log.info("update 하려는 Announcement를 찾을 수 없습니다. id = {}", id);
+            return new BaseException(Code.ANNOUNCEMENT_NOT_FOUND);
+        });
+        if(updateAnnouncement.getPicture() != null){
+            awsS3Service.deleteImage(updateAnnouncement.getPicture());
+        }
+        String imgUrl = null;
         announcementRepository.updateAnnouncementImgById(id, imgUrl);
         updateAnnouncement.update(announcementReq);
     }

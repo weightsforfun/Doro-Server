@@ -10,10 +10,12 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import lombok.Getter;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Getter
 public class JoinReq {
+
     @NotBlank
     @Pattern(regexp = "^[A-Za-z0-9]{4,20}$", message = "영문, 숫자 포함 4~20자로 입력해주세요")
     private String account;
@@ -61,26 +63,31 @@ public class JoinReq {
     private String doroAuth;
 
     private String profileImg;
+    private Boolean notificationAgreement;
 
-    public User toUserEntity(){
+    private Boolean isActive;
+
+    public User toUserEntity() {
         return User.builder()
-            .account(account)
-            .password(password)
-            .name(name)
-            .birth(birth)
-            .gender(gender)
-            .phone(phone)
-            .degree(
-                Degree.builder()
-                    .school(school)
-                    .studentId(studentId)
-                    .major(major)
-                    .studentStatus(studentStatus)
-                    .build()
-            )
-            .generation(generation)
-            .role(role)
-            .profileImg(profileImg)
-            .build();
+                .account(account)
+                .password(password)
+                .name(name)
+                .birth(birth)
+                .gender(gender)
+                .phone(phone)
+                .degree(
+                        Degree.builder()
+                                .school(school)
+                                .studentId(studentId)
+                                .major(major)
+                                .studentStatus(studentStatus)
+                                .build()
+                )
+                .generation(generation)
+                .role(role)
+                .profileImg(profileImg)
+                .notificationAgreement(notificationAgreement)
+                .isActive(true)
+                .build();
     }
 }

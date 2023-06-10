@@ -11,9 +11,9 @@ import com.example.DoroServer.global.exception.Code;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +28,9 @@ public class UserNotificationService {
     private final NotificationRepository notificationRepository;
 
 
+    public List<UserNotification> findUserNotificationsByUserId(Long userId, Pageable pageable) {
+        return userNotificationRepository.findUserNotificationsByUserId(userId,pageable);
+    }
 
     @Transactional
     public Long saveUserNotification(Long userId, Long notificationId) {
