@@ -10,6 +10,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import lombok.Getter;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Getter
@@ -64,6 +65,8 @@ public class JoinReq {
     private String profileImg;
     private Boolean notificationAgreement;
 
+    private Boolean isActive;
+
     public User toUserEntity() {
         return User.builder()
                 .account(account)
@@ -84,6 +87,7 @@ public class JoinReq {
                 .role(role)
                 .profileImg(profileImg)
                 .notificationAgreement(notificationAgreement)
+                .isActive(true)
                 .build();
     }
 }
