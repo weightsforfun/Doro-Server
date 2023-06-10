@@ -26,8 +26,8 @@ public class Notification extends BaseEntity {
     @NotBlank(message = "알림 내용을 입력하세요")
     private String body; // 알림 내용
 
-    @NotNull
-    private Boolean isPublic; // 전체 전송 메세지
+    @Enumerated(EnumType.STRING)
+    private NotificationType notificationType;
 
     private Boolean isRead; // 알림 읽음 유무
 
@@ -37,6 +37,7 @@ public class Notification extends BaseEntity {
                 .id(id)
                 .title(title)
                 .body(body)
+                .notificationType(notificationType)
                 .isRead(isRead)
                 .createdAt(getCreatedAt())
                 .lastModifiedAt(getLastModifiedAt())
