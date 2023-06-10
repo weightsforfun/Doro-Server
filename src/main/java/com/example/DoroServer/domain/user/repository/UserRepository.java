@@ -1,6 +1,8 @@
 package com.example.DoroServer.domain.user.repository;
 
 import com.example.DoroServer.domain.user.entity.User;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
@@ -23,4 +25,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying
     @Query(value = "update User u set u.profileImg = :profile_img where u.id = :userId")
     void updateProfileImgById(@Param("userId") Long userId, @Param("profile_img") String profile_img);
+
+    @Query("select u from User u where (u.lastModifiedAt < :time) and u.isActive = :isActive")
+    List<User> findBylastModifiedAtBeforeAndStatusEquals(@Param("time") LocalDateTime time, @Param("isActive") Boolean isActive);
 }
