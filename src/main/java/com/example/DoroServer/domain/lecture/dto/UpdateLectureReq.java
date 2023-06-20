@@ -1,6 +1,7 @@
 package com.example.DoroServer.domain.lecture.dto;
 
 import com.example.DoroServer.domain.lecture.entity.LectureDate;
+import com.example.DoroServer.domain.lecture.entity.LectureStatus;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -32,5 +33,6 @@ public class UpdateLectureReq {
     private String time; // 시간
     private List<LocalDateTime> lectureDates = new ArrayList<>(); // 강의 날짜
     private LectureDate lectureDate;
+    private LectureStatus lectureStatus;
 
 }

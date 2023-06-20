@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -76,6 +77,9 @@ public class User extends BaseEntity implements UserDetails {
 
     private Boolean notificationAgreement; // 사용자 알림 동의 여부
 
+    @ColumnDefault("true")
+    private Boolean isActive;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> collect = new ArrayList<GrantedAuthority>();
@@ -126,6 +130,10 @@ public class User extends BaseEntity implements UserDetails {
 
     public void updatePhone(String phone) {
         this.phone = phone;
+    }
+
+    public void toInactive(){
+        this.isActive = false;
     }
 
     public void addToken(Token token) {

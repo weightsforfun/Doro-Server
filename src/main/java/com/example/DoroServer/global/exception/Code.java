@@ -43,6 +43,7 @@ public enum Code {
 
     // 신청 강사 관련 오류
     TUTOR_NOT_FOUND(HttpStatus.BAD_REQUEST,"TUTOR001","신청하지 않은 강사입니다."),
+    ALREADY_EXIST(HttpStatus.BAD_REQUEST,"TUTOR002","이미 신청하셨습니다"),
 
     // 알림톡 관련 오류 M001, M002...
     MESSAGE_SEND_FAILED(HttpStatus.BAD_REQUEST, "M001", "메시지 전송이 실패했습니다. 올바른 번호인지 확인하세요."),
@@ -62,7 +63,10 @@ public enum Code {
     FILE_DELETE_FAILED(HttpStatus.BAD_REQUEST, "S004", "파일 삭제 중 오류가 발생했습니다."),
 
     // UserNotification 관련 오류
-    USER_NOTIFICATION_NOT_FOUND(HttpStatus.BAD_REQUEST,"USERNOTI001","UserNotification을 찾을 수 없습니다.");
+    USER_NOTIFICATION_NOT_FOUND(HttpStatus.BAD_REQUEST,"USERNOTI001","UserNotification을 찾을 수 없습니다."),
+
+    // fcm 관련 오류
+    FCM_NOTIFICATION_PUSH_FAIL(HttpStatus.BAD_REQUEST,"FCM001","FCM 알림 전송에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

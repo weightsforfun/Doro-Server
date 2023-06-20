@@ -16,6 +16,7 @@ import com.example.DoroServer.domain.lectureContent.repository.LectureContentRep
 import com.example.DoroServer.global.common.ErrorResponse;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -85,6 +86,12 @@ public class LectureService {
     public Long updateLecture(Long id, UpdateLectureReq updateLectureReq) {
         Lecture lecture = lectureRepository.findById(id).orElseThrow(() -> new BaseException(Code.LECTURE_NOT_FOUND));
         modelMapper.map(updateLectureReq,lecture);
+        lecture.getLectureDates().clear();
+        List<LocalDateTime> newLectureDates = updateLectureReq.getLectureDates();
+        for (LocalDateTime newLectureDate : newLectureDates) {
+            lecture.getLectureDates().add(newLectureDate);
+        }
+
         return id;
     }
 
