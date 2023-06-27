@@ -17,4 +17,8 @@ public interface UserService {
     List<FindAllUsersRes> findAllUsers();
 
     FindUserRes findUser(Long id);
+
+    String updateGeneration(Long id, int generation);
+
+    void updateInactiveUser();
 }

@@ -9,7 +9,4 @@ import org.springframework.data.repository.query.Param;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-    // NotificationRes 객체 모두를 직접 조회하는 메서드
-    @Query("select new com.example.DoroServer.domain.notification.dto.NotificationRes(n.id,n.title,n.body,n.isRead,n.createdAt,n.lastModifiedAt) from Notification n where n.isPublic = :isPublic")
-    List<NotificationRes> findAllPublicRes(@Param("isPublic") Boolean isPublic);
 }

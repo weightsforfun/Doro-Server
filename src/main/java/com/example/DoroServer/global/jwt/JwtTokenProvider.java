@@ -1,9 +1,13 @@
 package com.example.DoroServer.global.jwt;
 
+import static com.example.DoroServer.global.common.Constants.ACCESS_TOKEN_PREFIX;
+import static com.example.DoroServer.global.common.Constants.AUTHORIZATION_HEADER;
+
 import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.global.exception.Code;
 import com.example.DoroServer.global.exception.JwtAuthenticationException;
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.SecurityException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +32,7 @@ import java.util.List;
 @Slf4j
 @PropertySource("classpath:/jwt.properties")
 public class JwtTokenProvider {
-    private static final String AUTHORIZATION_HEADER = "Authorization";
+
     private final CustomUserDetailsService customUserDetailsService;
     private final UserRepository userRepository;
     private String secretKey;
@@ -55,8 +59,9 @@ public class JwtTokenProvider {
     }
 
 
-    public String createAccessToken(String account, Collection<? extends GrantedAuthority> roles) {
+    public String createAccessToken(String account, long idx, Collection<? extends GrantedAuthority> roles) {
         Claims claims = Jwts.claims().setSubject(account); // sub: account 형태로 저장
+        claims.put("id", idx);
         claims.put("roles", roles);
         Date now = new Date();
         return Jwts.builder()
@@ -86,7 +91,13 @@ public class JwtTokenProvider {
 
     //토큰에서 회원 정보 추출
     private String getAccount(String token) {
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
+        try {
+            return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody()
+                .getSubject();
+        }catch (ExpiredJwtException e){
+            log.info("AccessToken 만료 시 재발급 = {}", e.getClaims().toString());
+            return e.getClaims().getSubject();
+        }
     }
 
     // 토큰의 유효성, 만료일자 확인
@@ -94,20 +105,18 @@ public class JwtTokenProvider {
         try {
             Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
             return !claims.getBody().getExpiration().before(new Date());
-        }catch(io.jsonwebtoken.security.SecurityException | MalformedJwtException e){
+        }catch(SecurityException | MalformedJwtException | IllegalArgumentException e){
             throw new JwtAuthenticationException(Code.JWT_BAD_REQUEST);
         }catch(ExpiredJwtException e){
             throw new JwtAuthenticationException(Code.JWT_TOKEN_EXPIRED);
         }catch(UnsupportedJwtException e){
             throw new JwtAuthenticationException(Code.JWT_UNSUPPORTED_TOKEN);
-        }catch(IllegalArgumentException e){
-            throw new JwtAuthenticationException(Code.JWT_BAD_REQUEST);
         }
     }
 
     public String resolveToken(HttpServletRequest request){
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
-        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")){
+        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith(ACCESS_TOKEN_PREFIX)){
             return bearerToken.substring(7);
         }
         return null;

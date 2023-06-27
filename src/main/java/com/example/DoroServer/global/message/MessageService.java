@@ -1,7 +1,7 @@
 package com.example.DoroServer.global.message;
 
-import com.example.DoroServer.global.auth.dto.SendAuthNumReq;
-import com.example.DoroServer.global.auth.dto.VerifyAuthNumReq;
+import com.example.DoroServer.global.message.dto.SendAuthNumReq;
+import com.example.DoroServer.global.message.dto.VerifyAuthNumReq;
 
 public interface MessageService {
 

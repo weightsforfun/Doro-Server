@@ -16,6 +16,8 @@ public class AnnouncementRes {  // 공지 조회 후 전달하는 객체
 
     private String body; // 공지 내용
 
+    private String writer; // 공지 작성자
+
     private String  picture; // 공지 첨부 사진 - 업로드 사이즈 제한 추가 필요
 
     private LocalDateTime createdAt; // 공지 생성 시간
