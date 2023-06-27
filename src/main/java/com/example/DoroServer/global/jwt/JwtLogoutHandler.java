@@ -3,6 +3,7 @@ package com.example.DoroServer.global.jwt;
 import static com.example.DoroServer.global.common.Constants.AUTHORIZATION_HEADER;
 import static com.example.DoroServer.global.common.Constants.REDIS_REFRESH_TOKEN_PREFIX;
 
+import com.example.DoroServer.domain.token.service.TokenService;
 import com.example.DoroServer.global.common.SuccessResponse;
 import com.example.DoroServer.global.exception.Code;
 import com.example.DoroServer.global.exception.JwtAuthenticationException;
@@ -23,6 +24,7 @@ public class JwtLogoutHandler implements LogoutHandler {
 
     private final JwtTokenProvider tokenProvider;
     private final RedisService redisService;
+    private final TokenService tokenService;
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response,
@@ -41,5 +43,11 @@ public class JwtLogoutHandler implements LogoutHandler {
         }
         Long expiration = tokenProvider.getExpiration(accessToken);
         redisService.setValues(accessToken, "logout", Duration.ofMillis(expiration));
+
+        String fcmToken = request.getHeader("fcmToken");
+        if (fcmToken != null) {
+            Long userId = Long.valueOf(tokenProvider.getUserId(accessToken));
+            tokenService.deleteToken(userId, fcmToken);
+        }
     }
 }

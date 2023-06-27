@@ -3,6 +3,7 @@ package com.example.DoroServer.global.auth;
 import static com.example.DoroServer.global.common.Constants.AUTHORIZATION_HEADER;
 import static com.example.DoroServer.global.common.Constants.REDIS_REFRESH_TOKEN_PREFIX;
 
+import com.example.DoroServer.domain.token.service.TokenService;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.global.auth.dto.ChangePasswordReq;
 import com.example.DoroServer.global.auth.dto.JoinReq;
@@ -48,6 +49,7 @@ public class AuthController {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final CustomUserDetailsService customUserDetailsService;
     private final RedisService redisService;
+    private final TokenService tokenService;
 
     @Operation(summary = "001_01", description = "회원가입")
     @PostMapping("/join")
@@ -60,6 +62,7 @@ public class AuthController {
     @Operation(summary = "001_02", description = "로그인")
     @PostMapping("/login")
     public ResponseEntity<?> login (@RequestBody @Valid LoginReq loginReq,
+                                    @RequestHeader(required = false) String fcmToken,
                                     @RequestHeader("User-Agent") String userAgent){
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
             loginReq.getAccount(), loginReq.getPassword());
@@ -72,6 +75,10 @@ public class AuthController {
 
         redisService.setValues(REDIS_REFRESH_TOKEN_PREFIX + loginReq.getAccount() + userAgent, refreshToken, Duration.ofDays(60));
 
+        if(fcmToken != null) {
+            Long userId = Long.valueOf(tokenProvider.getUserId(accessToken));
+            tokenService.saveToken(userId, fcmToken);
+        }
         return ResponseEntity.ok()
             .headers(httpHeaders)
             .body(refreshToken);
