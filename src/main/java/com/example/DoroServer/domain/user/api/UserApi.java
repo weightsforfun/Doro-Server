@@ -12,6 +12,7 @@ import com.example.DoroServer.global.exception.Code;
 import io.swagger.annotations.Api;
 import java.util.List;
 import java.io.IOException;
+import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -92,5 +93,13 @@ public class UserApi {
     @Scheduled(cron = "0 0 0 * * *")
     public void updateInActiveUser(){
         userService.updateInactiveUser();
+    }
+    @PatchMapping("/{id}/notification-settings")
+    public SuccessResponse<String> updateNotificationAgreement(
+            @PathVariable("id") Long id,
+            @RequestBody Map<String, Boolean> notificationAgreement
+    ){
+        userService.updateNotificationAgreement(id, notificationAgreement);
+        return SuccessResponse.successResponse("알림 동의 여부가 변경되었습니다.");
     }
 }
