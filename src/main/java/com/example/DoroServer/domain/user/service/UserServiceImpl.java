@@ -3,12 +3,14 @@ package com.example.DoroServer.domain.user.service;
 import static com.example.DoroServer.global.common.Constants.REDIS_MESSAGE_PREFIX.UPDATE;
 import static com.example.DoroServer.global.common.Constants.VERIFIED_CODE;
 
+import com.example.DoroServer.domain.token.service.TokenService;
 import com.example.DoroServer.domain.user.dto.FindAllUsersRes;
 import com.example.DoroServer.domain.user.dto.FindUserRes;
 import com.example.DoroServer.domain.user.dto.UpdateUserReq;
 import com.example.DoroServer.domain.user.dto.UserMapper;
 import com.example.DoroServer.domain.user.entity.Degree;
 import com.example.DoroServer.domain.user.entity.User;
+import com.example.DoroServer.domain.user.entity.UserRole;
 import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
@@ -16,9 +18,11 @@ import com.example.DoroServer.global.jwt.RedisService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import com.example.DoroServer.global.s3.AwsS3Service;
 import java.io.IOException;
+import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -104,4 +108,13 @@ public class UserServiceImpl implements UserService{
             String imgUrl = awsS3Service.upload(multipartFile,"profile");
             userRepository.updateProfileImgById(user.getId(), imgUrl);
     }
+
+    public Long updateNotificationAgreement(Long id, Map<String, Boolean> notificationAgreement) {
+        User user = userRepository.findById(id)
+                .orElseThrow(()-> new BaseException(Code.USER_NOT_FOUND));
+        Boolean agreement = notificationAgreement.getOrDefault("agreement",false);
+        user.updateNotificationAgreement(agreement);
+        return id;
+    }
+
 }

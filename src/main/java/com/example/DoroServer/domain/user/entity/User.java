@@ -140,4 +140,8 @@ public class User extends BaseEntity implements UserDetails {
         tokens.add(token);
         token.addUser(this);
     }
+
+    public void updateNotificationAgreement(Boolean agreement) {
+        this.notificationAgreement = agreement;
+    }
 }

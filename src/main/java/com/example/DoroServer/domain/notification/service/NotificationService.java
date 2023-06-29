@@ -224,7 +224,7 @@ public class NotificationService {
                     // 응답을 받았을 때 처리 로직
                     int statusCode = response.code();
                     String responseData = response.body().string();
-                    log.info("fcm response: {}",responseData);
+//                    log.info("fcm response: {}",responseData);
 
                     if(statusCode == 400 || statusCode == 404){
                         // todo : 만료된 토큰 삭제 하는데 기기가 꺼져있어 안보내질 경우 고려해야함
@@ -284,7 +284,7 @@ public class NotificationService {
 
         try {
             fcmMessageString = objectMapper.writeValueAsString(fcmMessage);
-            log.info("{}",fcmMessageString);
+//            log.info("{}",fcmMessageString);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
