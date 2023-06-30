@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/lectures")
 @RequiredArgsConstructor
@@ -27,8 +29,6 @@ public class LectureApi {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
     ) {
-
-
         PageRequest pageRequest = PageRequest.of(page,size);
         List<FindAllLecturesRes> allLectures = lectureService.findAllLectures(findAllLecturesCond,
                 pageRequest);
@@ -36,7 +36,7 @@ public class LectureApi {
     }
 
     @PostMapping()
-    public SuccessResponse createLecture(@RequestBody CreateLectureReq createLectureReq) {
+    public SuccessResponse createLecture(@RequestBody @Valid CreateLectureReq createLectureReq) {
         Long lectureId = lectureService.createLecture(createLectureReq);
         return SuccessResponse.successResponse(
                 "lecture created"
@@ -53,7 +53,7 @@ public class LectureApi {
     @PatchMapping("/{id}")
     public SuccessResponse updateLecture(
             @PathVariable("id") Long id,
-            @RequestBody UpdateLectureReq updateLectureReq
+            @RequestBody @Valid UpdateLectureReq updateLectureReq
     ) {
         Long lectureId = lectureService.updateLecture(id, updateLectureReq);
         return SuccessResponse.successResponse(lectureId + "th lecture patched");
