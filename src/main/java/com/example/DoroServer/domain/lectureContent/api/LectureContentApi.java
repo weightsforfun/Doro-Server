@@ -6,6 +6,8 @@ import com.example.DoroServer.domain.lectureContent.dto.UpdateLectureContentReq;
 import com.example.DoroServer.domain.lectureContent.service.LectureContentService;
 import com.example.DoroServer.global.common.SuccessResponse;
 import java.util.List;
+
+import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-
+@Api(tags = "강의 자료")
 @RestController
 @RequestMapping("/lecture-contents")
 @RequiredArgsConstructor

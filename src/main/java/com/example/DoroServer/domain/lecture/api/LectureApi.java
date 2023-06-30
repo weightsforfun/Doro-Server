@@ -8,6 +8,9 @@ import com.example.DoroServer.domain.lecture.dto.UpdateLectureReq;
 import com.example.DoroServer.domain.lecture.service.LectureService;
 import com.example.DoroServer.global.common.SuccessResponse;
 import java.util.List;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+@Api(tags = "강의")
 @RestController
 @RequestMapping("/lectures")
 @RequiredArgsConstructor
@@ -22,7 +26,7 @@ import javax.validation.Valid;
 public class LectureApi {
 
     private final LectureService lectureService;
-
+    @ApiOperation(value = "강의 조회",notes = "모든 강의 조회  lecture content 먼저 만들고 여기에 넣어줘야 정삭적으로 만들어집니다.")
     @GetMapping()
     public SuccessResponse findAllLectures(
             @ModelAttribute("findAllLecturesCond") FindAllLecturesCond findAllLecturesCond,
