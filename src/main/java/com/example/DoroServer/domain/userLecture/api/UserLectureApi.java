@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController()
 @RequestMapping("/users-lectures")
 @RequiredArgsConstructor
@@ -36,7 +38,7 @@ public class UserLectureApi {
     //이미 신청한 user  일시 예외 출력
     public SuccessResponse createTutor(
             @PathVariable("id") Long id,
-            @RequestBody CreateTutorReq createTutorReq) {
+            @RequestBody @Valid CreateTutorReq createTutorReq) {
         Long userLectureId = userLectureService.createTutor(id, createTutorReq );
 
         return SuccessResponse.successResponse(userLectureId + "is created");
@@ -45,7 +47,7 @@ public class UserLectureApi {
     @PatchMapping("/lectures/{id}")
     public SuccessResponse selectTutor(
             @PathVariable("id") Long id,
-            @RequestBody SelectTutorReq selectTutorReq) {
+            @RequestBody @Valid SelectTutorReq selectTutorReq) {
         String result = userLectureService.selectTutor(id, selectTutorReq);
         return SuccessResponse.successResponse("change to"+result);
     }
