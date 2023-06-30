@@ -8,7 +8,6 @@ import com.example.DoroServer.global.exception.Code;
 import com.example.DoroServer.global.exception.JwtAuthenticationException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SecurityException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -20,12 +19,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 
 @Component
@@ -94,6 +91,16 @@ public class JwtTokenProvider {
         try {
             return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody()
                 .getSubject();
+        }catch (ExpiredJwtException e){
+            log.info("AccessToken 만료 시 재발급 = {}", e.getClaims().toString());
+            return e.getClaims().getSubject();
+        }
+    }
+
+    public String getUserId(String token) {
+        try {
+            return String.valueOf(
+                Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().get("id"));
         }catch (ExpiredJwtException e){
             log.info("AccessToken 만료 시 재발급 = {}", e.getClaims().toString());
             return e.getClaims().getSubject();
