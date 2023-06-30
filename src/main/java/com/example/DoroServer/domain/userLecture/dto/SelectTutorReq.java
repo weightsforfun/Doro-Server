@@ -12,9 +12,10 @@ import lombok.Getter;
 @Getter
 @EqualsAndHashCode
 public class SelectTutorReq {
-    @NotBlank
+    @NotNull
     private Long userId;
-    @NotNull()
+
+    @NotNull
     @Enumerated(EnumType.STRING)
     private TutorRole tutorRole;
 

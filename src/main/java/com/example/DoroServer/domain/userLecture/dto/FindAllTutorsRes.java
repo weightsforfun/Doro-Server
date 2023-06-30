@@ -12,10 +12,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FindAllTutorsRes {
-    private Long id;
+    private Long id; //
     private String name;
     private Degree degree;
     private TutorRole tutorRole;
+    private Long userId;
 
 
 }

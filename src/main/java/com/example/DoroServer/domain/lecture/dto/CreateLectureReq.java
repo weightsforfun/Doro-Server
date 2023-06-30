@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -54,15 +56,17 @@ public class CreateLectureReq {
     @NotBlank
     private String staffPayment;
     @NotBlank
+    private String transportCost;
+    @NotBlank
     private String time; // 시간
-    @NotBlank
+    @NotNull
     private List<LocalDateTime> lectureDates = new ArrayList<>(); // 강의 날짜
-    @NotBlank
+    @NotNull
     private LectureDate lectureDate;
 
-    @NotBlank
+    @NotNull
     private LectureStatus status;
 
-    @NotBlank
+    @NotNull
     private Long lectureContentId;
 }

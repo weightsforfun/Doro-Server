@@ -54,7 +54,10 @@ public class Lecture extends BaseEntity {
     private String subPayment;
     private String staffPayment;
 
+    private String transportCost;//교통비
+
     private String time; // 시간
+
     @ElementCollection()
     @CollectionTable(name = "lecture_date", joinColumns =
     @JoinColumn(name = "lecture_id"))
