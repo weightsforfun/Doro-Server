@@ -226,9 +226,6 @@ public class NotificationService {
                     String responseData = response.body().string();
 //                    log.info("fcm response: {}",responseData);
 
-                    if(statusCode == 400 || statusCode == 404){
-                        // todo : 만료된 토큰 삭제 하는데 기기가 꺼져있어 안보내질 경우 고려해야함
-                    }
                     response.close();
                 }
 

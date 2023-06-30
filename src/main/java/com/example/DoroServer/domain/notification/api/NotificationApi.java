@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,6 +55,7 @@ public class NotificationApi {
     // FCM 서버에 알림 전송요청
     @ApiOperation(value = "알림 전송", notes = "알림 제목(title), 내용(body), 전송할 유저들의 아이디(userIds)를 입력받아 알림을 생성합니다."
             + " userIds를 적지 않거나, 비워두면 사용자 전체에게 전송됩니다.")
+    @Secured("ROLE_ADMIN")
     @PostMapping
     public SuccessResponse pushNotifications(
             @RequestBody @Valid NotificationContentReq notificationContentReq
