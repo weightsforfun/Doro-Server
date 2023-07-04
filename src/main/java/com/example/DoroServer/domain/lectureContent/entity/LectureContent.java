@@ -20,7 +20,6 @@ public class LectureContent {
     @Column(name = "lecture_content_id")
     private Long id; // PK
 
-    @NotBlank
     private String kit; // 강의 사용 키트
 
     private String detail; // 강의 세부 구성
