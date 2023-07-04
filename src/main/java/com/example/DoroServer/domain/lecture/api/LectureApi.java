@@ -8,11 +8,17 @@ import com.example.DoroServer.domain.lecture.dto.UpdateLectureReq;
 import com.example.DoroServer.domain.lecture.service.LectureService;
 import com.example.DoroServer.global.common.SuccessResponse;
 import java.util.List;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
+@Api(tags = "강의")
 @RestController
 @RequestMapping("/lectures")
 @RequiredArgsConstructor
@@ -20,15 +26,13 @@ import org.springframework.web.bind.annotation.*;
 public class LectureApi {
 
     private final LectureService lectureService;
-
+    @ApiOperation(value = "강의 조회",notes = "모든 강의 조회  lecture content 먼저 만들고 여기에 넣어줘야 정삭적으로 만들어집니다.")
     @GetMapping()
     public SuccessResponse findAllLectures(
             @ModelAttribute("findAllLecturesCond") FindAllLecturesCond findAllLecturesCond,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
     ) {
-
-
         PageRequest pageRequest = PageRequest.of(page,size);
         List<FindAllLecturesRes> allLectures = lectureService.findAllLectures(findAllLecturesCond,
                 pageRequest);
@@ -36,7 +40,7 @@ public class LectureApi {
     }
 
     @PostMapping()
-    public SuccessResponse createLecture(@RequestBody CreateLectureReq createLectureReq) {
+    public SuccessResponse createLecture(@RequestBody @Valid CreateLectureReq createLectureReq) {
         Long lectureId = lectureService.createLecture(createLectureReq);
         return SuccessResponse.successResponse(
                 "lecture created"
@@ -53,7 +57,7 @@ public class LectureApi {
     @PatchMapping("/{id}")
     public SuccessResponse updateLecture(
             @PathVariable("id") Long id,
-            @RequestBody UpdateLectureReq updateLectureReq
+            @RequestBody @Valid UpdateLectureReq updateLectureReq
     ) {
         Long lectureId = lectureService.updateLecture(id, updateLectureReq);
         return SuccessResponse.successResponse(lectureId + "th lecture patched");

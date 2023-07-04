@@ -13,5 +13,6 @@ public interface UserLectureMapper {
     FindMyLecturesRes toFindMyLecturesRes(Lecture lecture, UserLecture userLecture);
 
     @Mapping(source = "userLecture.id", target = "id")
+    @Mapping(source = "user.id",target = "userId")
     FindAllTutorsRes toFindAllTutorsRes(UserLecture userLecture, User user);
 }

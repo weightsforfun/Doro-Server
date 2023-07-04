@@ -63,6 +63,8 @@ public class JoinReq {
     private String doroAuth;
 
     private String profileImg;
+
+    @NotNull
     private Boolean notificationAgreement;
 
     private Boolean isActive;

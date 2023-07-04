@@ -42,6 +42,15 @@ jobs:
           echo "${{ secrets.JWT_PROPERTIES }}" > ./jwt.properties
         shell: bash
         
+      - name: Make firebase_service_key.json
+        run: |
+          cd ./src/main/resources
+          mkdir firebase
+          cd ./firebase
+          touch ./firebase_service_key.json
+          echo "${{ secrets.FIREBASE_SERVICE_KEY }}" > ./firebase_service_key.json
+        shell: bash
+        
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
