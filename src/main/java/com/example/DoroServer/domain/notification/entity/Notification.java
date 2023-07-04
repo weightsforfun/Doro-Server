@@ -31,6 +31,8 @@ public class Notification extends BaseEntity {
 
     private Boolean isRead; // 알림 읽음 유무
 
+    private Long announcementId;
+
     // Notification을 NotificationRes객체로 변환해주는 메소드
     public NotificationRes toRes() {
         return NotificationRes.builder()
@@ -41,6 +43,7 @@ public class Notification extends BaseEntity {
                 .isRead(isRead)
                 .createdAt(getCreatedAt())
                 .lastModifiedAt(getLastModifiedAt())
+                .announcementId(announcementId)
                 .build();
     }
 
