@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.lang.Nullable;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -49,6 +50,7 @@ public class AnnouncementApi {
 
     // 공지 생성 후 생성 확인 알림 전송
     @ApiOperation(value = "공지 글 생성", notes = "공지 제목(title), 내용(body), 이미지(image)를 입력받아 공지를 생성합니다.")
+    @Secured("ROLE_ADMIN")
     @PostMapping
     public SuccessResponse createAnnouncement(
             @RequestPart(value = "announcementReq") @Valid AnnouncementReq announcementReq,
@@ -77,6 +79,7 @@ public class AnnouncementApi {
 
     // id에 해당하는 공지 수정
     @ApiOperation(value = "공지 글 수정", notes = "id에 해당하는 공지 글을 수정합니다.")
+    @Secured("ROLE_ADMIN")
     @PatchMapping("/{id}")
     public SuccessResponse editAnnouncement(@PathVariable("id") Long id,
             @RequestPart(value = "announcementReq") @Valid AnnouncementReq announcementReq,
@@ -91,6 +94,7 @@ public class AnnouncementApi {
 
     // id에 해당하는 공지 삭제
     @ApiOperation(value = "공지 글 삭제", notes = "id에 해당하는 공지글을 삭제합니다.")
+    @Secured("ROLE_ADMIN")
     @DeleteMapping("/{id}")
     public SuccessResponse deleteAnnouncement(@PathVariable("id") Long id) {
         announcementService.deleteAnnouncement(id);
