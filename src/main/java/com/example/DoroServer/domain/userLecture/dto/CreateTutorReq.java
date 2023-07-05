@@ -14,7 +14,7 @@ public class CreateTutorReq {
     @NotNull
     @Enumerated(EnumType.STRING)
     private TutorRole tutorRole;
-    @NotBlank
+    @NotNull
     private Long userId;
 
 }

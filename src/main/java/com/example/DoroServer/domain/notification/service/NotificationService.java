@@ -101,8 +101,8 @@ public class NotificationService {
     // 전달받은 title과 body로 알림을 저장하는 메소드
     @Transactional
     public Long saveNotification(NotificationContentReq notificationContentReq,
-            NotificationType notificationType) {
-        Notification notification = notificationContentReq.toEntity(notificationType);
+            NotificationType notificationType,Long announcementId) {
+        Notification notification = notificationContentReq.toEntity(notificationType, announcementId);
         notificationRepository.save(notification);
         return notification.getId();
     }
@@ -115,7 +115,7 @@ public class NotificationService {
         if (!users.isEmpty()) {
             users.stream().forEach(user -> {
                 // 알림 저장
-                Long notificationId = saveNotification(notificationContentReq, notificationType);
+                Long notificationId = saveNotification(notificationContentReq, notificationType,announcementId);
                 userNotificationService.saveUserNotification(user.getId(), notificationId);
 
                 // 유저별로 알림 수신 동의 여부 체크
@@ -161,7 +161,7 @@ public class NotificationService {
             );
             // 알림 저장
             Long notificationId = saveNotification(notificationContentReq,
-                    NotificationType.NOTIFICATION);
+                    NotificationType.NOTIFICATION,null);
             userNotificationService.saveUserNotification(id, notificationId);
 
             // 유저별로 알림 수신 동의 여부 체크
@@ -224,11 +224,8 @@ public class NotificationService {
                     // 응답을 받았을 때 처리 로직
                     int statusCode = response.code();
                     String responseData = response.body().string();
-                    log.info("fcm response: {}",responseData);
+//                    log.info("fcm response: {}",responseData);
 
-                    if(statusCode == 400 || statusCode == 404){
-                        // todo : 만료된 토큰 삭제 하는데 기기가 꺼져있어 안보내질 경우 고려해야함
-                    }
                     response.close();
                 }
 
@@ -284,7 +281,7 @@ public class NotificationService {
 
         try {
             fcmMessageString = objectMapper.writeValueAsString(fcmMessage);
-            log.info("{}",fcmMessageString);
+//            log.info("{}",fcmMessageString);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

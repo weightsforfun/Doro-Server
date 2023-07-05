@@ -75,6 +75,7 @@ public class User extends BaseEntity implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Token> tokens = new ArrayList<>(); // 사용자 보유 FCM 토큰
 
+    @NotNull
     private Boolean notificationAgreement; // 사용자 알림 동의 여부
 
     @ColumnDefault("true")
@@ -139,5 +140,9 @@ public class User extends BaseEntity implements UserDetails {
     public void addToken(Token token) {
         tokens.add(token);
         token.addUser(this);
+    }
+
+    public void updateNotificationAgreement(Boolean agreement) {
+        this.notificationAgreement = agreement;
     }
 }
