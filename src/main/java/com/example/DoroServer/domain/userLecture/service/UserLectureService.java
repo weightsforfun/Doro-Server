@@ -83,18 +83,19 @@ public class UserLectureService {
                 .orElseThrow(() -> new BaseException(Code.TUTOR_NOT_FOUND));
         User user = userRepository.findById(selectTutorReq.getUserId()).orElseThrow(()->new BaseException(Code.USER_NOT_FOUND));
         Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(()-> new BaseException(Code.LECTURE_NOT_FOUND));
-        if(userLecture.getTutorStatus()==TutorStatus.WAITING){
-            notificationService.sendFixedMessageToUser(user,"강사 배정 완료",lecture.getSubTitle()+"강의에 배정되셨습니다");
-        }
-        else {
-            notificationService.sendFixedMessageToUser(user, "강사 배정 취소",
-                    lecture.getSubTitle() + "강의에 배정이 취소되었습니다.");
-        }
+
+//        if(userLecture.getTutorStatus()==TutorStatus.WAITING){
+//            notificationService.sendFixedMessageToUser(user,"강사 배정 완료",lecture.getSubTitle()+"강의에 배정되셨습니다");
+//        }
+//        else {
+//            notificationService.sendFixedMessageToUser(user, "강사 배정 취소",
+//                    lecture.getSubTitle() + "강의에 배정이 취소되었습니다.");
+//        }
         userLecture.changeTutorStatus();
         return String.valueOf(userLecture.getTutorStatus());
     }
     public Long deleteLecture(Long lectureId){
-        userRepository.deleteById(lectureId);
+        userLectureRepository.deleteById(lectureId);
         return lectureId;
     }
 }
