@@ -5,6 +5,7 @@ import static com.example.DoroServer.global.common.Constants.REDIS_MESSAGE_PREFI
 import static com.example.DoroServer.global.common.Constants.REDIS_MESSAGE_PREFIX.PASSWORD;
 import static com.example.DoroServer.global.common.Constants.VERIFIED_CODE;
 
+import com.example.DoroServer.domain.token.repository.TokenRepository;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.entity.UserRole;
 import com.example.DoroServer.domain.user.repository.UserRepository;
@@ -30,6 +31,7 @@ public class AuthServiceImpl implements AuthService{
     private final UserRepository userRepository;
     private final UserLectureRepository userLectureRepository;
     private final UserNotificationRepository userNotificationRepository;
+    private final TokenRepository tokenRepository;
     private final RedisService redisService;
     private final String DORO_ADMIN;
     private final String DORO_USER;
@@ -39,6 +41,7 @@ public class AuthServiceImpl implements AuthService{
                             UserRepository userRepository,
                             UserLectureRepository userLectureRepository,
                             UserNotificationRepository userNotificationRepository,
+                            TokenRepository tokenRepository,
                             RedisService redisService,
                             @Value("${doro.admin}") String doro_admin,
                             @Value("${doro.user}") String doro_user) {
@@ -46,6 +49,7 @@ public class AuthServiceImpl implements AuthService{
         this.userRepository = userRepository;
         this.userLectureRepository = userLectureRepository;
         this.userNotificationRepository = userNotificationRepository;
+        this.tokenRepository = tokenRepository;
         this.redisService = redisService;
         DORO_ADMIN = doro_admin;
         DORO_USER = doro_user;
@@ -117,6 +121,7 @@ public class AuthServiceImpl implements AuthService{
         try {
             userLectureRepository.deleteAllByUser(user);
             userNotificationRepository.deleteAllByUser(user);
+            tokenRepository.deleteAllByUser(user);
             userRepository.deleteById(user.getId());
         } catch (Exception e){
             throw new BaseException(Code.WITHDRAWAL_FAILED);
