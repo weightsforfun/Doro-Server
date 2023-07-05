@@ -51,7 +51,9 @@ public class Lecture extends BaseEntity {
     private String staff; // 강의 스태프 수
 
     private String mainPayment; //강사 급여
+
     private String subPayment;
+
     private String staffPayment;
 
     private String transportCost;//교통비
@@ -59,15 +61,14 @@ public class Lecture extends BaseEntity {
     private String time; // 시간
 
     @ElementCollection()
-    @CollectionTable(name = "lecture_date", joinColumns =
-    @JoinColumn(name = "lecture_id"))
-    private List<LocalDateTime> lectureDates = new ArrayList<>(); // 강의 날짜
+    @CollectionTable(name = "lecture_date", joinColumns = @JoinColumn(name = "lecture_id"))
+    private List<LocalDate> lectureDates = new ArrayList<>(); // 강의 날짜
 
     @Enumerated(EnumType.STRING)
     private LectureStatus status; // 강의 상태 [RECRUITING, ALLOCATION_COMP,FINISH]
 
     @Embedded
-    private LectureDate lectureDate; // 강의 날짜 관련 [lectureStartDates, enrollStateDate, enrollEndDate]
+    private LectureDate lectureDate; // 강의 날짜 관련 [enrollStateDate, enrollEndDate]
 
     //== 연관관계 매핑 ==//
 

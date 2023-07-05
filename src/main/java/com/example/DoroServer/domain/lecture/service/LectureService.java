@@ -16,7 +16,8 @@ import com.example.DoroServer.domain.lectureContent.repository.LectureContentRep
 import com.example.DoroServer.global.common.ErrorResponse;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
-import java.time.LocalDateTime;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -24,7 +25,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,8 +87,8 @@ public class LectureService {
         Lecture lecture = lectureRepository.findById(id).orElseThrow(() -> new BaseException(Code.LECTURE_NOT_FOUND));
         modelMapper.map(updateLectureReq,lecture);
         lecture.getLectureDates().clear();
-        List<LocalDateTime> newLectureDates = updateLectureReq.getLectureDates();
-        for (LocalDateTime newLectureDate : newLectureDates) {
+        List<LocalDate> newLectureDates = updateLectureReq.getLectureDates();
+        for (LocalDate newLectureDate : newLectureDates) {
             lecture.getLectureDates().add(newLectureDate);
         }
 
