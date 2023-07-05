@@ -9,6 +9,7 @@ import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.entity.UserRole;
 import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.domain.userLecture.repository.UserLectureRepository;
+import com.example.DoroServer.domain.userNotification.repository.UserNotificationRepository;
 import com.example.DoroServer.global.auth.dto.ChangePasswordReq;
 import com.example.DoroServer.global.auth.dto.JoinReq;
 import com.example.DoroServer.global.exception.BaseException;
@@ -28,6 +29,7 @@ public class AuthServiceImpl implements AuthService{
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final UserLectureRepository userLectureRepository;
+    private final UserNotificationRepository userNotificationRepository;
     private final RedisService redisService;
     private final String DORO_ADMIN;
     private final String DORO_USER;
@@ -36,12 +38,14 @@ public class AuthServiceImpl implements AuthService{
     public AuthServiceImpl(PasswordEncoder passwordEncoder,
                             UserRepository userRepository,
                             UserLectureRepository userLectureRepository,
+                            UserNotificationRepository userNotificationRepository,
                             RedisService redisService,
                             @Value("${doro.admin}") String doro_admin,
                             @Value("${doro.user}") String doro_user) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.userLectureRepository = userLectureRepository;
+        this.userNotificationRepository = userNotificationRepository;
         this.redisService = redisService;
         DORO_ADMIN = doro_admin;
         DORO_USER = doro_user;
@@ -112,6 +116,7 @@ public class AuthServiceImpl implements AuthService{
     public void withdrawalUser(User user) {
         try {
             userLectureRepository.deleteAllByUser(user);
+            userNotificationRepository.deleteAllByUser(user);
             userRepository.deleteById(user.getId());
         } catch (Exception e){
             throw new BaseException(Code.WITHDRAWAL_FAILED);
