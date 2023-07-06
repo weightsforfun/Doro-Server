@@ -8,15 +8,16 @@ import com.example.DoroServer.domain.lecture.dto.LectureDto;
 import com.example.DoroServer.domain.lecture.dto.LectureMapper;
 import com.example.DoroServer.domain.lecture.dto.UpdateLectureReq;
 import com.example.DoroServer.domain.lecture.entity.Lecture;
+import com.example.DoroServer.domain.lecture.entity.LectureStatus;
 import com.example.DoroServer.domain.lecture.repository.LectureRepository;
 import com.example.DoroServer.domain.lectureContent.dto.LectureContentDto;
 import com.example.DoroServer.domain.lectureContent.dto.LectureContentMapper;
 import com.example.DoroServer.domain.lectureContent.entity.LectureContent;
 import com.example.DoroServer.domain.lectureContent.repository.LectureContentRepository;
-import com.example.DoroServer.global.common.ErrorResponse;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
-import java.time.LocalDateTime;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -24,7 +25,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,8 +87,8 @@ public class LectureService {
         Lecture lecture = lectureRepository.findById(id).orElseThrow(() -> new BaseException(Code.LECTURE_NOT_FOUND));
         modelMapper.map(updateLectureReq,lecture);
         lecture.getLectureDates().clear();
-        List<LocalDateTime> newLectureDates = updateLectureReq.getLectureDates();
-        for (LocalDateTime newLectureDate : newLectureDates) {
+        List<LocalDate> newLectureDates = updateLectureReq.getLectureDates();
+        for (LocalDate newLectureDate : newLectureDates) {
             lecture.getLectureDates().add(newLectureDate);
         }
 
@@ -98,5 +98,15 @@ public class LectureService {
     public String deleteLecture(Long id) {
         lectureRepository.deleteById(id);
         return "deleted";
+    }
+
+    public void checkLectureFinishedDate(){
+        List<Long> finishedLecturesId = lectureRepository.findLecturesByFinishedDate(LocalDate.now().minusDays(1));
+
+        log.info(finishedLecturesId.toString());
+        for (Long id : finishedLecturesId) {
+            Lecture lecture = lectureRepository.findLectureById(id).orElseThrow(() -> new BaseException(Code.LECTURE_NOT_FOUND));
+            lecture.changeLectureStatus(LectureStatus.FINISH);
+        }
     }
 }

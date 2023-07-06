@@ -26,6 +26,7 @@ public class SecurityConfig{
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final RedisService redisService;
     private final JwtLogoutHandler jwtLogoutHandler;
+    private final JwtLogoutSuccessHandler jwtLogoutSuccessHandler;
 
     // Spring Security 내부에서 비밀번호를 암호화할 때 사용
     @Bean
@@ -64,6 +65,7 @@ public class SecurityConfig{
                 .logout()
                 .logoutUrl("/logout")
                 .addLogoutHandler(jwtLogoutHandler)
+                .logoutSuccessHandler(jwtLogoutSuccessHandler)
                 .and()
 
                 /**401, 403 Exception 핸들링 */

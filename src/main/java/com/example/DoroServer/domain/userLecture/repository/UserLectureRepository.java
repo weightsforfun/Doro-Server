@@ -46,7 +46,5 @@ public interface UserLectureRepository extends JpaRepository<UserLecture, Long> 
             @Param("userId") Long userId,
             @Param("tutorRole") TutorRole tutorRole
     );
-
-
-
+    void deleteAllByUser(User user);
 }

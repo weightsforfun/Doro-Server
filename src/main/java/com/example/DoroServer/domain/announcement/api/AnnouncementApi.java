@@ -1,5 +1,6 @@
 package com.example.DoroServer.domain.announcement.api;
 
+import com.example.DoroServer.domain.announcement.dto.AnnouncementMultipartReq;
 import com.example.DoroServer.domain.announcement.dto.AnnouncementReq;
 import com.example.DoroServer.domain.announcement.dto.AnnouncementRes;
 import com.example.DoroServer.domain.announcement.service.AnnouncementService;
@@ -9,6 +10,7 @@ import com.example.DoroServer.domain.notification.service.NotificationService;
 import com.example.DoroServer.global.common.SuccessResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.lang.reflect.Parameter;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -58,7 +61,6 @@ public class AnnouncementApi {
         Long announcementId;
         if (picture != null) {
             announcementId = announcementService.createAnnouncement(announcementReq, picture);
-
         } else {
             announcementId = announcementService.createAnnouncement(announcementReq);
         }
@@ -66,6 +68,52 @@ public class AnnouncementApi {
                 .title("새로운 공지가 올라왔습니다!")
                 .body(announcementReq.getTitle())
                 .build(), NotificationType.ANNOUNCEMENT,announcementId);
+        return SuccessResponse.successResponse("announcement created " + announcementId);
+    }
+
+    // axios - verision multipart 문제로 인해 만든 여러가지 버전
+    @ApiOperation(value = "공지 글 생성 ModelAttribute 이용", notes = "DTO내에 모든 값이 들어갑니다")
+    @Secured("ROLE_ADMIN")
+    @PostMapping("/dto")
+    public SuccessResponse createAnnouncementHeader(
+        @ModelAttribute AnnouncementMultipartReq announcementMultipartReq) {
+        Long announcementId;
+        MultipartFile picture = announcementMultipartReq.getPicture();
+        AnnouncementReq announcementReq = new AnnouncementReq(announcementMultipartReq.getTitle(),
+            announcementMultipartReq.getTitle(), announcementMultipartReq.getWriter());
+        if (picture != null) {
+            announcementId = announcementService.createAnnouncement(announcementReq, picture);
+
+        } else {
+            announcementId = announcementService.createAnnouncement(announcementReq);
+        }
+        notificationService.sendNotificationToAll(NotificationContentReq.builder()
+            .title("새로운 공지가 올라왔습니다!")
+            .body(announcementReq.getTitle())
+            .build(), NotificationType.ANNOUNCEMENT,announcementId);
+        return SuccessResponse.successResponse("announcement created " + announcementId);
+    }
+
+    @ApiOperation(value = "공지 글 생성 Dto 내의 Multipart", notes = "공지 제목(title), 내용(body)은 헤더에 삽입하고 이미지(image)는 바디에 입력받아 공지를 생성합니다.")
+    @Secured("ROLE_ADMIN")
+    @PostMapping("/header")
+    public SuccessResponse createAnnouncementHeader(
+        @RequestHeader("X-announcement-title") String title,
+        @RequestHeader("X-announcement-body") String body,
+        @RequestHeader("X-announcement-writer") String writer,
+        @RequestParam(value = "picture", required = false) MultipartFile picture) {
+        Long announcementId;
+        AnnouncementReq announcementReq = new AnnouncementReq(title, body, writer);
+        if (picture != null) {
+            announcementId = announcementService.createAnnouncement(announcementReq, picture);
+
+        } else {
+            announcementId = announcementService.createAnnouncement(announcementReq);
+        }
+        notificationService.sendNotificationToAll(NotificationContentReq.builder()
+            .title("새로운 공지가 올라왔습니다!")
+            .body(announcementReq.getTitle())
+            .build(), NotificationType.ANNOUNCEMENT,announcementId);
         return SuccessResponse.successResponse("announcement created " + announcementId);
     }
 
