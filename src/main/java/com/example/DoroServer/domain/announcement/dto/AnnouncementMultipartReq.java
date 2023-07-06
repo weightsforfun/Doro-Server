@@ -1,16 +1,16 @@
 package com.example.DoroServer.domain.announcement.dto;
 
-import com.example.DoroServer.domain.announcement.entity.Announcement;
 import javax.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
 @Getter
+@Setter
 @NoArgsConstructor
-@AllArgsConstructor
-public class AnnouncementReq {  // 공지 생성 시 전달 받는 객체
+public class AnnouncementMultipartReq {
 
     @NotBlank(message = "제목이 비어있습니다.")
     private String title; // 공지 제목
@@ -20,4 +20,6 @@ public class AnnouncementReq {  // 공지 생성 시 전달 받는 객체
 
     @NotBlank(message = "작성자 이름이 필요합니다.")
     private String writer; // 공지 작성자 이름
+
+    private MultipartFile picture;
 }
