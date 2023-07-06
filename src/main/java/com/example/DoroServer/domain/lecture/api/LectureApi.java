@@ -14,6 +14,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -68,6 +69,13 @@ public class LectureApi {
         String lectureId = lectureService.deleteLecture(id);
         return SuccessResponse.successResponse(lectureId + "th lecture deleted");
     }
+
+    @Scheduled(cron = "0 0 0 * * *")
+    public void checkLectureFinishedDate(){
+        lectureService.checkLectureFinishedDate();
+    }
+
+
 
 
 }

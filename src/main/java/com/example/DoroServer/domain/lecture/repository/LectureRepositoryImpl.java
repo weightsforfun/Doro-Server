@@ -7,7 +7,8 @@ import com.example.DoroServer.domain.lecture.entity.Lecture;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import java.time.LocalDateTime;
+
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -45,9 +46,9 @@ public class LectureRepositoryImpl implements LectureRepositoryCustom{
         }
         return booleanBuilder;
    }
-   private BooleanExpression betweenDate(LocalDateTime startDate,LocalDateTime endDate){
+   private BooleanExpression betweenDate(LocalDate startDate, LocalDate endDate){
         if(startDate !=null && endDate != null){
-            return lecture.lectureDates.any().between(startDate,endDate);
+            return lecture.lectureDates.any().between(startDate, endDate);
         }
         return null;
 
