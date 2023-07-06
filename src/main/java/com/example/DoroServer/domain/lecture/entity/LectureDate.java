@@ -24,7 +24,7 @@ public class LectureDate {
 
 
 //
-    private LocalDateTime enrollStartDate; // 강의 등록 시작 날짜
+    private LocalDate enrollStartDate; // 강의 등록 시작 날짜
     //
-    private LocalDateTime enrollEndDate; // 강의 등록 종료 날짜
+    private LocalDate enrollEndDate; // 강의 등록 종료 날짜
 }

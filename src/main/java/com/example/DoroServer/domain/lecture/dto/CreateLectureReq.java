@@ -60,7 +60,7 @@ public class CreateLectureReq {
     @NotBlank
     private String time; // 시간
     @NotNull
-    private List<LocalDateTime> lectureDates = new ArrayList<>(); // 강의 날짜
+    private List<LocalDate> lectureDates = new ArrayList<>(); // 강의 날짜
     @NotNull
     private LectureDate lectureDate;
 
