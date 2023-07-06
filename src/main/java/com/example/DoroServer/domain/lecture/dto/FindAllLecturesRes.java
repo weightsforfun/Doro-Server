@@ -22,13 +22,13 @@ public class FindAllLecturesRes {
     private String mainTitle;
     private String subTitle;
     private LectureStatus status;
-    private LocalDateTime enrollEndDate;
+    private LocalDate enrollEndDate;
     private String city;
     private String place;
     private String mainTutor;
     private String subTutor;
     private String time;
-    private List<LocalDateTime> lectureDates;
+    private List<LocalDate> lectureDates;
 
 
 
