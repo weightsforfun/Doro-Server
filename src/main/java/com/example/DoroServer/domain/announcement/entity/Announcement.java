@@ -3,6 +3,7 @@ package com.example.DoroServer.domain.announcement.entity;
 import com.example.DoroServer.domain.announcement.dto.AnnouncementReq;
 import com.example.DoroServer.domain.announcement.dto.AnnouncementRes;
 import com.example.DoroServer.domain.base.BaseEntity;
+import javax.persistence.GenerationType;
 import lombok.*;
 
 import javax.persistence.Column;
@@ -20,7 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class Announcement extends BaseEntity {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "announcement_id")
     private Long id; //PK
 

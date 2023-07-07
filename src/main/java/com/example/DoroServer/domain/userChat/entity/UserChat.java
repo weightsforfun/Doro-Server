@@ -16,7 +16,7 @@ import static javax.persistence.FetchType.*;
 public class UserChat {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_chat_id")
     private Long id; // PK
 
