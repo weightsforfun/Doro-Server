@@ -1,5 +1,6 @@
 package com.example.DoroServer.domain.userNotification.repository;
 
+import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.userNotification.entity.UserNotification;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
@@ -14,4 +15,6 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
             + " where u.id = :id"
     )
     List<UserNotification> findUserNotificationsByUserId(@Param("id") Long userId, Pageable pageable);
+
+    void deleteAllByUser(User user);
 }

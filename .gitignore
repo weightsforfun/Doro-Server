@@ -40,3 +40,5 @@ out/
 **/jwt.properties
 
 firebase/
+
+kanu-keystore.p12
