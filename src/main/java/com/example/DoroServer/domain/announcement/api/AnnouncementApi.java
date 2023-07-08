@@ -51,68 +51,38 @@ public class AnnouncementApi {
         return SuccessResponse.successResponse(announcements);
     }
 
-    // 공지 생성 후 생성 확인 알림 전송
-    @ApiOperation(value = "공지 글 생성", notes = "공지 제목(title), 내용(body), 이미지(image)를 입력받아 공지를 생성합니다.")
-    @Secured("ROLE_ADMIN")
-    @PostMapping
-    public SuccessResponse createAnnouncement(
-            @RequestPart(value = "announcementReq") @Valid AnnouncementReq announcementReq,
-            @RequestPart(value = "picture", required = false) MultipartFile picture) {
-        Long announcementId;
-        if (picture != null) {
-            announcementId = announcementService.createAnnouncement(announcementReq, picture);
-        } else {
-            announcementId = announcementService.createAnnouncement(announcementReq);
-        }
-        notificationService.sendNotificationToAll(NotificationContentReq.builder()
-                .title("새로운 공지가 올라왔습니다!")
-                .body(announcementReq.getTitle())
-                .build(), NotificationType.ANNOUNCEMENT,announcementId);
-        return SuccessResponse.successResponse("announcement created " + announcementId);
-    }
+    // 공지 생성 후 생성 확인 알림 전송 Version1
+//    @ApiOperation(value = "공지 글 생성", notes = "공지 제목(title), 내용(body), 이미지(image)를 입력받아 공지를 생성합니다.")
+//    @Secured("ROLE_ADMIN")
+//    //@PostMapping
+//    public SuccessResponse createAnnouncement(
+//            @RequestPart(value = "announcementReq") @Valid AnnouncementReq announcementReq,
+//            @RequestPart(value = "picture", required = false) MultipartFile picture) {
+//        Long announcementId;
+//        if (picture != null) {
+//            announcementId = announcementService.createAnnouncement(announcementReq, picture);
+//        } else {
+//            announcementId = announcementService.createAnnouncement(announcementReq);
+//        }
+//        notificationService.sendNotificationToAll(NotificationContentReq.builder()
+//                .title("새로운 공지가 올라왔습니다!")
+//                .body(announcementReq.getTitle())
+//                .build(), NotificationType.ANNOUNCEMENT,announcementId);
+//        return SuccessResponse.successResponse("announcement created " + announcementId);
+//    }
 
-    // axios - verision multipart 문제로 인해 만든 여러가지 버전
+    /**
+     * axios - verision multipart 문제로 인해 만든 Version2
+     */
     @ApiOperation(value = "공지 글 생성 ModelAttribute 이용", notes = "DTO내에 모든 값이 들어갑니다")
     @Secured("ROLE_ADMIN")
-    @PostMapping("/dto")
+    @PostMapping
     public SuccessResponse createAnnouncementHeader(
         @ModelAttribute AnnouncementMultipartReq announcementMultipartReq) {
-        Long announcementId;
-        MultipartFile picture = announcementMultipartReq.getPicture();
-        AnnouncementReq announcementReq = new AnnouncementReq(announcementMultipartReq.getTitle(),
-            announcementMultipartReq.getTitle(), announcementMultipartReq.getWriter());
-        if (picture != null) {
-            announcementId = announcementService.createAnnouncement(announcementReq, picture);
-
-        } else {
-            announcementId = announcementService.createAnnouncement(announcementReq);
-        }
+        Long announcementId = announcementService.createAnnouncement(announcementMultipartReq);
         notificationService.sendNotificationToAll(NotificationContentReq.builder()
             .title("새로운 공지가 올라왔습니다!")
-            .body(announcementReq.getTitle())
-            .build(), NotificationType.ANNOUNCEMENT,announcementId);
-        return SuccessResponse.successResponse("announcement created " + announcementId);
-    }
-
-    @ApiOperation(value = "공지 글 생성 Dto 내의 Multipart", notes = "공지 제목(title), 내용(body)은 헤더에 삽입하고 이미지(image)는 바디에 입력받아 공지를 생성합니다.")
-    @Secured("ROLE_ADMIN")
-    @PostMapping("/header")
-    public SuccessResponse createAnnouncementHeader(
-        @RequestHeader("X-announcement-title") String title,
-        @RequestHeader("X-announcement-body") String body,
-        @RequestHeader("X-announcement-writer") String writer,
-        @RequestParam(value = "picture", required = false) MultipartFile picture) {
-        Long announcementId;
-        AnnouncementReq announcementReq = new AnnouncementReq(title, body, writer);
-        if (picture != null) {
-            announcementId = announcementService.createAnnouncement(announcementReq, picture);
-
-        } else {
-            announcementId = announcementService.createAnnouncement(announcementReq);
-        }
-        notificationService.sendNotificationToAll(NotificationContentReq.builder()
-            .title("새로운 공지가 올라왔습니다!")
-            .body(announcementReq.getTitle())
+            .body(announcementMultipartReq.getTitle())
             .build(), NotificationType.ANNOUNCEMENT,announcementId);
         return SuccessResponse.successResponse("announcement created " + announcementId);
     }

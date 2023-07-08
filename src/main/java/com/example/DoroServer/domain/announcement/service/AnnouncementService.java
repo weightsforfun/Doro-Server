@@ -1,5 +1,6 @@
 package com.example.DoroServer.domain.announcement.service;
 
+import com.example.DoroServer.domain.announcement.dto.AnnouncementMultipartReq;
 import com.example.DoroServer.domain.announcement.dto.AnnouncementReq;
 import com.example.DoroServer.domain.announcement.dto.AnnouncementRes;
 import com.example.DoroServer.domain.announcement.entity.Announcement;
@@ -48,31 +49,22 @@ public class AnnouncementService {
 
     // Announcement 생성 메소드
     @Transactional
-    public Long createAnnouncement(AnnouncementReq announcementReq, MultipartFile picture) {
+    public Long createAnnouncement(AnnouncementMultipartReq announcementMultipartReq) {
         String imgUrl = null;
+        MultipartFile picture = announcementMultipartReq.getPicture();
         try {
-            if (!picture.isEmpty()) {
+            if (picture != null) {
                 imgUrl = awsS3Service.upload(picture, "announcement");
             }
         } catch (IOException e) {
             throw new BaseException(Code.UPLOAD_FAILED);
         }
         Announcement announcement = Announcement.builder()
-            .title(announcementReq.getTitle())
-            .body(announcementReq.getBody())
-            .writer(announcementReq.getWriter())
+            .title(announcementMultipartReq.getTitle())
+            .body(announcementMultipartReq.getBody())
+            .writer(announcementMultipartReq.getWriter())
             .picture(imgUrl)
             .build();
-        announcementRepository.save(announcement);
-        return announcement.getId();
-    }
-    @Transactional
-    public Long createAnnouncement(AnnouncementReq announcementReq) {
-        Announcement announcement = Announcement.builder()
-                .title(announcementReq.getTitle())
-                .body(announcementReq.getBody())
-                .writer(announcementReq.getWriter())
-                .build();
         announcementRepository.save(announcement);
         return announcement.getId();
     }
