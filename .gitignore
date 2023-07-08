@@ -40,3 +40,4 @@ out/
 **/jwt.properties
 
 firebase/
+jacoco/
