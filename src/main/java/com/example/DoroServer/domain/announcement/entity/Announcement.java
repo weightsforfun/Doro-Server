@@ -1,5 +1,6 @@
 package com.example.DoroServer.domain.announcement.entity;
 
+import com.example.DoroServer.domain.announcement.dto.AnnouncementMultipartReq;
 import com.example.DoroServer.domain.announcement.dto.AnnouncementReq;
 import com.example.DoroServer.domain.announcement.dto.AnnouncementRes;
 import com.example.DoroServer.domain.base.BaseEntity;
@@ -51,8 +52,9 @@ public class Announcement extends BaseEntity {
 
     // Announcement 수정 메소드
     // Picture는 따로 Update
-    public void update(AnnouncementReq announcementReq) {
-        this.title = announcementReq.getTitle();
-        this.body = announcementReq.getBody();
+    public void update(AnnouncementMultipartReq announcementMultipartReq, String imgUrl) {
+        this.title = announcementMultipartReq.getTitle();
+        this.body = announcementMultipartReq.getBody();
+        this.picture = imgUrl;
     }
 }

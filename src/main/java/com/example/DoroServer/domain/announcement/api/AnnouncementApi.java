@@ -77,8 +77,8 @@ public class AnnouncementApi {
     @ApiOperation(value = "공지 글 생성 ModelAttribute 이용", notes = "DTO내에 모든 값이 들어갑니다")
     @Secured("ROLE_ADMIN")
     @PostMapping
-    public SuccessResponse createAnnouncementHeader(
-        @ModelAttribute AnnouncementMultipartReq announcementMultipartReq) {
+    public SuccessResponse createAnnouncement(
+        @ModelAttribute @Valid AnnouncementMultipartReq announcementMultipartReq) {
         Long announcementId = announcementService.createAnnouncement(announcementMultipartReq);
         notificationService.sendNotificationToAll(NotificationContentReq.builder()
             .title("새로운 공지가 올라왔습니다!")
@@ -95,19 +95,32 @@ public class AnnouncementApi {
         return SuccessResponse.successResponse(announcementRes);
     }
 
-    // id에 해당하는 공지 수정
+//    // id에 해당하는 공지 수정
+//    @ApiOperation(value = "공지 글 수정", notes = "id에 해당하는 공지 글을 수정합니다.")
+//    @Secured("ROLE_ADMIN")
+//    @PatchMapping("/{id}")
+//    public SuccessResponse editAnnouncement(@PathVariable("id") Long id,
+//            @RequestPart(value = "announcementReq") @Valid AnnouncementReq announcementReq,
+//            @RequestPart(value = "picture", required = false) MultipartFile picture) {
+//        if (picture != null) {
+//            announcementService.updateAnnouncement(id, announcementReq, picture);
+//        } else {
+//            announcementService.updateAnnouncement(id, announcementReq);
+//        }
+//        return SuccessResponse.successResponse("update complete");
+//    }
+
+    /**
+     * axios - verision multipart 문제로 인해 만든 Version2
+     */
     @ApiOperation(value = "공지 글 수정", notes = "id에 해당하는 공지 글을 수정합니다.")
     @Secured("ROLE_ADMIN")
     @PatchMapping("/{id}")
     public SuccessResponse editAnnouncement(@PathVariable("id") Long id,
-            @RequestPart(value = "announcementReq") @Valid AnnouncementReq announcementReq,
-            @RequestPart(value = "picture", required = false) MultipartFile picture) {
-        if (picture != null) {
-            announcementService.updateAnnouncement(id, announcementReq, picture);
-        } else {
-            announcementService.updateAnnouncement(id, announcementReq);
-        }
-        return SuccessResponse.successResponse("update complete");
+        @ModelAttribute @Valid AnnouncementMultipartReq announcementMultipartReq) {
+        Long announcementId = announcementService.updateAnnouncement(id, announcementMultipartReq);
+
+        return SuccessResponse.successResponse("업데이트 완료 = " + announcementId);
     }
 
     // id에 해당하는 공지 삭제
