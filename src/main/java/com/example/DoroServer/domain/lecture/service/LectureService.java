@@ -67,16 +67,14 @@ public class LectureService {
     public Long createLecture(CreateLectureReq createLectureReq) {
 
         Lecture lecture = lectureMapper.toLecture(createLectureReq);
-        Optional<LectureContent> optionalLectureContent = lectureContentRepository.findById(
-                createLectureReq.getLectureContentId());
+        LectureContent LectureContent = lectureContentRepository.findById(
+                        createLectureReq.getLectureContentId())
+                .orElseThrow(() -> new BaseException(Code.LECTURE_CONTENT_NOT_FOUND));
+        lecture.setLectureContent(LectureContent);
+        lectureRepository.save(lecture);
+        return lecture.getId();
 
-        if (optionalLectureContent.isPresent()) {
-            lecture.setLectureContent(optionalLectureContent.get());
-            lectureRepository.save(lecture);
-            return lecture.getId();
-        }
 
-        throw new BaseException(Code.LECTURE_NOT_FOUND);
     }
 
     public FindLectureRes findLecture(Long lectureId, User user) {
