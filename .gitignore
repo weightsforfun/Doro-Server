@@ -40,4 +40,9 @@ out/
 **/jwt.properties
 
 firebase/
+
 jacoco/
+
+
+kanu-keystore.p12
+

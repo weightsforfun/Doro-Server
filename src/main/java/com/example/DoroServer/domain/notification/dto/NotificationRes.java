@@ -25,4 +25,6 @@ public class NotificationRes {
 
     private LocalDateTime lastModifiedAt; // 알림 수정 시간
 
+    private Long announcementId; // 알림에 해당하는 공지 id
+
 }
