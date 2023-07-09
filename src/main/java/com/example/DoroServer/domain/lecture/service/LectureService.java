@@ -14,13 +14,20 @@ import com.example.DoroServer.domain.lectureContent.dto.LectureContentDto;
 import com.example.DoroServer.domain.lectureContent.dto.LectureContentMapper;
 import com.example.DoroServer.domain.lectureContent.entity.LectureContent;
 import com.example.DoroServer.domain.lectureContent.repository.LectureContentRepository;
+import com.example.DoroServer.domain.user.entity.User;
+import com.example.DoroServer.domain.userLecture.dto.FindAllAssignedTutorsRes;
+import com.example.DoroServer.domain.userLecture.dto.UserLectureMapper;
+import com.example.DoroServer.domain.userLecture.entity.UserLecture;
+import com.example.DoroServer.domain.userLecture.repository.UserLectureRepository;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -37,19 +44,21 @@ public class LectureService {
 
     private final LectureRepository lectureRepository;
     private final LectureContentRepository lectureContentRepository;
+    private final UserLectureRepository userLectureRepository;
     private final ModelMapper modelMapper;
     private final LectureMapper lectureMapper;
     private final LectureContentMapper lectureContentMapper;
+    private final UserLectureMapper userLectureMapper;
 
     public List<FindAllLecturesRes> findAllLectures(FindAllLecturesCond findAllLecturesCond,
-            Pageable pageable) {
+                                                    Pageable pageable) {
         Page<Lecture> allLecturesWithFilter = lectureRepository.findAllLecturesWithFilter(
                 findAllLecturesCond, pageable);
 
         List<Lecture> content = allLecturesWithFilter.getContent();
 
         List<FindAllLecturesRes> lectureResList = content.stream()
-                .map(res -> lectureMapper.toFindAllLecturesRes(res,res.getLectureDate()))
+                .map(res -> lectureMapper.toFindAllLecturesRes(res, res.getLectureDate()))
                 .collect(Collectors.toList());
 
         return lectureResList;
@@ -70,22 +79,41 @@ public class LectureService {
         throw new BaseException(Code.LECTURE_NOT_FOUND);
     }
 
-    public FindLectureRes findLecture(Long id) {
-        Optional<Lecture> optionalLecture = lectureRepository.findLectureById(id);
-        if (optionalLecture.isPresent()) {
-            Lecture lecture = optionalLecture.get();
-            LectureDto lectureDto = lectureMapper.toLectureDto(lecture);
-            LectureContentDto lectureContentDto = lectureContentMapper.toLectureContentDto(lecture.getLectureContent());
-            FindLectureRes findLectureRes = lectureMapper.toFindLectureRes(lectureDto,lectureContentDto);
-            return findLectureRes;
-        } else {
-            throw new BaseException(Code.LECTURE_NOT_FOUND);
+    public FindLectureRes findLecture(Long lectureId, User user) {
+        Lecture lecture = lectureRepository.findLectureById(lectureId).orElseThrow(() -> new BaseException(Code.LECTURE_NOT_FOUND));
+        LectureDto lectureDto = lectureMapper.toLectureDto(lecture);
+
+        LectureContentDto lectureContentDto = lectureContentMapper.toLectureContentDto(lecture.getLectureContent());
+
+        List<UserLecture> allAssignedTutors = userLectureRepository.findAllAssignedTutors(lectureId);
+
+        List<FindAllAssignedTutorsRes> findAllAssignedTutorsResList = allAssignedTutors.stream()
+                .map(res -> userLectureMapper.toFindFindAllAssignedTutorsRes(res, res.getUser()))
+                .collect(Collectors.toList());
+
+        Boolean isAssigned = Boolean.FALSE;
+
+        for (FindAllAssignedTutorsRes findAllAssignedTutorsRes : findAllAssignedTutorsResList) {
+            if(findAllAssignedTutorsRes.getUserId()==user.getId()){
+                isAssigned=Boolean.TRUE;
+            }
         }
+
+        if (isAssigned) {
+            FindLectureRes findLectureRes = lectureMapper.toFindLectureRes(lectureDto, lectureContentDto,findAllAssignedTutorsResList);
+            return findLectureRes;
+        }
+        else{
+            FindLectureRes findLectureRes = lectureMapper.toFindLectureRes(lectureDto, lectureContentDto,null);
+            return findLectureRes;
+        }
+
+
     }
 
     public Long updateLecture(Long id, UpdateLectureReq updateLectureReq) {
         Lecture lecture = lectureRepository.findById(id).orElseThrow(() -> new BaseException(Code.LECTURE_NOT_FOUND));
-        modelMapper.map(updateLectureReq,lecture);
+        modelMapper.map(updateLectureReq, lecture);
         lecture.getLectureDates().clear();
         List<LocalDate> newLectureDates = updateLectureReq.getLectureDates();
         for (LocalDate newLectureDate : newLectureDates) {
@@ -100,7 +128,7 @@ public class LectureService {
         return "deleted";
     }
 
-    public void checkLectureFinishedDate(){
+    public void checkLectureFinishedDate() {
         List<Long> finishedLecturesId = lectureRepository.findLecturesByFinishedDate(LocalDate.now().minusDays(1));
 
         log.info(finishedLecturesId.toString());

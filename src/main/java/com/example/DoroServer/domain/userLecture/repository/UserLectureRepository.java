@@ -26,6 +26,16 @@ public interface UserLectureRepository extends JpaRepository<UserLecture, Long> 
 
     @Query(value =
             "select ul from UserLecture ul "
+                    + "join ul.lecture l "
+                    + "join fetch ul.user "
+                    + "where l.id = :lectureId and ul.tutorStatus = 'ASSIGNED'"
+    )
+    List<UserLecture> findAllAssignedTutors(
+            @Param("lectureId") Long lectureId
+            );
+
+    @Query(value =
+            "select ul from UserLecture ul "
                     + "join ul.user u "
                     + "join fetch ul.lecture "
                     + "where u.id = :id"
