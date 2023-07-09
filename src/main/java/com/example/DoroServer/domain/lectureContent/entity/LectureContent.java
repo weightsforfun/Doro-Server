@@ -28,4 +28,6 @@ public class LectureContent {
     private String remark; // 강의 기타 사항
 
     private String requirement; // 강의 자격 요건
+
+    private String content;
 }

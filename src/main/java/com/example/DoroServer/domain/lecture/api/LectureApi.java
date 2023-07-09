@@ -6,6 +6,7 @@ import com.example.DoroServer.domain.lecture.dto.FindAllLecturesRes;
 import com.example.DoroServer.domain.lecture.dto.FindLectureRes;
 import com.example.DoroServer.domain.lecture.dto.UpdateLectureReq;
 import com.example.DoroServer.domain.lecture.service.LectureService;
+import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.global.common.SuccessResponse;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -41,7 +43,8 @@ public class LectureApi {
     }
 
     @PostMapping()
-    public SuccessResponse createLecture(@RequestBody @Valid CreateLectureReq createLectureReq) {
+    public SuccessResponse createLecture(
+            @RequestBody @Valid CreateLectureReq createLectureReq) {
         Long lectureId = lectureService.createLecture(createLectureReq);
         return SuccessResponse.successResponse(
                 "lecture created"
@@ -50,9 +53,11 @@ public class LectureApi {
     }
 
     @GetMapping("/{id}")
-    public SuccessResponse findLecture(@PathVariable("id") Long id) {
-        FindLectureRes lecture = lectureService.findLecture(id);
-        return SuccessResponse.successResponse(lecture);
+    public SuccessResponse findLecture(
+            @PathVariable("id") Long lectureId,
+            @AuthenticationPrincipal User user) {
+        FindLectureRes findLectureRes = lectureService.findLecture(lectureId,user);
+        return SuccessResponse.successResponse(findLectureRes);
     }
 
     @PatchMapping("/{id}")
