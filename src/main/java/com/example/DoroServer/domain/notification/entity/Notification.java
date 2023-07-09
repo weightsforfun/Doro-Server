@@ -16,7 +16,7 @@ import javax.validation.constraints.NotBlank;
 public class Notification extends BaseEntity {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "notification_id")
     private Long id; // PK
 
