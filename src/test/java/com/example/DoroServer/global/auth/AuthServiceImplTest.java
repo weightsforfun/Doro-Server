@@ -3,6 +3,7 @@ package com.example.DoroServer.global.auth;
 import static com.example.DoroServer.global.common.Constants.VERIFIED_CODE;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.example.DoroServer.domain.user.entity.Degree;
 import com.example.DoroServer.domain.user.entity.Gender;
 import com.example.DoroServer.domain.user.entity.StudentStatus;
 import com.example.DoroServer.domain.user.entity.User;
@@ -13,6 +14,7 @@ import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
 import com.example.DoroServer.global.jwt.RedisService;
 import java.time.LocalDate;
+import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -81,8 +83,9 @@ class AuthServiceImplTest {
     void JoinRedisException(){
         // given
         JoinReq joinReq = getJoinReq("password1@", UserRole.ROLE_ADMIN, "1111");
-        // when
         given(redisService.getValues(anyString())).willReturn(null);
+        // when
+
         // then
         Assertions.assertThatThrownBy(() -> authService.join(joinReq)).isInstanceOf(BaseException.class)
             .hasFieldOrPropertyWithValue("code", Code.UNAUTHORIZED_PHONE_NUMBER);
@@ -93,9 +96,11 @@ class AuthServiceImplTest {
     void JoinDuplicateException(){
         // given
         JoinReq joinReq = getJoinReq("password1@", UserRole.ROLE_ADMIN, "1111");
-        // when
+
         given(redisService.getValues(anyString())).willReturn(VERIFIED_CODE);
         given(userRepository.existsByPhone(anyString())).willReturn(true);
+        // when
+
         // then
         Assertions.assertThatThrownBy(() -> authService.join(joinReq)).isInstanceOf(BaseException.class)
             .hasFieldOrPropertyWithValue("code", Code.EXIST_PHONE);
@@ -106,9 +111,10 @@ class AuthServiceImplTest {
     void JoinPasswordNotEqualException(){
         // given
         JoinReq joinReq = getJoinReq("password1", UserRole.ROLE_ADMIN, "1111");
-        // when
         given(redisService.getValues(anyString())).willReturn(VERIFIED_CODE);
         given(userRepository.existsByPhone(anyString())).willReturn(false);
+        // when
+
         // then
         Assertions.assertThatThrownBy(() -> authService.join(joinReq)).isInstanceOf(BaseException.class)
             .hasFieldOrPropertyWithValue("code", Code.PASSWORD_DID_NOT_MATCH);
@@ -120,9 +126,11 @@ class AuthServiceImplTest {
         // given
         ReflectionTestUtils.setField(authService, "DORO_ADMIN", "1111");
         JoinReq joinReq = getJoinReq("password1@", UserRole.ROLE_ADMIN, "2222");
-        // when
+
         given(redisService.getValues(anyString())).willReturn(VERIFIED_CODE);
         given(userRepository.existsByPhone(anyString())).willReturn(false);
+        // when
+
         // then
         Assertions.assertThatThrownBy(() -> authService.join(joinReq)).isInstanceOf(BaseException.class)
             .hasFieldOrPropertyWithValue("code", Code.DORO_ADMIN_AUTH_FAILED);
@@ -134,16 +142,44 @@ class AuthServiceImplTest {
         // given
         ReflectionTestUtils.setField(authService, "DORO_USER", "2222");
         JoinReq joinReq = getJoinReq("password1@", UserRole.ROLE_USER, "1111");
-        // when
+
         given(redisService.getValues(anyString())).willReturn(VERIFIED_CODE);
         given(userRepository.existsByPhone(anyString())).willReturn(false);
+        // when
+
         // then
         Assertions.assertThatThrownBy(() -> authService.join(joinReq)).isInstanceOf(BaseException.class)
             .hasFieldOrPropertyWithValue("code", Code.DORO_USER_AUTH_FAILED);
     }
 
+    @Test
+    @DisplayName("아이디 중복 체크 성공")
+    void checkAccountSuccess(){
+        // given
+        given(userRepository.existsByAccount(anyString())).willReturn(false);
+        // when
+        authService.checkAccount(anyString());
+        // then
+        verify(userRepository, times(1)).existsByAccount(anyString());
+    }
 
-    private static JoinReq getJoinReq(String passwordCheck, UserRole role, String authNum) {
+    @Test
+    @DisplayName("아이디 중복 체크 예외 발생")
+    void checkAccountException(){
+        // given
+        given(userRepository.existsByAccount(anyString())).willReturn(true);
+        // when
+
+        // then
+        Assertions.assertThatThrownBy(() -> authService.checkAccount(anyString()))
+            .isInstanceOf(BaseException.class)
+            .hasFieldOrPropertyWithValue("code", Code.EXIST_ACCOUNT);
+    }
+
+
+
+
+    private JoinReq getJoinReq(String passwordCheck, UserRole role, String authNum) {
         return JoinReq.builder()
             .account("test")
             .password("password1@")
@@ -161,4 +197,6 @@ class AuthServiceImplTest {
             .notificationAgreement(Boolean.TRUE)
             .build();
     }
+
+
 }
