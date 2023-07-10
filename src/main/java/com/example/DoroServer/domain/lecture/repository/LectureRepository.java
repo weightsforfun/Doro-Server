@@ -17,12 +17,12 @@ public interface LectureRepository extends JpaRepository<Lecture,Long>, LectureR
             +"where l.id = :id")
     Optional<Lecture> findLectureById(@Param("id") Long id);
 
-    @Query(value="select  l.lecture_id "
+    @Query(value="select * "
             + "from lecture l "
             + "where l.lecture_id in "
             + "(select ld.lecture_id "
             + "from lecture_date ld "
             + "group by ld.lecture_id having date_format(max(lecture_dates),\"%Y-%m-%d\") = date_format(:finishedDate,\"%Y-%m-%d\")) "
             ,nativeQuery = true)
-    List<Long> findLecturesByFinishedDate(@Param("finishedDate") LocalDate finishedDate);
+    List<Lecture> findLecturesByFinishedDate(@Param("finishedDate") LocalDate finishedDate);
 }
