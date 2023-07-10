@@ -1,5 +1,6 @@
 package com.example.DoroServer.domain.announcement.service;
 
+import com.example.DoroServer.domain.announcement.dto.AnnouncementMultipartReq;
 import com.example.DoroServer.domain.announcement.dto.AnnouncementReq;
 import com.example.DoroServer.domain.announcement.dto.AnnouncementRes;
 import com.example.DoroServer.domain.announcement.entity.Announcement;
@@ -48,70 +49,49 @@ public class AnnouncementService {
 
     // Announcement 생성 메소드
     @Transactional
-    public Long createAnnouncement(AnnouncementReq announcementReq, MultipartFile picture) {
+    public Long createAnnouncement(AnnouncementMultipartReq announcementMultipartReq) {
         String imgUrl = null;
+        MultipartFile picture = announcementMultipartReq.getPicture();
         try {
-            if (!picture.isEmpty()) {
+            if (picture != null) {
                 imgUrl = awsS3Service.upload(picture, "announcement");
             }
         } catch (IOException e) {
             throw new BaseException(Code.UPLOAD_FAILED);
         }
         Announcement announcement = Announcement.builder()
-            .title(announcementReq.getTitle())
-            .body(announcementReq.getBody())
-            .writer(announcementReq.getWriter())
+            .title(announcementMultipartReq.getTitle())
+            .body(announcementMultipartReq.getBody())
+            .writer(announcementMultipartReq.getWriter())
             .picture(imgUrl)
             .build();
-        announcementRepository.save(announcement);
-        return announcement.getId();
-    }
-    @Transactional
-    public Long createAnnouncement(AnnouncementReq announcementReq) {
-        Announcement announcement = Announcement.builder()
-                .title(announcementReq.getTitle())
-                .body(announcementReq.getBody())
-                .writer(announcementReq.getWriter())
-                .build();
         announcementRepository.save(announcement);
         return announcement.getId();
     }
 
     // Announcement 수정 메소드
     @Transactional
-    public void updateAnnouncement(Long id, AnnouncementReq announcementReq, MultipartFile picture) {
-        Optional<Announcement> announcement = announcementRepository.findById(id);
-        Announcement updateAnnouncement = announcement.orElseThrow(() -> {
-            log.info("update 하려는 Announcement를 찾을 수 없습니다. id = {}", id);
+    public Long updateAnnouncement(Long id, AnnouncementMultipartReq announcementMultipartReq) {
+        Announcement announcement = announcementRepository.findById(id).orElseThrow(() -> {
+            log.info("업데이트 하려는 공지를 찾을 수 없습니다. id = {}", id);
             return new BaseException(Code.ANNOUNCEMENT_NOT_FOUND);
         });
-        if(updateAnnouncement.getPicture() != null){
-            awsS3Service.deleteImage(updateAnnouncement.getPicture());
+
+        if(announcement.getPicture() != null){
+            awsS3Service.deleteImage(announcement.getPicture());
         }
+
         String imgUrl = null;
+        MultipartFile picture = announcementMultipartReq.getPicture();
         try {
-            if (!picture.isEmpty()) {
+            if (picture != null) {
                 imgUrl = awsS3Service.upload(picture, "announcement");
             }
         } catch (IOException e) {
             throw new BaseException(Code.UPLOAD_FAILED);
         }
-        announcementRepository.updateAnnouncementImgById(id, imgUrl);
-        updateAnnouncement.update(announcementReq);
-    }
-    @Transactional
-    public void updateAnnouncement(Long id, AnnouncementReq announcementReq) {
-        Optional<Announcement> announcement = announcementRepository.findById(id);
-        Announcement updateAnnouncement = announcement.orElseThrow(() -> {
-            log.info("update 하려는 Announcement를 찾을 수 없습니다. id = {}", id);
-            return new BaseException(Code.ANNOUNCEMENT_NOT_FOUND);
-        });
-        if(updateAnnouncement.getPicture() != null){
-            awsS3Service.deleteImage(updateAnnouncement.getPicture());
-        }
-        String imgUrl = null;
-        announcementRepository.updateAnnouncementImgById(id, imgUrl);
-        updateAnnouncement.update(announcementReq);
+        announcement.update(announcementMultipartReq, imgUrl);
+        return announcement.getId();
     }
 
     // Announcement 수정 메서드
