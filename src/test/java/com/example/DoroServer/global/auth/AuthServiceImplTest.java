@@ -79,7 +79,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("레디스 조회 실패 -> 전화번호 미인증")
+    @DisplayName("회원가입 - 레디스 조회 실패 -> 전화번호 미인증")
     void JoinRedisException(){
         // given
         JoinReq joinReq = getJoinReq("password1@", UserRole.ROLE_ADMIN, "1111");
@@ -176,7 +176,45 @@ class AuthServiceImplTest {
             .hasFieldOrPropertyWithValue("code", Code.EXIST_ACCOUNT);
     }
 
+    @Test
+    @DisplayName("아이디 찾기 성공")
+    void findAccountSuccess(){
+        // given
+        User user = setUpUser();
+        given(redisService.getValues(anyString())).willReturn(VERIFIED_CODE);
+        given(userRepository.findByPhone(anyString())).willReturn(Optional.of(user));
+        // when
+        String result = authService.findAccount(user.getPhone());
+        // then
+        assertEquals(user.getAccount(), result);
+    }
 
+    @Test
+    @DisplayName("아이디 찾기 - 레디스 조회 실패 -> 전화번호 미인증")
+    void findAccountRedisException(){
+        // given
+        given(redisService.getValues(anyString())).willReturn(null);
+        // when
+
+        // then
+        Assertions.assertThatThrownBy(() -> authService.findAccount(anyString()))
+            .isInstanceOf(BaseException.class)
+            .hasFieldOrPropertyWithValue("code", Code.UNAUTHORIZED_PHONE_NUMBER);
+    }
+
+    @Test
+    @DisplayName("아이디 찾기 - 유저 부재")
+    void findAccountNotFound(){
+        // given
+        given(redisService.getValues(anyString())).willReturn(VERIFIED_CODE);
+        // when
+
+        // then
+        Assertions.assertThatThrownBy(() -> authService.findAccount(anyString()))
+            .isInstanceOf(BaseException.class)
+            .hasFieldOrPropertyWithValue("code", Code.ACCOUNT_NOT_FOUND);
+        verify(userRepository, times(1)).findByPhone(anyString());
+    }
 
 
     private JoinReq getJoinReq(String passwordCheck, UserRole role, String authNum) {
@@ -198,5 +236,28 @@ class AuthServiceImplTest {
             .build();
     }
 
-
+    private User setUpUser(){
+        return User.builder()
+            .id(1L)
+            .account("userAccount")
+            .password("userPassword")
+            .name("userName")
+            .birth(LocalDate.of(2023, 7, 11))
+            .gender(Gender.MALE)
+            .phone("01011111111")
+            .degree(
+                Degree.builder()
+                    .school("school")
+                    .studentId("2023045650")
+                    .major("major")
+                    .studentStatus(StudentStatus.ATTENDING)
+                    .build()
+            )
+            .generation(1)
+            .role(UserRole.ROLE_USER)
+            .profileImg("path/to/profile/test.jpg")
+            .notificationAgreement(true)
+            .isActive(true)
+            .build();
+    }
 }
