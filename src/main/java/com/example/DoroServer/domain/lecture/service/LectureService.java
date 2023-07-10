@@ -98,12 +98,12 @@ public class LectureService {
         }
 
         if (isAssigned) {
-            FindLectureRes findLectureRes = lectureMapper.toFindLectureRes(lectureDto, lectureContentDto,findAllAssignedTutorsResList);
-            return findLectureRes;
+            return lectureMapper.toFindLectureRes(lectureDto, lectureContentDto,findAllAssignedTutorsResList);
+
         }
         else{
-            FindLectureRes findLectureRes = lectureMapper.toFindLectureRes(lectureDto, lectureContentDto,null);
-            return findLectureRes;
+            return lectureMapper.toFindLectureRes(lectureDto, lectureContentDto,null);
+
         }
 
 
@@ -127,11 +127,10 @@ public class LectureService {
     }
 
     public void checkLectureFinishedDate() {
-        List<Long> finishedLecturesId = lectureRepository.findLecturesByFinishedDate(LocalDate.now().minusDays(1));
+        List<Lecture> lectureList = lectureRepository.findLecturesByFinishedDate(LocalDate.now().minusDays(1));
 
-        log.info(finishedLecturesId.toString());
-        for (Long id : finishedLecturesId) {
-            Lecture lecture = lectureRepository.findLectureById(id).orElseThrow(() -> new BaseException(Code.LECTURE_NOT_FOUND));
+        log.info(lectureList.toString());
+        for (Lecture lecture : lectureList) {
             lecture.changeLectureStatus(LectureStatus.FINISH);
         }
     }
