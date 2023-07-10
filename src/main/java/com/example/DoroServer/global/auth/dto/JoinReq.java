@@ -9,11 +9,13 @@ import java.time.LocalDate;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import lombok.Builder;
 import lombok.Getter;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Getter
+@Builder
 public class JoinReq {
 
     @NotBlank
