@@ -86,7 +86,7 @@ public class LectureService {
         List<UserLecture> allAssignedTutors = userLectureRepository.findAllAssignedTutors(lectureId);
 
         List<FindAllAssignedTutorsRes> findAllAssignedTutorsResList = allAssignedTutors.stream()
-                .map(res -> userLectureMapper.toFindFindAllAssignedTutorsRes(res, res.getUser()))
+                .map(res -> userLectureMapper.toFindAllAssignedTutorsRes(res, res.getUser()))
                 .collect(Collectors.toList());
 
         Boolean isAssigned = Boolean.FALSE;
