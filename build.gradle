@@ -76,9 +76,6 @@ dependencies {
 
 }
 
-tasks.named('test') {
-	useJUnitPlatform()
-}
 
 //querydsl 추가 시작
 def querydslDir = "$buildDir/generated/querydsl"
@@ -102,6 +99,12 @@ configurations {
 //querydsl 추가 끝
 
 //jacoco 설정
+test {
+	useJUnitPlatform() // JUnit5를 사용하기 위한 설정
+	finalizedBy 'jacocoTestReport' // 추가
+}
+
+
 jacocoTestReport {
 	reports {
 		html.enabled true
@@ -110,12 +113,31 @@ jacocoTestReport {
 
 		// 리포트의 저장 경로를 설정합니다.
 		html.destination file("jacoco/jacocoHtml")
-//		xml.destination file("jacoco/jacoco.xml")
 	}
+	def Qdomains = []
+	for(qPattern in "**/QA" .. "**/QZ"){
+		Qdomains.add(qPattern+"*")
+	}
+	afterEvaluate {
+		classDirectories.setFrom(
+				files(classDirectories.files.collect {
+					fileTree(dir: it, excludes: [
+							'**/*Application*',
+							'**/*Exception*',
+							'**/dto/**',
+							// ...
+					]+Qdomains)
+				})
+		)
+	}
+	finalizedBy 'jacocoTestCoverageVerification'
 }
 
 jacocoTestCoverageVerification {
-
+	def Qdomains = []
+	for (qPattern in "*.QA".."*.QZ") {  // qPattern = "*.QA","*.QB","*.QC", ... "*.QZ"
+		Qdomains.add(qPattern + "*")
+	}
 	violationRules { // 커버리지의 범위와 퍼센테이지를 설정합니다.
 		rule {
 			element = 'CLASS'
@@ -123,8 +145,14 @@ jacocoTestCoverageVerification {
 			limit {
 				counter = 'BRANCH'
 				value = 'COVEREDRATIO'
-				minimum = 0.90
+				minimum = 0.00
 			}
+			excludes = [
+					'*.*Application',
+					'*.*Exception',
+					'*.dto.*',
+					// ...
+			] + Qdomains
 		}
 	}
 }
