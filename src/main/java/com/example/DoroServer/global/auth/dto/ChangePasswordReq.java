@@ -2,9 +2,11 @@ package com.example.DoroServer.global.auth.dto;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder
 public class ChangePasswordReq {
 
     @NotBlank

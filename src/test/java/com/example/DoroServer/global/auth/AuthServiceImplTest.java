@@ -3,12 +3,16 @@ package com.example.DoroServer.global.auth;
 import static com.example.DoroServer.global.common.Constants.VERIFIED_CODE;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.example.DoroServer.domain.token.repository.TokenRepository;
 import com.example.DoroServer.domain.user.entity.Degree;
 import com.example.DoroServer.domain.user.entity.Gender;
 import com.example.DoroServer.domain.user.entity.StudentStatus;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.entity.UserRole;
 import com.example.DoroServer.domain.user.repository.UserRepository;
+import com.example.DoroServer.domain.userLecture.repository.UserLectureRepository;
+import com.example.DoroServer.domain.userNotification.repository.UserNotificationRepository;
+import com.example.DoroServer.global.auth.dto.ChangePasswordReq;
 import com.example.DoroServer.global.auth.dto.JoinReq;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
@@ -37,11 +41,17 @@ class AuthServiceImplTest {
     PasswordEncoder passwordEncoder;
     @Mock
     UserRepository userRepository;
+    @Mock
+    UserLectureRepository userLectureRepository;
+    @Mock
+    UserNotificationRepository userNotificationRepository;
+    @Mock
+    TokenRepository tokenRepository;
     @InjectMocks
     private AuthServiceImpl authService;
 
     @Test
-    @DisplayName("관리자 회원가입 성공")
+    @DisplayName("회원가입 - 관리자 회원가입 성공")
     void ShouldAdminJoinSuccessfully(){
         // given
         ReflectionTestUtils.setField(authService, "DORO_ADMIN", "1111");
@@ -60,7 +70,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("유저 회원가입 성공")
+    @DisplayName("회원가입 - 유저 회원가입 성공")
     void ShouldUserJoinSuccessfully(){
         // given
         ReflectionTestUtils.setField(authService, "DORO_USER", "2222");
@@ -92,7 +102,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("휴대폰 번호 중복")
+    @DisplayName("회원가입 - 휴대폰 번호 중복")
     void JoinDuplicateException(){
         // given
         JoinReq joinReq = getJoinReq("password1@", UserRole.ROLE_ADMIN, "1111");
@@ -107,7 +117,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("비밀번호, 비밀번호 확인 불일치")
+    @DisplayName("회원가입 - 비밀번호, 비밀번호 확인 불일치")
     void JoinPasswordNotEqualException(){
         // given
         JoinReq joinReq = getJoinReq("password1", UserRole.ROLE_ADMIN, "1111");
@@ -137,7 +147,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("회원가입 유저 인증번호 불일치")
+    @DisplayName("회원가입 - 유저 인증번호 불일치")
     void JoinUserAuthNumException(){
         // given
         ReflectionTestUtils.setField(authService, "DORO_USER", "2222");
@@ -153,7 +163,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("아이디 중복 체크 성공")
+    @DisplayName("아이디 중복 체크 - 성공")
     void checkAccountSuccess(){
         // given
         given(userRepository.existsByAccount(anyString())).willReturn(false);
@@ -164,7 +174,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("아이디 중복 체크 예외 발생")
+    @DisplayName("아이디 중복 체크 - 예외 발생")
     void checkAccountException(){
         // given
         given(userRepository.existsByAccount(anyString())).willReturn(true);
@@ -177,7 +187,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("아이디 찾기 성공")
+    @DisplayName("아이디 찾기 - 성공")
     void findAccountSuccess(){
         // given
         User user = setUpUser();
@@ -203,7 +213,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("아이디 찾기 - 유저 부재")
+    @DisplayName("아이디 찾기 - 계정 부재")
     void findAccountNotFound(){
         // given
         given(redisService.getValues(anyString())).willReturn(VERIFIED_CODE);
@@ -214,6 +224,108 @@ class AuthServiceImplTest {
             .isInstanceOf(BaseException.class)
             .hasFieldOrPropertyWithValue("code", Code.ACCOUNT_NOT_FOUND);
         verify(userRepository, times(1)).findByPhone(anyString());
+    }
+
+    @Test
+    @DisplayName("비밀번호 변경 - 성공")
+    void changePasswordSuccess(){
+        //given
+        User user = setUpUser();
+        ChangePasswordReq changePasswordReq = setUpChangePasswordReq("changepassword1@");
+        String newPassword = changePasswordReq.getNewPassword();
+
+        given(redisService.getValues(anyString())).willReturn(VERIFIED_CODE);
+        given(userRepository.findByAccountAndPhone(anyString(), anyString())).willReturn(
+            Optional.of(user));
+        given(passwordEncoder.encode(anyString())).willReturn(newPassword);
+        //when
+        authService.changePassword(changePasswordReq);
+        //then
+        Assertions.assertThat(user.getPassword()).isEqualTo(newPassword);
+    }
+
+    @Test
+    @DisplayName("비밀번호 변경 - 레디스 조회 실패 -> 전화번호 미인증")
+    void changePasswordRedisException(){
+        // given
+        ChangePasswordReq changePasswordReq = setUpChangePasswordReq("changePassword1@");
+        given(redisService.getValues(anyString())).willReturn(null);
+        // when
+
+        // then
+        Assertions.assertThatThrownBy(() -> authService.changePassword(changePasswordReq))
+            .isInstanceOf(BaseException.class)
+            .hasFieldOrPropertyWithValue("code", Code.UNAUTHORIZED_PHONE_NUMBER);
+    }
+
+    @Test
+    @DisplayName("비밀번호 변경 - 비밀번호, 비밀번호 확인 불일치")
+    void changePasswordNotEqualException(){
+        // given
+        ChangePasswordReq changePasswordReq = setUpChangePasswordReq("NotEqualPassword");
+        given(redisService.getValues(anyString())).willReturn(VERIFIED_CODE);
+        // when
+
+        // then
+        Assertions.assertThatThrownBy(() -> authService.changePassword(changePasswordReq))
+            .isInstanceOf(BaseException.class)
+            .hasFieldOrPropertyWithValue("code", Code.PASSWORD_DID_NOT_MATCH);
+    }
+    @Test
+    @DisplayName("비밀번호 변경 - 계정 부재")
+    void changePasswordAccountNotFound(){
+        //given
+        ChangePasswordReq changePasswordReq = setUpChangePasswordReq("changepassword1@");
+        given(redisService.getValues(anyString())).willReturn(VERIFIED_CODE);
+        //when
+
+        //then
+        Assertions.assertThatThrownBy(() -> authService.changePassword(changePasswordReq))
+            .isInstanceOf(BaseException.class)
+            .hasFieldOrPropertyWithValue("code", Code.ACCOUNT_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴 - 성공")
+    void withdrawalSucess(){
+        // Given
+        User user = setUpUser();
+        // When
+        authService.withdrawalUser(user);
+        // Then
+        verify(userLectureRepository, times(1)).deleteAllByUser(user);
+        verify(userNotificationRepository, times(1)).deleteAllByUser(user);
+        verify(tokenRepository, times(1)).deleteAllByUser(user);
+        verify(userRepository, times(1)).deleteById(user.getId());
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴 - 실패")
+    public void testWithdrawalUserWithException() {
+        // Given
+        User user = setUpUser();
+        doThrow(new RuntimeException()).when(userRepository).deleteById(any());
+
+        // When
+
+        // then
+        Assertions.assertThatThrownBy(() -> authService.withdrawalUser(user))
+                .isInstanceOf(BaseException.class)
+            .hasFieldOrPropertyWithValue("code", Code.WITHDRAWAL_FAILED);
+
+        then(userLectureRepository).should(times(1)).deleteAllByUser(user);
+        then(userNotificationRepository).should(times(1)).deleteAllByUser(user);
+        then(tokenRepository).should(times(1)).deleteAllByUser(user);
+        then(userRepository).should(times(1)).deleteById(user.getId());
+    }
+
+    private ChangePasswordReq setUpChangePasswordReq(String passwordCheck) {
+        return ChangePasswordReq.builder()
+            .account("account")
+            .phone("01011111111")
+            .newPassword("changepassword1@")
+            .newPasswordCheck(passwordCheck)
+            .build();
     }
 
 
@@ -239,8 +351,8 @@ class AuthServiceImplTest {
     private User setUpUser(){
         return User.builder()
             .id(1L)
-            .account("userAccount")
-            .password("userPassword")
+            .account("account")
+            .password("password01@")
             .name("userName")
             .birth(LocalDate.of(2023, 7, 11))
             .gender(Gender.MALE)
