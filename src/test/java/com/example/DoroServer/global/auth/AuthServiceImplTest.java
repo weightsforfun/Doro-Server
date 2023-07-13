@@ -1,5 +1,8 @@
 package com.example.DoroServer.global.auth;
 
+import static com.example.DoroServer.global.auth.AuthTestSetup.getJoinReq;
+import static com.example.DoroServer.global.auth.AuthTestSetup.setUpChangePasswordReq;
+import static com.example.DoroServer.global.auth.AuthTestSetup.setUpUser;
 import static com.example.DoroServer.global.common.Constants.VERIFIED_CODE;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -51,7 +54,7 @@ class AuthServiceImplTest {
     private AuthServiceImpl authService;
 
     @Test
-    @DisplayName("회원가입 - 관리자 회원가입 성공")
+    @DisplayName("join_관리자 회원가입_성공")
     void ShouldAdminJoinSuccessfully(){
         // given
         ReflectionTestUtils.setField(authService, "DORO_ADMIN", "1111");
@@ -70,7 +73,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("회원가입 - 유저 회원가입 성공")
+    @DisplayName("join_유저 회원가입_성공")
     void ShouldUserJoinSuccessfully(){
         // given
         ReflectionTestUtils.setField(authService, "DORO_USER", "2222");
@@ -89,7 +92,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("회원가입 - 레디스 조회 실패 -> 전화번호 미인증")
+    @DisplayName("join_레디스 조회 실패_전화번호 미인증 예외")
     void JoinRedisException(){
         // given
         JoinReq joinReq = getJoinReq("password1@", UserRole.ROLE_ADMIN, "1111");
@@ -102,7 +105,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("회원가입 - 휴대폰 번호 중복")
+    @DisplayName("join_휴대폰 번호 중복_예외")
     void JoinDuplicateException(){
         // given
         JoinReq joinReq = getJoinReq("password1@", UserRole.ROLE_ADMIN, "1111");
@@ -117,7 +120,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("회원가입 - 비밀번호, 비밀번호 확인 불일치")
+    @DisplayName("join_비밀번호, 비밀번호 확인 불일치_예외")
     void JoinPasswordNotEqualException(){
         // given
         JoinReq joinReq = getJoinReq("password1", UserRole.ROLE_ADMIN, "1111");
@@ -131,7 +134,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("회원가입 관리자 인증번호 불일치")
+    @DisplayName("join_관리자 인증번호 불일치_예외")
     void JoinAdminAuthNumException(){
         // given
         ReflectionTestUtils.setField(authService, "DORO_ADMIN", "1111");
@@ -147,7 +150,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("회원가입 - 유저 인증번호 불일치")
+    @DisplayName("join_유저 인증번호 불일치_예외")
     void JoinUserAuthNumException(){
         // given
         ReflectionTestUtils.setField(authService, "DORO_USER", "2222");
@@ -163,7 +166,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("아이디 중복 체크 - 성공")
+    @DisplayName("checkAccount_성공")
     void checkAccountSuccess(){
         // given
         given(userRepository.existsByAccount(anyString())).willReturn(false);
@@ -174,7 +177,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("아이디 중복 체크 - 예외 발생")
+    @DisplayName("checkAccount_예외")
     void checkAccountException(){
         // given
         given(userRepository.existsByAccount(anyString())).willReturn(true);
@@ -187,7 +190,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("아이디 찾기 - 성공")
+    @DisplayName("findAccount_성공")
     void findAccountSuccess(){
         // given
         User user = setUpUser();
@@ -200,7 +203,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("아이디 찾기 - 레디스 조회 실패 -> 전화번호 미인증")
+    @DisplayName("findAccount_레디스 조회 실패_전화번호 미인증 예외")
     void findAccountRedisException(){
         // given
         given(redisService.getValues(anyString())).willReturn(null);
@@ -213,7 +216,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("아이디 찾기 - 계정 부재")
+    @DisplayName("findAccount_계정 부재_예외")
     void findAccountNotFound(){
         // given
         given(redisService.getValues(anyString())).willReturn(VERIFIED_CODE);
@@ -227,7 +230,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("비밀번호 변경 - 성공")
+    @DisplayName("changePassword_성공")
     void changePasswordSuccess(){
         //given
         User user = setUpUser();
@@ -245,7 +248,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("비밀번호 변경 - 레디스 조회 실패 -> 전화번호 미인증")
+    @DisplayName("changePassword_레디스 조회 실패_전화번호 미인증 예외")
     void changePasswordRedisException(){
         // given
         ChangePasswordReq changePasswordReq = setUpChangePasswordReq("changePassword1@");
@@ -259,7 +262,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("비밀번호 변경 - 비밀번호, 비밀번호 확인 불일치")
+    @DisplayName("changePassword_비밀번호, 비밀번호 확인 불일치_예외")
     void changePasswordNotEqualException(){
         // given
         ChangePasswordReq changePasswordReq = setUpChangePasswordReq("NotEqualPassword");
@@ -272,7 +275,7 @@ class AuthServiceImplTest {
             .hasFieldOrPropertyWithValue("code", Code.PASSWORD_DID_NOT_MATCH);
     }
     @Test
-    @DisplayName("비밀번호 변경 - 계정 부재")
+    @DisplayName("changePassword_계정 부재_예외")
     void changePasswordAccountNotFound(){
         //given
         ChangePasswordReq changePasswordReq = setUpChangePasswordReq("changepassword1@");
@@ -286,7 +289,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("회원 탈퇴 - 성공")
+    @DisplayName("withdrawalUser_성공")
     void withdrawalSucess(){
         // Given
         User user = setUpUser();
@@ -300,7 +303,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("회원 탈퇴 - 실패")
+    @DisplayName("withdrawalUser_예외")
     public void testWithdrawalUserWithException() {
         // Given
         User user = setUpUser();
@@ -319,57 +322,5 @@ class AuthServiceImplTest {
         then(userRepository).should(times(1)).deleteById(user.getId());
     }
 
-    private ChangePasswordReq setUpChangePasswordReq(String passwordCheck) {
-        return ChangePasswordReq.builder()
-            .account("account")
-            .phone("01011111111")
-            .newPassword("changepassword1@")
-            .newPasswordCheck(passwordCheck)
-            .build();
-    }
 
-
-    private JoinReq getJoinReq(String passwordCheck, UserRole role, String authNum) {
-        return JoinReq.builder()
-            .account("test")
-            .password("password1@")
-            .passwordCheck(passwordCheck)
-            .name("name")
-            .birth(LocalDate.parse("2023-07-10"))
-            .gender(Gender.MALE)
-            .phone("010-1111-1111")
-            .school("school")
-            .studentId("2023045650")
-            .major("major")
-            .studentStatus(StudentStatus.ATTENDING)
-            .role(role)
-            .doroAuth(authNum)
-            .notificationAgreement(Boolean.TRUE)
-            .build();
-    }
-
-    private User setUpUser(){
-        return User.builder()
-            .id(1L)
-            .account("account")
-            .password("password01@")
-            .name("userName")
-            .birth(LocalDate.of(2023, 7, 11))
-            .gender(Gender.MALE)
-            .phone("01011111111")
-            .degree(
-                Degree.builder()
-                    .school("school")
-                    .studentId("2023045650")
-                    .major("major")
-                    .studentStatus(StudentStatus.ATTENDING)
-                    .build()
-            )
-            .generation(1)
-            .role(UserRole.ROLE_USER)
-            .profileImg("path/to/profile/test.jpg")
-            .notificationAgreement(true)
-            .isActive(true)
-            .build();
-    }
 }
