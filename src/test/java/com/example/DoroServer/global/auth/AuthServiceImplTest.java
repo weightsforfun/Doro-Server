@@ -1,5 +1,13 @@
 package com.example.DoroServer.global.auth;
 
+import static com.example.DoroServer.global.auth.AuthTestSetup.DORO_ADMIN;
+import static com.example.DoroServer.global.auth.AuthTestSetup.DORO_ADMIN_CODE;
+import static com.example.DoroServer.global.auth.AuthTestSetup.DORO_USER;
+import static com.example.DoroServer.global.auth.AuthTestSetup.DORO_USER_CODE;
+import static com.example.DoroServer.global.auth.AuthTestSetup.EXCEPTION_CODE_FIELD;
+import static com.example.DoroServer.global.auth.AuthTestSetup.NEWPASSWORD;
+import static com.example.DoroServer.global.auth.AuthTestSetup.PASSWORD_CHECK;
+import static com.example.DoroServer.global.auth.AuthTestSetup.WRONG_PASSWORD;
 import static com.example.DoroServer.global.auth.AuthTestSetup.getJoinReq;
 import static com.example.DoroServer.global.auth.AuthTestSetup.setUpChangePasswordReq;
 import static com.example.DoroServer.global.auth.AuthTestSetup.setUpUser;
@@ -57,13 +65,13 @@ class AuthServiceImplTest {
     @DisplayName("join_관리자 회원가입_성공")
     void ShouldAdminJoinSuccessfully(){
         // given
-        ReflectionTestUtils.setField(authService, "DORO_ADMIN", "1111");
+        ReflectionTestUtils.setField(authService, DORO_ADMIN, DORO_ADMIN_CODE);
 
-        JoinReq joinReq = getJoinReq("password1@", UserRole.ROLE_ADMIN, "1111");
+        JoinReq joinReq = getJoinReq(PASSWORD_CHECK, UserRole.ROLE_ADMIN, DORO_ADMIN_CODE);
 
         given(redisService.getValues(anyString())).willReturn(VERIFIED_CODE);
         given(userRepository.existsByPhone(anyString())).willReturn(false);
-        given(passwordEncoder.encode(anyString())).willReturn("EncodedPassword");
+        given(passwordEncoder.encode(anyString())).willReturn(anyString());
 
         // when
         authService.join(joinReq);
@@ -76,13 +84,13 @@ class AuthServiceImplTest {
     @DisplayName("join_유저 회원가입_성공")
     void ShouldUserJoinSuccessfully(){
         // given
-        ReflectionTestUtils.setField(authService, "DORO_USER", "2222");
+        ReflectionTestUtils.setField(authService, DORO_USER, DORO_USER_CODE);
 
-        JoinReq joinReq = getJoinReq("password1@", UserRole.ROLE_USER, "2222");
+        JoinReq joinReq = getJoinReq(PASSWORD_CHECK, UserRole.ROLE_USER, DORO_USER_CODE);
 
         given(redisService.getValues(anyString())).willReturn(VERIFIED_CODE);
         given(userRepository.existsByPhone(anyString())).willReturn(false);
-        given(passwordEncoder.encode(anyString())).willReturn("EncodedPassword");
+        given(passwordEncoder.encode(anyString())).willReturn(anyString());
 
         // when
         authService.join(joinReq);
@@ -95,20 +103,20 @@ class AuthServiceImplTest {
     @DisplayName("join_레디스 조회 실패_전화번호 미인증 예외")
     void JoinRedisException(){
         // given
-        JoinReq joinReq = getJoinReq("password1@", UserRole.ROLE_ADMIN, "1111");
+        JoinReq joinReq = getJoinReq(PASSWORD_CHECK, UserRole.ROLE_ADMIN, DORO_ADMIN_CODE);
         given(redisService.getValues(anyString())).willReturn(null);
         // when
 
         // then
         Assertions.assertThatThrownBy(() -> authService.join(joinReq)).isInstanceOf(BaseException.class)
-            .hasFieldOrPropertyWithValue("code", Code.UNAUTHORIZED_PHONE_NUMBER);
+            .hasFieldOrPropertyWithValue(EXCEPTION_CODE_FIELD, Code.UNAUTHORIZED_PHONE_NUMBER);
     }
 
     @Test
     @DisplayName("join_휴대폰 번호 중복_예외")
     void JoinDuplicateException(){
         // given
-        JoinReq joinReq = getJoinReq("password1@", UserRole.ROLE_ADMIN, "1111");
+        JoinReq joinReq = getJoinReq(PASSWORD_CHECK, UserRole.ROLE_ADMIN, DORO_ADMIN_CODE);
 
         given(redisService.getValues(anyString())).willReturn(VERIFIED_CODE);
         given(userRepository.existsByPhone(anyString())).willReturn(true);
@@ -116,29 +124,29 @@ class AuthServiceImplTest {
 
         // then
         Assertions.assertThatThrownBy(() -> authService.join(joinReq)).isInstanceOf(BaseException.class)
-            .hasFieldOrPropertyWithValue("code", Code.EXIST_PHONE);
+            .hasFieldOrPropertyWithValue(EXCEPTION_CODE_FIELD, Code.EXIST_PHONE);
     }
 
     @Test
     @DisplayName("join_비밀번호, 비밀번호 확인 불일치_예외")
     void JoinPasswordNotEqualException(){
         // given
-        JoinReq joinReq = getJoinReq("password1", UserRole.ROLE_ADMIN, "1111");
+        JoinReq joinReq = getJoinReq(WRONG_PASSWORD, UserRole.ROLE_ADMIN, DORO_ADMIN_CODE);
         given(redisService.getValues(anyString())).willReturn(VERIFIED_CODE);
         given(userRepository.existsByPhone(anyString())).willReturn(false);
         // when
 
         // then
         Assertions.assertThatThrownBy(() -> authService.join(joinReq)).isInstanceOf(BaseException.class)
-            .hasFieldOrPropertyWithValue("code", Code.PASSWORD_DID_NOT_MATCH);
+            .hasFieldOrPropertyWithValue(EXCEPTION_CODE_FIELD, Code.PASSWORD_DID_NOT_MATCH);
     }
 
     @Test
     @DisplayName("join_관리자 인증번호 불일치_예외")
     void JoinAdminAuthNumException(){
         // given
-        ReflectionTestUtils.setField(authService, "DORO_ADMIN", "1111");
-        JoinReq joinReq = getJoinReq("password1@", UserRole.ROLE_ADMIN, "2222");
+        ReflectionTestUtils.setField(authService, DORO_ADMIN, DORO_ADMIN_CODE);
+        JoinReq joinReq = getJoinReq(PASSWORD_CHECK, UserRole.ROLE_ADMIN, DORO_USER_CODE);
 
         given(redisService.getValues(anyString())).willReturn(VERIFIED_CODE);
         given(userRepository.existsByPhone(anyString())).willReturn(false);
@@ -146,15 +154,15 @@ class AuthServiceImplTest {
 
         // then
         Assertions.assertThatThrownBy(() -> authService.join(joinReq)).isInstanceOf(BaseException.class)
-            .hasFieldOrPropertyWithValue("code", Code.DORO_ADMIN_AUTH_FAILED);
+            .hasFieldOrPropertyWithValue(EXCEPTION_CODE_FIELD, Code.DORO_ADMIN_AUTH_FAILED);
     }
 
     @Test
     @DisplayName("join_유저 인증번호 불일치_예외")
     void JoinUserAuthNumException(){
         // given
-        ReflectionTestUtils.setField(authService, "DORO_USER", "2222");
-        JoinReq joinReq = getJoinReq("password1@", UserRole.ROLE_USER, "1111");
+        ReflectionTestUtils.setField(authService, DORO_USER, DORO_USER_CODE);
+        JoinReq joinReq = getJoinReq(PASSWORD_CHECK, UserRole.ROLE_USER, DORO_ADMIN_CODE);
 
         given(redisService.getValues(anyString())).willReturn(VERIFIED_CODE);
         given(userRepository.existsByPhone(anyString())).willReturn(false);
@@ -162,7 +170,7 @@ class AuthServiceImplTest {
 
         // then
         Assertions.assertThatThrownBy(() -> authService.join(joinReq)).isInstanceOf(BaseException.class)
-            .hasFieldOrPropertyWithValue("code", Code.DORO_USER_AUTH_FAILED);
+            .hasFieldOrPropertyWithValue(EXCEPTION_CODE_FIELD, Code.DORO_USER_AUTH_FAILED);
     }
 
     @Test
@@ -186,7 +194,7 @@ class AuthServiceImplTest {
         // then
         Assertions.assertThatThrownBy(() -> authService.checkAccount(anyString()))
             .isInstanceOf(BaseException.class)
-            .hasFieldOrPropertyWithValue("code", Code.EXIST_ACCOUNT);
+            .hasFieldOrPropertyWithValue(EXCEPTION_CODE_FIELD, Code.EXIST_ACCOUNT);
     }
 
     @Test
@@ -212,7 +220,7 @@ class AuthServiceImplTest {
         // then
         Assertions.assertThatThrownBy(() -> authService.findAccount(anyString()))
             .isInstanceOf(BaseException.class)
-            .hasFieldOrPropertyWithValue("code", Code.UNAUTHORIZED_PHONE_NUMBER);
+            .hasFieldOrPropertyWithValue(EXCEPTION_CODE_FIELD, Code.UNAUTHORIZED_PHONE_NUMBER);
     }
 
     @Test
@@ -225,7 +233,7 @@ class AuthServiceImplTest {
         // then
         Assertions.assertThatThrownBy(() -> authService.findAccount(anyString()))
             .isInstanceOf(BaseException.class)
-            .hasFieldOrPropertyWithValue("code", Code.ACCOUNT_NOT_FOUND);
+            .hasFieldOrPropertyWithValue(EXCEPTION_CODE_FIELD, Code.ACCOUNT_NOT_FOUND);
         verify(userRepository, times(1)).findByPhone(anyString());
     }
 
@@ -234,7 +242,7 @@ class AuthServiceImplTest {
     void changePasswordSuccess(){
         //given
         User user = setUpUser();
-        ChangePasswordReq changePasswordReq = setUpChangePasswordReq("changepassword1@");
+        ChangePasswordReq changePasswordReq = setUpChangePasswordReq(NEWPASSWORD);
         String newPassword = changePasswordReq.getNewPassword();
 
         given(redisService.getValues(anyString())).willReturn(VERIFIED_CODE);
@@ -251,41 +259,41 @@ class AuthServiceImplTest {
     @DisplayName("changePassword_레디스 조회 실패_전화번호 미인증 예외")
     void changePasswordRedisException(){
         // given
-        ChangePasswordReq changePasswordReq = setUpChangePasswordReq("changePassword1@");
+        ChangePasswordReq changePasswordReq = setUpChangePasswordReq(NEWPASSWORD);
         given(redisService.getValues(anyString())).willReturn(null);
         // when
 
         // then
         Assertions.assertThatThrownBy(() -> authService.changePassword(changePasswordReq))
             .isInstanceOf(BaseException.class)
-            .hasFieldOrPropertyWithValue("code", Code.UNAUTHORIZED_PHONE_NUMBER);
+            .hasFieldOrPropertyWithValue(EXCEPTION_CODE_FIELD, Code.UNAUTHORIZED_PHONE_NUMBER);
     }
 
     @Test
     @DisplayName("changePassword_비밀번호, 비밀번호 확인 불일치_예외")
     void changePasswordNotEqualException(){
         // given
-        ChangePasswordReq changePasswordReq = setUpChangePasswordReq("NotEqualPassword");
+        ChangePasswordReq changePasswordReq = setUpChangePasswordReq(WRONG_PASSWORD);
         given(redisService.getValues(anyString())).willReturn(VERIFIED_CODE);
         // when
 
         // then
         Assertions.assertThatThrownBy(() -> authService.changePassword(changePasswordReq))
             .isInstanceOf(BaseException.class)
-            .hasFieldOrPropertyWithValue("code", Code.PASSWORD_DID_NOT_MATCH);
+            .hasFieldOrPropertyWithValue(EXCEPTION_CODE_FIELD, Code.PASSWORD_DID_NOT_MATCH);
     }
     @Test
     @DisplayName("changePassword_계정 부재_예외")
     void changePasswordAccountNotFound(){
         //given
-        ChangePasswordReq changePasswordReq = setUpChangePasswordReq("changepassword1@");
+        ChangePasswordReq changePasswordReq = setUpChangePasswordReq(NEWPASSWORD);
         given(redisService.getValues(anyString())).willReturn(VERIFIED_CODE);
         //when
 
         //then
         Assertions.assertThatThrownBy(() -> authService.changePassword(changePasswordReq))
             .isInstanceOf(BaseException.class)
-            .hasFieldOrPropertyWithValue("code", Code.ACCOUNT_NOT_FOUND);
+            .hasFieldOrPropertyWithValue(EXCEPTION_CODE_FIELD, Code.ACCOUNT_NOT_FOUND);
     }
 
     @Test
@@ -314,7 +322,7 @@ class AuthServiceImplTest {
         // then
         Assertions.assertThatThrownBy(() -> authService.withdrawalUser(user))
                 .isInstanceOf(BaseException.class)
-            .hasFieldOrPropertyWithValue("code", Code.WITHDRAWAL_FAILED);
+            .hasFieldOrPropertyWithValue(EXCEPTION_CODE_FIELD, Code.WITHDRAWAL_FAILED);
 
         then(userLectureRepository).should(times(1)).deleteAllByUser(user);
         then(userNotificationRepository).should(times(1)).deleteAllByUser(user);
