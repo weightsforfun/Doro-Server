@@ -51,7 +51,7 @@ public interface UserLectureRepository extends JpaRepository<UserLecture, Long> 
                     + "ul.tutorRole = :tutorRole "
 
     )
-    Optional<UserLecture> findUerLecture(
+    Optional<UserLecture> findUserLecture(
             @Param("lectureId") Long lectureId,
             @Param("userId") Long userId,
             @Param("tutorRole") TutorRole tutorRole
