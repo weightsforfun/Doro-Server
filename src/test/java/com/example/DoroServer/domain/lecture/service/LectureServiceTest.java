@@ -17,6 +17,7 @@ import com.example.DoroServer.domain.userLecture.dto.UserLectureMapper;
 import com.example.DoroServer.domain.userLecture.entity.UserLecture;
 import com.example.DoroServer.domain.userLecture.repository.UserLectureRepository;
 import com.example.DoroServer.global.exception.BaseException;
+import com.example.DoroServer.global.exception.Code;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -120,12 +121,12 @@ class LectureServiceTest {
                 .build();
     }
 
-    private Lecture setUpLecture() {
+    private Lecture setUpLecture(Long lectureId) {
         ArrayList<LocalDate> dates = new ArrayList<>();
         LocalDate now = LocalDate.now();
         dates.add(now);
         return Lecture.builder()
-                .id(1L)
+                .id(lectureId)
                 .mainTitle("mainTitle")
                 .subTitle("subTitle")
                 .institution("institution")
@@ -151,10 +152,16 @@ class LectureServiceTest {
                 .build();
     }
 
+    private User setUpUser(Long userId){
+        return User.builder()
+                .id(userId)
+                .build();
+    }
+
     private List<Lecture> setUpLectures(int length){
         ArrayList<Lecture> lectureArrayList = new ArrayList<>();
         for(int i=0;i<length;i++){
-            lectureArrayList.add(setUpLecture());
+            lectureArrayList.add(setUpLecture(Long.valueOf(i)));
         }
         return lectureArrayList;
     }
@@ -195,9 +202,7 @@ class LectureServiceTest {
                 .build();
     }
 
-    private void setUpFindLectureTest(){
 
-    }
     @DisplayName("강의 생성 mapper 테스트")
     @Test
     void createLectureReqMapperTest() throws IllegalAccessException {
@@ -219,12 +224,37 @@ class LectureServiceTest {
 
     }
 
+    @DisplayName("강의 생성 예외 테스트 - 강의 자료가 존재하지 않음")
+    @Test
+    void createLectureLectureContentNotFoundTest() {
+        // given
+        Long lectureContentId=3L;
+        CreateLectureReq createLectureReq = setUpCreateLectureReq(lectureContentId);
+
+        Long lectureId=4L;
+        Lecture lecture = setUpLecture(lectureId);
+        given(lectureMapper.toLecture(any(CreateLectureReq.class))).willReturn(lecture);
+
+        given(lectureContentRepository.findById(any(Long.class))).willReturn(Optional.empty());
+        // when
+
+        // then
+        BaseException baseException = assertThrows(BaseException.class, () -> {
+            lectureService.createLecture(createLectureReq);
+        });
+        assertThat(baseException.getCode()).isEqualTo(Code.LECTURE_CONTENT_NOT_FOUND);
+
+    }
+
     @DisplayName("강의 생성 테스트")
     @Test
     void createLectureTest() {
         // given
-        CreateLectureReq createLectureReq = setUpCreateLectureReq(1L);
-        Lecture lecture = setUpLecture();
+        Long lectureContentId=4L;
+        CreateLectureReq createLectureReq = setUpCreateLectureReq(lectureContentId);
+
+        Long lectureId=2L;
+        Lecture lecture = setUpLecture(lectureId);
         LectureContent lectureContent = setUpLectureContent();
         given(lectureMapper.toLecture(any(CreateLectureReq.class))).willReturn(lecture);
         given(lectureContentRepository.findById(any(Long.class))).willReturn(Optional.of(lectureContent));
@@ -244,8 +274,8 @@ class LectureServiceTest {
     @Test
     void findAllLecturesResMapperTest() throws IllegalAccessException {
         // given
-
-        Lecture lecture = setUpLecture();
+        Long lectureId=3L;
+        Lecture lecture = setUpLecture(lectureId);
         // when
 
         FindAllLecturesRes findAllLecturesRes = lectureMapper.toFindAllLecturesRes(lecture, lecture.getLectureDate());
@@ -294,7 +324,8 @@ class LectureServiceTest {
     @Test
     void lectureDTOMapperTest() throws IllegalAccessException {
         // given
-        Lecture lecture = setUpLecture();
+        Long lectureId=5L;
+        Lecture lecture = setUpLecture(lectureId);
         // when
         LectureDto lectureDto = lectureMapper.toLectureDto(lecture);
         // then
@@ -306,11 +337,32 @@ class LectureServiceTest {
 
     }
 
+    @DisplayName("강의 조회 예외 테스트 - 강의가 존재하지 않음")
+    @Test
+    void findLectureLectureNotFoundTest() {
+        // given
+        given(lectureRepository.findLectureById(any(Long.class))).willReturn(Optional.empty());
+
+        Long lectureId=3L;
+        Long userId=6L;
+        User user = setUpUser(userId);
+
+        // when
+
+        // then
+        BaseException baseException = assertThrows(BaseException.class, () -> {
+            lectureService.findLecture(lectureId, user);
+        });
+        assertThat(baseException.getCode()).isEqualTo(Code.LECTURE_NOT_FOUND);
+    }
+
     @DisplayName("선정된 강의 조회 테스트 ")
     @Test
     void assignedFindLectureTest() throws IllegalAccessException {
         // given
-        Lecture lecture = setUpLecture();
+        Long lectureId=3L;
+        Lecture lecture = setUpLecture(lectureId);
+
         LectureContentDto lectureContentDto = setUpLectureContentDTO();
         LectureDto lectureDto = setUpLectureDTO();
 
@@ -318,19 +370,16 @@ class LectureServiceTest {
         given(lectureMapper.toLectureDto(any(Lecture.class))).willReturn(lectureDto);
         given(lectureContentMapper.toLectureContentDto(any(LectureContent.class))).willReturn(lectureContentDto);
 
-        int userLectureCount=5;
+        int userLectureCount=5; //강사로 선정된 유저 ID
         List<UserLecture> userLectures = setUpUserLectures(userLectureCount);
         given(userLectureRepository.findAllAssignedTutors(any(Long.class))).willReturn(userLectures);
 
-        Long assignedUserId= 5L;
+        Long assignedUserId= 5L;//강사로 선정된 유저 ID
         FindAllAssignedTutorsRes findAllAssignedTutorsRes = setUpFindAllAssignedTutorsRes(assignedUserId);
         given(userLectureMapper.toFindAllAssignedTutorsRes(any(UserLecture.class),any(User.class))).willReturn(findAllAssignedTutorsRes);
 
-        Long currentUserId=5L;
-
-        User user = User.builder()
-                .id(currentUserId)
-                .build();
+        Long currentUserId=5L;// 현재 강의를 조회하는 유저 ID (선정된 유저라 강사 정보 보여야함)
+        User user = setUpUser(currentUserId);
 
         // when
         FindLectureRes findLectureRes = lectureService.findLecture(lecture.getId(), user);
@@ -352,7 +401,9 @@ class LectureServiceTest {
     @Test
     void unassignedFindLectureTest() throws IllegalAccessException {
         // given
-        Lecture lecture = setUpLecture();
+        Long lectureId=3L;
+        Lecture lecture = setUpLecture(lectureId);
+
         LectureContentDto lectureContentDto = setUpLectureContentDTO();
         LectureDto lectureDto = setUpLectureDTO();
 
@@ -364,15 +415,12 @@ class LectureServiceTest {
         List<UserLecture> userLectures = setUpUserLectures(userLectureCount);
         given(userLectureRepository.findAllAssignedTutors(any(Long.class))).willReturn(userLectures);
 
-        Long assignedUserId= 5L;
+        Long assignedUserId= 5L; // 강의에 선정된 유저 ID
         FindAllAssignedTutorsRes findAllAssignedTutorsRes = setUpFindAllAssignedTutorsRes(assignedUserId);
         given(userLectureMapper.toFindAllAssignedTutorsRes(any(UserLecture.class),any(User.class))).willReturn(findAllAssignedTutorsRes);
 
-        Long currentUserId=4L;
-
-        User user = User.builder()
-                .id(currentUserId)
-                .build();
+        Long currentUserId=4L; // 현재 강의를 조회하는 유저 ID (선정되지 않아 강사 정보가 안보여야 한다.)
+        User user = setUpUser(currentUserId);
 
         // when
         FindLectureRes findLectureRes = lectureService.findLecture(lecture.getId(), user);
@@ -394,24 +442,30 @@ class LectureServiceTest {
     @Test
     void updateLectureExceptionTest() {
         // given
-        Lecture lecture = setUpLecture();
+        Long lectureId=2L;
+        Lecture lecture = setUpLecture(lectureId);
+
         UpdateLectureReq updateLectureReq = setUpUpdateLectureReq();
-        given(lectureRepository.findById(any(Long.class))).willThrow(BaseException.class);
+        given(lectureRepository.findById(any(Long.class))).willReturn(Optional.empty());
         // when
 
         // then
-        assertThrows(BaseException.class,()->{
-            lectureService.updateLecture(lecture.getId(),updateLectureReq);
+        BaseException baseException = assertThrows(BaseException.class, () -> {
+            lectureService.updateLecture(lecture.getId(), updateLectureReq);
         });
+        assertThat(baseException.getCode()).isEqualTo(Code.LECTURE_NOT_FOUND);
     }
 
     @DisplayName("강의 업데이트 테스트")
     @Test
     void updateLectureTest() {
         // given
-        Lecture lecture = setUpLecture();
+        Long lectureId=2L;
+        Lecture lecture = setUpLecture(lectureId);
+
         UpdateLectureReq updateLectureReq = setUpUpdateLectureReq();
         given(lectureRepository.findById(any(Long.class))).willReturn(Optional.of(lecture));
+
         doNothing().when(modelMapper).map(any(UpdateLectureReq.class),any(Lecture.class));
 
         // when
