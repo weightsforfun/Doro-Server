@@ -163,7 +163,7 @@ class LectureContentServiceTest {
         // given
         LectureContent lectureContent = setUpLectureContent();
         UpdateLectureContentReq updateLectureContentReq = setUpUpdateLectureContentReq();
-        given(lectureContentRepository.findById(any(Long.class))).willThrow(BaseException.class);
+        given(lectureContentRepository.findById(any(Long.class))).willReturn(Optional.empty());
 
         // when
 
