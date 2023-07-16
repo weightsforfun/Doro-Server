@@ -372,7 +372,7 @@ class LectureServiceTest {
 
         int userLectureCount=5; //강사로 선정된 유저 ID
         List<UserLecture> userLectures = setUpUserLectures(userLectureCount);
-        given(userLectureRepository.findAllAssignedTutors(any(Long.class))).willReturn(userLectures);
+        given(userLectureRepository.findAllAssignedTutors(any(Long.class),any(Long.class))).willReturn(userLectures);
 
         Long assignedUserId= 5L;//강사로 선정된 유저 ID
         FindAllAssignedTutorsRes findAllAssignedTutorsRes = setUpFindAllAssignedTutorsRes(assignedUserId);
@@ -413,7 +413,7 @@ class LectureServiceTest {
 
         int userLectureCount=5;
         List<UserLecture> userLectures = setUpUserLectures(userLectureCount);
-        given(userLectureRepository.findAllAssignedTutors(any(Long.class))).willReturn(userLectures);
+        given(userLectureRepository.findAllAssignedTutors(any(Long.class),any(Long.class))).willReturn(userLectures);
 
         Long assignedUserId= 5L; // 강의에 선정된 유저 ID
         FindAllAssignedTutorsRes findAllAssignedTutorsRes = setUpFindAllAssignedTutorsRes(assignedUserId);
@@ -428,12 +428,8 @@ class LectureServiceTest {
         for (Field field : findLectureRes.getClass().getDeclaredFields()) {
             field.setAccessible(true);
             Object value = field.get(findLectureRes);
-            if(field.getName().equals("assignedTutors")){
-                assertThat(value).isNull();
-            }
-            else {
-                assertThat(value).isNotNull();
-            }
+            assertThat(value).isNotNull();
+
         }
 
     }
