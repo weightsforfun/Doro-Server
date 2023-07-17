@@ -29,6 +29,7 @@ public class FindMyLecturesRes {
     private String time;
     private TutorRole tutorRole;
     private TutorStatus tutorStatus;
+    private Long lectureId;
 
 
 
