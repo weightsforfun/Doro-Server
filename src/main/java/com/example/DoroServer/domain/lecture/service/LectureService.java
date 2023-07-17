@@ -131,6 +131,8 @@ public class LectureService {
     }
 
     public String deleteLecture(Long id) {
+        Lecture lecture = lectureRepository.findLectureById(id).orElseThrow(()->new BaseException(Code.LECTURE_NOT_FOUND));
+        userLectureRepository.deleteAllByLecture(lecture);
         lectureRepository.deleteById(id);
         return "deleted";
     }
