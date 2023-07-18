@@ -37,6 +37,14 @@ public class AuthTestSetup {
     public static String DORO_USER_CODE = "2222";
     public static String EXCEPTION_CODE_FIELD = "code";
     public static String WRONG_PASSWORD = "wrongpassword1@";
+    public static String USER_AGENT = "Mozilla/5.0";
+    public static String FCM_TOKEN = "fcmTokenRandomValue";
+    public static String ACCESS_TOKEN = "accessTokenRandomValue";
+    public static String REFRESH_TOKEN = "refreshTokenRandomValue";
+
+    // 개발 코드에도 적용 필요
+    public static String USER_AGENT_HEADER = "User-Agent";
+    public static String FCM_TOKEN_HEADER = "fcmToken";
 
     public static ChangePasswordReq setUpChangePasswordReq(String passwordCheck) {
         return ChangePasswordReq.builder()
