@@ -62,10 +62,10 @@ public class AuthServiceImpl implements AuthService{
         if(!VERIFIED_CODE.equals(redisService.getValues(JOIN + joinReq.getPhone()))) {
             throw new BaseException(Code.UNAUTHORIZED_PHONE_NUMBER);
         }
-//        // 휴대폰 번호 중복 체크
-//        if(userRepository.existsByPhone(joinReq.getPhone())){
-//            throw new BaseException(Code.EXIST_PHONE);
-//        }
+        // 휴대폰 번호 중복 체크
+        if(userRepository.existsByPhone(joinReq.getPhone())){
+            throw new BaseException(Code.EXIST_PHONE);
+        }
         // 비밀번호, 비밀번호 확인 비교
         if(!joinReq.getPassword().equals(joinReq.getPasswordCheck())){
             throw new BaseException(Code.PASSWORD_DID_NOT_MATCH);
@@ -77,7 +77,7 @@ public class AuthServiceImpl implements AuthService{
         if(role == UserRole.ROLE_ADMIN && !DORO_ADMIN.equals(doroAuth)) {
             throw new BaseException(Code.DORO_ADMIN_AUTH_FAILED);
         }
-        if(role == UserRole.ROLE_USER && !DORO_USER.equals(doroAuth)) {
+        else if(role == UserRole.ROLE_USER && !DORO_USER.equals(doroAuth)) {
             throw new BaseException(Code.DORO_USER_AUTH_FAILED);
         }
         User user = joinReq.toUserEntity();
