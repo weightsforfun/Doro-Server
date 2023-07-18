@@ -10,6 +10,8 @@ plugins {
 	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 	//QueryDsl
 	id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
+	//JACOCO
+	id 'jacoco'
 }
 
 group = 'com.example'
@@ -71,6 +73,8 @@ dependencies {
 	implementation 'org.mapstruct:mapstruct:1.5.3.Final'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
 
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
 
 }
 
@@ -94,3 +98,62 @@ configurations {
 	querydsl.extendsFrom compileClasspath
 }
 //querydsl 추가 끝
+
+//jacoco 설정
+test {
+	useJUnitPlatform() // JUnit5를 사용하기 위한 설정
+	finalizedBy 'jacocoTestReport' // 추가
+}
+
+
+jacocoTestReport {
+	reports {
+		html.enabled true
+		xml.enabled false
+		csv.enabled false
+
+		// 리포트의 저장 경로를 설정합니다.
+		html.destination file("jacoco/jacocoHtml")
+	}
+	def Qdomains = []
+	for(qPattern in "**/QA" .. "**/QZ"){
+		Qdomains.add(qPattern+"*")
+	}
+	afterEvaluate {
+		classDirectories.setFrom(
+				files(classDirectories.files.collect {
+					fileTree(dir: it, excludes: [
+							'**/*Application*',
+							'**/*Exception*',
+							'**/dto/**',
+							// ...
+					]+Qdomains)
+				})
+		)
+	}
+	finalizedBy 'jacocoTestCoverageVerification'
+}
+
+jacocoTestCoverageVerification {
+	def Qdomains = []
+	for (qPattern in "*.QA".."*.QZ") {  // qPattern = "*.QA","*.QB","*.QC", ... "*.QZ"
+		Qdomains.add(qPattern + "*")
+	}
+	violationRules { // 커버리지의 범위와 퍼센테이지를 설정합니다.
+		rule {
+			element = 'CLASS'
+
+			limit {
+				counter = 'BRANCH'
+				value = 'COVEREDRATIO'
+				minimum = 0.00
+			}
+			excludes = [
+					'*.*Application',
+					'*.*Exception',
+					'*.dto.*',
+					// ...
+			] + Qdomains
+		}
+	}
+}

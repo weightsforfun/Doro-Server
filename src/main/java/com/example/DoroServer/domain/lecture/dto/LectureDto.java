@@ -1,11 +1,13 @@
 package com.example.DoroServer.domain.lecture.dto;
 
-import com.example.DoroServer.domain.lecture.entity.Lecture;
+
 import com.example.DoroServer.domain.lecture.entity.LectureDate;
+
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.example.DoroServer.domain.lecture.entity.LectureStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,6 +35,7 @@ public class LectureDto {
     private String subPayment;
     private String staffPayment;
     private String transportCost;
+    private LectureStatus status;
     private String time; // 시간
     private List<LocalDate> lectureDates = new ArrayList<>(); // 강의 날짜
     private LectureDate lectureDate;

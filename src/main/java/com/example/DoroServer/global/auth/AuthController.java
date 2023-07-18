@@ -15,6 +15,7 @@ import com.example.DoroServer.global.exception.JwtAuthenticationException;
 import com.example.DoroServer.global.jwt.CustomUserDetailsService;
 import com.example.DoroServer.global.jwt.JwtTokenProvider;
 import com.example.DoroServer.global.jwt.RedisService;
+import com.example.DoroServer.global.util.annotation.ClearSecurityContext;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import java.time.Duration;
@@ -59,6 +60,7 @@ public class AuthController {
         return SuccessResponse.successResponse("회원가입 완료");
     }
 
+    @ClearSecurityContext
     @Operation(summary = "001_02", description = "로그인")
     @PostMapping("/login")
     public ResponseEntity<?> login (@RequestBody @Valid LoginReq loginReq,
@@ -100,6 +102,7 @@ public class AuthController {
         return SuccessResponse.successResponse(account);
     }
 
+    @ClearSecurityContext
     @Operation(summary = "001_05", description = "비밀번호 변경")
     @PostMapping("/change/password")
     public SuccessResponse<String> changePassword(@RequestBody @Valid ChangePasswordReq changePasswordReq){
@@ -107,6 +110,7 @@ public class AuthController {
         return SuccessResponse.successResponse("비밀번호가 변경되었습니다.");
     }
 
+    @ClearSecurityContext
     @Operation(summary = "001_06", description = "토큰 재발급")
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(@RequestBody @Valid ReissueReq reissueReq,

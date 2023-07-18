@@ -18,7 +18,7 @@ import static javax.persistence.FetchType.*;
 public class Message extends BaseEntity {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "message_id")
     private Long id; //PK
 
