@@ -41,4 +41,8 @@ out/
 
 firebase/
 
+jacoco/
+
+
 kanu-keystore.p12
+

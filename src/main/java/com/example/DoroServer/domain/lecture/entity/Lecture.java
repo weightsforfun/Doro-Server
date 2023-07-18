@@ -27,7 +27,7 @@ import static javax.persistence.FetchType.*;
 public class Lecture extends BaseEntity {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "lecture_id")
     private Long id; // PK
 

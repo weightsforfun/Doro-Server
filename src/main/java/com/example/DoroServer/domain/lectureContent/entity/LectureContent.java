@@ -1,5 +1,6 @@
 package com.example.DoroServer.domain.lectureContent.entity;
 
+import javax.persistence.GenerationType;
 import lombok.*;
 
 import javax.persistence.Column;
@@ -16,7 +17,7 @@ import javax.validation.constraints.NotBlank;
 public class LectureContent {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "lecture_content_id")
     private Long id; // PK
 
@@ -27,4 +28,6 @@ public class LectureContent {
     private String remark; // 강의 기타 사항
 
     private String requirement; // 강의 자격 요건
+
+    private String content;
 }
