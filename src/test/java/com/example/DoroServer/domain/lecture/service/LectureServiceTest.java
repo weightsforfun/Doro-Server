@@ -478,12 +478,17 @@ class LectureServiceTest {
     void deleteLectureTest() {
         // given
         Long lectureId=1L;
+
+        Lecture lecture = setUpLecture(lectureId);
         doNothing().when(lectureRepository).deleteById(any(Long.class));
+        given(lectureRepository.findLectureById(any(Long.class))).willReturn(Optional.of(lecture));
+        doNothing().when(userLectureRepository).deleteAllByLecture(any(Lecture.class));
         // when
         lectureService.deleteLecture(lectureId);
         // then
         verify(lectureRepository,times(1)).deleteById(lectureId);
-
+        verify(lectureRepository,times(1)).findLectureById(lectureId);
+        verify(userLectureRepository,times(1)).deleteAllByLecture(lecture);
     }
 
     @DisplayName("끝난 강의 상태 변경 스케줄링 테스트")
