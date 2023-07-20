@@ -25,4 +25,7 @@ public interface LectureRepository extends JpaRepository<Lecture,Long>, LectureR
             + "group by ld.lecture_id having date_format(max(lecture_dates),\"%Y-%m-%d\") = date_format(:finishedDate,\"%Y-%m-%d\")) "
             ,nativeQuery = true)
     List<Lecture> findLecturesByFinishedDate(@Param("finishedDate") LocalDate finishedDate);
+
+    @Query(value = "select DISTINCT (l.city) from Lecture l")
+    List<String> findDistinctCity();
 }

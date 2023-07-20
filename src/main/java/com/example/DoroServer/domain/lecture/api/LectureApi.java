@@ -1,10 +1,7 @@
 package com.example.DoroServer.domain.lecture.api;
 
-import com.example.DoroServer.domain.lecture.dto.CreateLectureReq;
-import com.example.DoroServer.domain.lecture.dto.FindAllLecturesCond;
-import com.example.DoroServer.domain.lecture.dto.FindAllLecturesRes;
-import com.example.DoroServer.domain.lecture.dto.FindLectureRes;
-import com.example.DoroServer.domain.lecture.dto.UpdateLectureReq;
+import com.example.DoroServer.domain.lecture.dto.*;
+import com.example.DoroServer.domain.lecture.dto.FindAllLecturesInfo;
 import com.example.DoroServer.domain.lecture.service.LectureService;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.global.common.SuccessResponse;
@@ -37,7 +34,7 @@ public class LectureApi {
             @RequestParam(value = "size", defaultValue = "10") int size
     ) {
         PageRequest pageRequest = PageRequest.of(page,size);
-        List<FindAllLecturesRes> allLectures = lectureService.findAllLectures(findAllLecturesCond,
+        FindAllLecturesRes allLectures = lectureService.findAllLectures(findAllLecturesCond,
                 pageRequest);
         return SuccessResponse.successResponse(allLectures);
     }
@@ -73,6 +70,12 @@ public class LectureApi {
     public SuccessResponse deleteLecture(@PathVariable("id") Long id) {
         String lectureId = lectureService.deleteLecture(id);
         return SuccessResponse.successResponse(lectureId + "th lecture deleted");
+    }
+
+    @GetMapping("/cities")
+    public SuccessResponse findAllCities(){
+        List<String> cities = lectureService.findAllCities();
+        return  SuccessResponse.successResponse(cities);
     }
 
     @Scheduled(cron = "0 0 0 * * *")
