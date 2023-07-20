@@ -7,10 +7,8 @@ import com.example.DoroServer.domain.lecture.entity.LectureStatus;
 import com.example.DoroServer.domain.lecture.repository.LectureRepository;
 import com.example.DoroServer.domain.lectureContent.dto.LectureContentDto;
 import com.example.DoroServer.domain.lectureContent.dto.LectureContentMapper;
-import com.example.DoroServer.domain.lectureContent.dto.UpdateLectureContentReq;
 import com.example.DoroServer.domain.lectureContent.entity.LectureContent;
 import com.example.DoroServer.domain.lectureContent.repository.LectureContentRepository;
-import com.example.DoroServer.domain.lectureContent.service.LectureContentService;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.userLecture.dto.FindAllAssignedTutorsRes;
 import com.example.DoroServer.domain.userLecture.dto.UserLectureMapper;
@@ -18,7 +16,6 @@ import com.example.DoroServer.domain.userLecture.entity.UserLecture;
 import com.example.DoroServer.domain.userLecture.repository.UserLectureRepository;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +23,6 @@ import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
@@ -278,12 +274,12 @@ class LectureServiceTest {
         Lecture lecture = setUpLecture(lectureId);
         // when
 
-        FindAllLecturesRes findAllLecturesRes = lectureMapper.toFindAllLecturesRes(lecture, lecture.getLectureDate());
+        FindAllLecturesInfo findAllLecturesInfo = lectureMapper.toFindAllLecturesRes(lecture, lecture.getLectureDate());
 
         // then
-        for (Field field : findAllLecturesRes.getClass().getDeclaredFields()) {
+        for (Field field : findAllLecturesInfo.getClass().getDeclaredFields()) {
             field.setAccessible(true);
-            Object value = field.get(findAllLecturesRes);
+            Object value = field.get(findAllLecturesInfo);
             assertThat(value).isNotNull();
         }
 
@@ -296,12 +292,12 @@ class LectureServiceTest {
         int lectureLength=5;
         List<Lecture> lectureList = setUpLectures(lectureLength);
         Page<Lecture> lecturesPage = new PageImpl<>(lectureList);
-        FindAllLecturesRes findAllLecturesRes = FindAllLecturesRes.builder()
+        FindAllLecturesInfo findAllLecturesInfo = FindAllLecturesInfo.builder()
                 .place("place")
                 .build();
 
         given(lectureRepository.findAllLecturesWithFilter(any(FindAllLecturesCond.class),any(org.springframework.data.domain.Pageable.class))).willReturn(lecturesPage);
-        given(lectureMapper.toFindAllLecturesRes(any(Lecture.class),any(LectureDate.class))).willReturn(findAllLecturesRes);
+        given(lectureMapper.toFindAllLecturesRes(any(Lecture.class),any(LectureDate.class))).willReturn(findAllLecturesInfo);
         FindAllLecturesCond findAllLecturesCond = FindAllLecturesCond.builder()
                 .startDate(LocalDate.now())
                 .endDate(LocalDate.now())
@@ -312,9 +308,9 @@ class LectureServiceTest {
         int size=10;
         PageRequest pageRequest = PageRequest.of(page, size);
         // when
-        List<FindAllLecturesRes> allLectures = lectureService.findAllLectures(findAllLecturesCond, pageRequest);
+        FindAllLecturesRes allLectures = lectureService.findAllLectures(findAllLecturesCond, pageRequest);
         // then
-        assertThat(allLectures.size()).isEqualTo(lectureLength);
+        assertThat(allLectures.getLecturesInfos().size()).isEqualTo(lectureLength);
         verify(lectureRepository,times(1)).findAllLecturesWithFilter(findAllLecturesCond,pageRequest);
         verify(lectureMapper,times(lectureLength)).toFindAllLecturesRes(any(Lecture.class),any(LectureDate.class));
 
