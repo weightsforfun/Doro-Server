@@ -1,16 +1,9 @@
 package com.example.DoroServer.domain.lecture.dto;
 
-import com.example.DoroServer.domain.lecture.entity.Lecture;
-import com.example.DoroServer.domain.lecture.entity.LectureStatus;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+
+import lombok.*;
+
 import java.util.List;
-import javax.validation.constraints.NotEmpty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Getter
 @NoArgsConstructor
@@ -18,22 +11,6 @@ import lombok.ToString;
 @Builder
 @AllArgsConstructor
 public class FindAllLecturesRes {
-    private Long id;
-    private String mainTitle;
-    private String subTitle;
-    private LectureStatus status;
-    private LocalDate enrollEndDate;
-    private String city;
-    private String place;
-    private String mainTutor;
-    private String subTutor;
-    private String time;
-    private List<LocalDate> lectureDates;
-
-
-
-
-
-
-
+    private List<FindAllLecturesInfo> lecturesInfos;
+    private Long totalCount;
 }
