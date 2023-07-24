@@ -5,6 +5,8 @@ import com.example.DoroServer.domain.lecture.entity.Lecture;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
+import com.example.DoroServer.domain.lecture.entity.LectureStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -26,6 +28,6 @@ public interface LectureRepository extends JpaRepository<Lecture,Long>, LectureR
             ,nativeQuery = true)
     List<Lecture> findLecturesByFinishedDate(@Param("finishedDate") LocalDate finishedDate);
 
-    @Query(value = "select DISTINCT (l.city) from Lecture l")
-    List<String> findDistinctCity();
+    @Query(value = "select DISTINCT (l.city) from Lecture l where l.status= :lectureStatus")
+    List<String> findDistinctCity(LectureStatus lectureStatus);
 }

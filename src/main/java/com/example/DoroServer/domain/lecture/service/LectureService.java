@@ -135,8 +135,8 @@ public class LectureService {
         return "deleted";
     }
 
-    public List<String> findAllCities(){
-        return lectureRepository.findDistinctCity();
+    public List<String> findAllCities(LectureStatus lectureStatus){
+        return lectureRepository.findDistinctCity(lectureStatus);
     }
 
     public void checkLectureFinishedDate() {
