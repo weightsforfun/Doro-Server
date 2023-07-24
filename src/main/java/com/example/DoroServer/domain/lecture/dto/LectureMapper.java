@@ -3,7 +3,6 @@ package com.example.DoroServer.domain.lecture.dto;
 
 import com.example.DoroServer.domain.lecture.entity.Lecture;
 import com.example.DoroServer.domain.lecture.entity.LectureDate;
-import com.example.DoroServer.domain.lecture.entity.LectureStatus;
 import com.example.DoroServer.domain.lectureContent.dto.LectureContentDto;
 import com.example.DoroServer.domain.userLecture.dto.FindAllAssignedTutorsRes;
 import org.mapstruct.Mapper;
@@ -19,7 +18,7 @@ public interface LectureMapper {
 
 
     //Lecture -> FindAllLectureRes
-    FindAllLecturesRes toFindAllLecturesRes(Lecture lecture, LectureDate lectureDate);
+    FindAllLecturesInfo toFindAllLecturesRes(Lecture lecture, LectureDate lectureDate);
 
     //CreateLectureReq -> Lecture
     @Mapping(target = "status", constant = "RECRUITING")
