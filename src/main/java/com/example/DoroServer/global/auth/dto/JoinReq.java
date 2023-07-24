@@ -37,7 +37,6 @@ public class JoinReq {
     @NotBlank
     private String name;
 
-    @NotNull
     private LocalDate birth;
 
     @NotNull

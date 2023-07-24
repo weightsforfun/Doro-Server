@@ -51,7 +51,6 @@ public class User extends BaseEntity implements UserDetails {
     @NotBlank
     private String name; // 사용자 이름
 
-    @NotNull
     private LocalDate birth; // 생년월일
 
     @Enumerated(EnumType.STRING)
