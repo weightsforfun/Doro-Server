@@ -9,6 +9,7 @@ import com.example.DoroServer.domain.user.dto.FindUserRes;
 import com.example.DoroServer.domain.user.dto.UpdateUserReq;
 import com.example.DoroServer.domain.user.dto.UserMapper;
 import com.example.DoroServer.domain.user.entity.Degree;
+import com.example.DoroServer.domain.user.entity.Gender;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.entity.UserRole;
 import com.example.DoroServer.domain.user.repository.UserRepository;
@@ -112,7 +113,7 @@ public class UserServiceImpl implements UserService{
     public Long updateNotificationAgreement(Long id, Map<String, Boolean> notificationAgreement) {
         User user = userRepository.findById(id)
                 .orElseThrow(()-> new BaseException(Code.USER_NOT_FOUND));
-        Boolean agreement = notificationAgreement.getOrDefault("agreement",false);
+        Boolean agreement = notificationAgreement.getOrDefault("notificationAgreement",false);
         user.updateNotificationAgreement(agreement);
         return id;
     }

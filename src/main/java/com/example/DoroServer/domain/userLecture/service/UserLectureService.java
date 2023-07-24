@@ -54,7 +54,7 @@ public class UserLectureService {
 
     public Long createTutor(Long id, CreateTutorReq createTutorReq) {
         //중복방지
-        Optional<UserLecture> optionalUserLecture = userLectureRepository.findUerLecture(id,
+        Optional<UserLecture> optionalUserLecture = userLectureRepository.findUserLecture(id,
                 createTutorReq.getUserId(), createTutorReq.getTutorRole());
 
         if(optionalUserLecture.isPresent()){
@@ -78,7 +78,7 @@ public class UserLectureService {
     }
 
     public String selectTutor(Long lectureId, SelectTutorReq selectTutorReq) {
-        UserLecture userLecture = userLectureRepository.findUerLecture(lectureId,
+        UserLecture userLecture = userLectureRepository.findUserLecture(lectureId,
                         selectTutorReq.getUserId(), selectTutorReq.getTutorRole())
                 .orElseThrow(() -> new BaseException(Code.TUTOR_NOT_FOUND));
         User user = userRepository.findById(selectTutorReq.getUserId()).orElseThrow(()->new BaseException(Code.USER_NOT_FOUND));

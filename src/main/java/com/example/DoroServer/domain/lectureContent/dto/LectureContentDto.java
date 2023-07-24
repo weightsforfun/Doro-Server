@@ -28,8 +28,6 @@ public class LectureContentDto {
     @NotBlank
     private String detail; // 강의 세부 구성
 
-    @NotNull
-    private String remark; // 강의 기타 사항
 
     @NotNull
     private String requirement; // 강의 자격 요건

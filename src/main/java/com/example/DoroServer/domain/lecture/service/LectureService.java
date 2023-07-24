@@ -1,12 +1,7 @@
 package com.example.DoroServer.domain.lecture.service;
 
-import com.example.DoroServer.domain.lecture.dto.CreateLectureReq;
-import com.example.DoroServer.domain.lecture.dto.FindAllLecturesCond;
-import com.example.DoroServer.domain.lecture.dto.FindAllLecturesRes;
-import com.example.DoroServer.domain.lecture.dto.FindLectureRes;
-import com.example.DoroServer.domain.lecture.dto.LectureDto;
-import com.example.DoroServer.domain.lecture.dto.LectureMapper;
-import com.example.DoroServer.domain.lecture.dto.UpdateLectureReq;
+import com.example.DoroServer.domain.lecture.dto.*;
+import com.example.DoroServer.domain.lecture.dto.FindAllLecturesInfo;
 import com.example.DoroServer.domain.lecture.entity.Lecture;
 import com.example.DoroServer.domain.lecture.entity.LectureStatus;
 import com.example.DoroServer.domain.lecture.repository.LectureRepository;
@@ -17,15 +12,16 @@ import com.example.DoroServer.domain.lectureContent.repository.LectureContentRep
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.userLecture.dto.FindAllAssignedTutorsRes;
 import com.example.DoroServer.domain.userLecture.dto.UserLectureMapper;
+import com.example.DoroServer.domain.userLecture.entity.TutorStatus;
 import com.example.DoroServer.domain.userLecture.entity.UserLecture;
 import com.example.DoroServer.domain.userLecture.repository.UserLectureRepository;
+import com.example.DoroServer.global.common.SuccessResponse;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
 
 import java.time.LocalDate;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -50,18 +46,22 @@ public class LectureService {
     private final LectureContentMapper lectureContentMapper;
     private final UserLectureMapper userLectureMapper;
 
-    public List<FindAllLecturesRes> findAllLectures(FindAllLecturesCond findAllLecturesCond,
-                                                    Pageable pageable) {
+    public FindAllLecturesRes findAllLectures(FindAllLecturesCond findAllLecturesCond,
+                                                     Pageable pageable) {
         Page<Lecture> allLecturesWithFilter = lectureRepository.findAllLecturesWithFilter(
                 findAllLecturesCond, pageable);
 
         List<Lecture> content = allLecturesWithFilter.getContent();
 
-        List<FindAllLecturesRes> lectureResList = content.stream()
+        List<FindAllLecturesInfo> lectureResList = content.stream()
                 .map(res -> lectureMapper.toFindAllLecturesRes(res, res.getLectureDate()))
                 .collect(Collectors.toList());
 
-        return lectureResList;
+        return FindAllLecturesRes.builder()
+                .lecturesInfos(lectureResList)
+                .totalCount(allLecturesWithFilter.getTotalElements())
+                .build();
+
     }
 
     public Long createLecture(CreateLectureReq createLectureReq) {
@@ -83,26 +83,33 @@ public class LectureService {
 
         LectureContentDto lectureContentDto = lectureContentMapper.toLectureContentDto(lecture.getLectureContent());
 
-        List<UserLecture> allAssignedTutors = userLectureRepository.findAllAssignedTutors(lectureId);
+        List<UserLecture> allAssignedTutors = userLectureRepository.findAllAssignedTutors(lectureId, user.getId());
 
         List<FindAllAssignedTutorsRes> findAllAssignedTutorsResList = allAssignedTutors.stream()
-                .map(res -> userLectureMapper.toFindFindAllAssignedTutorsRes(res, res.getUser()))
+                .map(res -> userLectureMapper.toFindAllAssignedTutorsRes(res, res.getUser()))
                 .collect(Collectors.toList());
 
         Boolean isAssigned = Boolean.FALSE;
 
+        LinkedList<FindAllAssignedTutorsRes> myUserLecture = new LinkedList<>();
+
         for (FindAllAssignedTutorsRes findAllAssignedTutorsRes : findAllAssignedTutorsResList) {
-            if(findAllAssignedTutorsRes.getUserId()==user.getId()){
-                isAssigned=Boolean.TRUE;
+            if(findAllAssignedTutorsRes.getUserId()==user.getId()){  //현재 조회자가 강의신청자인가
+                myUserLecture.add(findAllAssignedTutorsRes);
+                if(findAllAssignedTutorsRes.getTutorStatus()==TutorStatus.ASSIGNED) { // 조회자가 강의신청자이고 배정이 됐는가.
+                    isAssigned=Boolean.TRUE;
+                }
             }
         }
 
         if (isAssigned) {
+            log.info("assigned");
             return lectureMapper.toFindLectureRes(lectureDto, lectureContentDto,findAllAssignedTutorsResList);
 
         }
         else{
-            return lectureMapper.toFindLectureRes(lectureDto, lectureContentDto,null);
+            log.info("not assigned");
+            return lectureMapper.toFindLectureRes(lectureDto, lectureContentDto,myUserLecture);
 
         }
 
@@ -111,7 +118,14 @@ public class LectureService {
 
     public Long updateLecture(Long id, UpdateLectureReq updateLectureReq) {
         Lecture lecture = lectureRepository.findById(id).orElseThrow(() -> new BaseException(Code.LECTURE_NOT_FOUND));
+        if(updateLectureReq.getLectureContentId()!=null){
+            Long lectureContentId = updateLectureReq.getLectureContentId();
+            LectureContent lectureContent = lectureContentRepository.findById(lectureContentId).orElseThrow(() -> new BaseException(Code.LECTURE_CONTENT_NOT_FOUND));
+            lecture.setLectureContent(lectureContent);
+        }
+
         modelMapper.map(updateLectureReq, lecture);
+
         lecture.getLectureDates().clear();
         List<LocalDate> newLectureDates = updateLectureReq.getLectureDates();
         for (LocalDate newLectureDate : newLectureDates) {
@@ -122,8 +136,14 @@ public class LectureService {
     }
 
     public String deleteLecture(Long id) {
+        Lecture lecture = lectureRepository.findLectureById(id).orElseThrow(()->new BaseException(Code.LECTURE_NOT_FOUND));
+        userLectureRepository.deleteAllByLecture(lecture);
         lectureRepository.deleteById(id);
         return "deleted";
+    }
+
+    public List<String> findAllCities(LectureStatus lectureStatus){
+        return lectureRepository.findDistinctCity(lectureStatus);
     }
 
     public void checkLectureFinishedDate() {
