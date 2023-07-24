@@ -2,6 +2,7 @@ package com.example.DoroServer.domain.lecture.api;
 
 import com.example.DoroServer.domain.lecture.dto.*;
 import com.example.DoroServer.domain.lecture.dto.FindAllLecturesInfo;
+import com.example.DoroServer.domain.lecture.entity.LectureStatus;
 import com.example.DoroServer.domain.lecture.service.LectureService;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.global.common.SuccessResponse;
@@ -72,9 +73,9 @@ public class LectureApi {
         return SuccessResponse.successResponse(lectureId + "th lecture deleted");
     }
 
-    @GetMapping("/cities")
-    public SuccessResponse findAllCities(){
-        List<String> cities = lectureService.findAllCities();
+    @GetMapping("/cities/{status}")
+    public SuccessResponse findAllCities(@PathVariable("status")LectureStatus lectureStatus){
+        List<String> cities = lectureService.findAllCities(lectureStatus);
         return  SuccessResponse.successResponse(cities);
     }
 
