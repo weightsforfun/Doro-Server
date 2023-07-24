@@ -37,6 +37,7 @@ public class LectureDto {
     private String transportCost;
     private LectureStatus status;
     private String time; // 시간
+    private String remark;
     private List<LocalDate> lectureDates = new ArrayList<>(); // 강의 날짜
     private LectureDate lectureDate;
 

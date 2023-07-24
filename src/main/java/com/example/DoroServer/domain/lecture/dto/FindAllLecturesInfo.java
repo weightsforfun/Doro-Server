@@ -25,6 +25,7 @@ public class FindAllLecturesInfo {
     private String place;
     private String mainTutor;
     private String subTutor;
+    private String staff;
     private String time;
     private List<LocalDate> lectureDates;
 

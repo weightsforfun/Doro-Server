@@ -60,6 +60,8 @@ public class Lecture extends BaseEntity {
 
     private String time; // 시간
 
+    private String remark; // 강의 기타 사항
+
     @ElementCollection()
     @CollectionTable(name = "lecture_date", joinColumns = @JoinColumn(name = "lecture_id"))
     private List<LocalDate> lectureDates = new ArrayList<>(); // 강의 날짜

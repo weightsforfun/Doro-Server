@@ -59,6 +59,8 @@ public class CreateLectureReq {
     private String transportCost;
     @NotBlank
     private String time; // 시간
+    @NotBlank
+    private String remark;
     @NotNull
     private List<LocalDate> lectureDates = new ArrayList<>(); // 강의 날짜
     @NotNull
