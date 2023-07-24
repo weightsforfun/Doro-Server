@@ -51,7 +51,6 @@ class LectureContentServiceTest {
         return LectureContentDto.builder()
                 .kit("kit")
                 .detail("detail")
-                .remark("remark")
                 .requirement("requirement")
                 .content("content")
                 .build();
@@ -62,7 +61,6 @@ class LectureContentServiceTest {
                 .id(1L)
                 .kit("kit")
                 .detail("detail")
-                .remark("remark")
                 .requirement("requirement")
                 .content("content")
                 .build();

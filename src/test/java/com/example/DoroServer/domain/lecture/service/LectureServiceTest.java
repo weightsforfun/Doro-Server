@@ -96,6 +96,7 @@ class LectureServiceTest {
                 .staffPayment("staffPayment")
                 .transportCost("transPortCost")
                 .time("time")
+                .remark("remark")
                 .lectureDates(dates)
                 .lectureDate(LectureDate.builder()
                         .enrollEndDate(now)
@@ -111,7 +112,6 @@ class LectureServiceTest {
                 .content("content")
                 .kit("kit")
                 .id(1L)
-                .remark("remark")
                 .requirement("requirement")
                 .detail("detail")
                 .build();
@@ -138,6 +138,7 @@ class LectureServiceTest {
                 .staffPayment("staffPayment")
                 .transportCost("transPortCost")
                 .time("time")
+                .remark("remark")
                 .lectureDates(dates)
                 .lectureDate(LectureDate.builder()
                         .enrollEndDate(now)
