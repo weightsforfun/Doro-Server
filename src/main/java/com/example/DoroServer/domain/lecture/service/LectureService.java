@@ -118,7 +118,14 @@ public class LectureService {
 
     public Long updateLecture(Long id, UpdateLectureReq updateLectureReq) {
         Lecture lecture = lectureRepository.findById(id).orElseThrow(() -> new BaseException(Code.LECTURE_NOT_FOUND));
+        if(updateLectureReq.getLectureContentId()!=null){
+            Long lectureContentId = updateLectureReq.getLectureContentId();
+            LectureContent lectureContent = lectureContentRepository.findById(lectureContentId).orElseThrow(() -> new BaseException(Code.LECTURE_CONTENT_NOT_FOUND));
+            lecture.setLectureContent(lectureContent);
+        }
+
         modelMapper.map(updateLectureReq, lecture);
+
         lecture.getLectureDates().clear();
         List<LocalDate> newLectureDates = updateLectureReq.getLectureDates();
         for (LocalDate newLectureDate : newLectureDates) {

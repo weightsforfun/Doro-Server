@@ -38,5 +38,6 @@ public class UpdateLectureReq {
     private List<LocalDate> lectureDates = new ArrayList<>(); // 강의 날짜
     private LectureDate lectureDate;
     private LectureStatus status;
+    private Long lectureContentId;
 
 }
