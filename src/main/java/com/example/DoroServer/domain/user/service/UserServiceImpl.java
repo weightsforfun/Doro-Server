@@ -54,6 +54,7 @@ public class UserServiceImpl implements UserService{
 
         user.updateDegree(updateDegree);
         user.updateGeneration(updateUserReq.getGeneration());
+        user.updateBirth(updateUserReq.getBirth());
 
         if(!user.getPhone().equals(updateUserReq.getPhone())){
             if(!VERIFIED_CODE.equals(redisService.getValues(UPDATE + updateUserReq.getPhone()))) {
