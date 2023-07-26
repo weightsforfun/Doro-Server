@@ -128,6 +128,10 @@ public class User extends BaseEntity implements UserDetails {
         this.generation = generation;
     }
 
+    public void updateBirth(LocalDate birth){
+        this.birth = birth;
+    }
+
     public void updatePhone(String phone) {
         this.phone = phone;
     }
