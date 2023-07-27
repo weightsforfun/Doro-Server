@@ -13,6 +13,7 @@ import com.example.DoroServer.domain.userLecture.repository.UserLectureRepositor
 import com.example.DoroServer.domain.userNotification.repository.UserNotificationRepository;
 import com.example.DoroServer.global.auth.dto.ChangePasswordReq;
 import com.example.DoroServer.global.auth.dto.JoinReq;
+import com.example.DoroServer.global.common.Constants.REDIS_MESSAGE_PREFIX;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
 import com.example.DoroServer.global.jwt.RedisService;
@@ -55,21 +56,27 @@ public class AuthServiceImpl implements AuthService{
         DORO_USER = doro_user;
     }
 
+    private void validatePhoneRedis(REDIS_MESSAGE_PREFIX prefix, String phone) {
+        if(!VERIFIED_CODE.equals(redisService.getValues(prefix + phone))) {
+            throw new BaseException(Code.UNAUTHORIZED_PHONE_NUMBER);
+        }
+    }
+
+    private void validatePasswordConsistency(String password, String passwordCheck) {
+        if(!password.equals(passwordCheck)){
+            throw new BaseException(Code.PASSWORD_DID_NOT_MATCH);
+        }
+    }
 
     @Override
     public void join(JoinReq joinReq) {
-        // 레디스 인증된 번호 조회
-        if(!VERIFIED_CODE.equals(redisService.getValues(JOIN + joinReq.getPhone()))) {
-            throw new BaseException(Code.UNAUTHORIZED_PHONE_NUMBER);
-        }
+        validatePhoneRedis(JOIN, joinReq.getPhone());
         // 휴대폰 번호 중복 체크
         if(userRepository.existsByPhone(joinReq.getPhone())){
             throw new BaseException(Code.EXIST_PHONE);
         }
         // 비밀번호, 비밀번호 확인 비교
-        if(!joinReq.getPassword().equals(joinReq.getPasswordCheck())){
-            throw new BaseException(Code.PASSWORD_DID_NOT_MATCH);
-        }
+        validatePasswordConsistency(joinReq.getPassword(), joinReq.getPasswordCheck());
 
         // Role - Admin 회원가입 희망 시 Admin Code 입력해야 가입 가능
         UserRole role = joinReq.getRole();
@@ -85,6 +92,8 @@ public class AuthServiceImpl implements AuthService{
         userRepository.save(user);
     }
 
+
+
     @Override
     public void checkAccount(String account) {
         if(userRepository.existsByAccount(account)){
@@ -94,9 +103,8 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     public String findAccount(String phone) {
-        if(!VERIFIED_CODE.equals(redisService.getValues(ACCOUNT + phone))) {
-            throw new BaseException(Code.UNAUTHORIZED_PHONE_NUMBER);
-        }
+        validatePhoneRedis(ACCOUNT, phone);
+
         User user = userRepository.findByPhone(phone).orElseThrow(()
             -> new BaseException(Code.ACCOUNT_NOT_FOUND));
         return user.getAccount();
@@ -104,12 +112,11 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     public void changePassword(ChangePasswordReq changePasswordReq) {
-        if(!VERIFIED_CODE.equals(redisService.getValues(PASSWORD + changePasswordReq.getPhone()))) {
-            throw new BaseException(Code.UNAUTHORIZED_PHONE_NUMBER);
-        }
-        if(!changePasswordReq.getNewPassword().equals(changePasswordReq.getNewPasswordCheck())){
-            throw new BaseException(Code.PASSWORD_DID_NOT_MATCH);
-        }
+        validatePhoneRedis(PASSWORD, changePasswordReq.getPhone());
+
+        validatePasswordConsistency(changePasswordReq.getNewPassword(),
+                changePasswordReq.getNewPasswordCheck());
+
         User user = userRepository.findByAccountAndPhone(changePasswordReq.getAccount(),
                 changePasswordReq.getPhone())
             .orElseThrow(() -> new BaseException(Code.ACCOUNT_NOT_FOUND));
