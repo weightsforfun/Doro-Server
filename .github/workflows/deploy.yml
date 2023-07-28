@@ -1,0 +1,88 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+        
+      - name: Setup MySQL
+        uses: mirromutth/mysql-action@v1.1
+        with:
+          mysql database: 'dev' 
+          mysql user: 'test'
+          mysql password: ${{ secrets.MYSQL_PWD }}
+
+      - name: Make application.properties
+        run: |
+          cd ./src/main
+          mkdir resources
+          cd ./resources
+          touch ./application.properties
+          echo "${{ secrets.APPLICATION }}" > ./application.properties
+        shell: bash
+      
+      - name: Make jwt.properties
+        run: |
+          cd ./src/main/resources
+          touch ./jwt.properties
+          echo "${{ secrets.JWT_PROPERTIES }}" > ./jwt.properties
+        shell: bash
+        
+      - name: Make firebase_service_key.json
+        run: |
+          cd ./src/main/resources
+          mkdir firebase
+          cd ./firebase
+          touch ./firebase_service_key.json
+          echo "${{ secrets.FIREBASE_SERVICE_KEY }}" > ./firebase_service_key.json
+        shell: bash
+        
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build -x test
+        
+      - name: Make zip file
+        run: |
+          mkdir deploy
+          cp ./docker-compose.blue.yml ./deploy/
+          cp ./docker-compose.green.yml ./deploy/
+          cp ./appspec.yml ./deploy/
+          cp ./Dockerfile ./deploy/
+          cp ./*.sh ./deploy/
+          cp ./build/libs/*.jar ./deploy/
+          zip -r -qq -j ./doro-build.zip ./deploy
+          
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+        
+      - name: Upload to S3
+        run: |
+          aws s3 cp \
+            --region ap-northeast-2 \
+            ./doro-build.zip s3://doroeduapp
+      
+      - name: Code Deploy
+        run: aws deploy create-deployment --application-name doro-deploy
+          --deployment-config-name CodeDeployDefault.OneAtATime
+          --deployment-group-name doro-deploy-group
+          --s3-location bucket=doroeduapp,bundleType=zip,key=doro-build.zip

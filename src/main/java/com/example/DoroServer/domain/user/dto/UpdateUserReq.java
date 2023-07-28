@@ -2,6 +2,7 @@ package com.example.DoroServer.domain.user.dto;
 
 import com.example.DoroServer.domain.user.entity.Degree;
 import com.example.DoroServer.domain.user.entity.StudentStatus;
+import java.time.LocalDate;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.validation.constraints.NotBlank;
@@ -32,5 +33,5 @@ public class UpdateUserReq {
     @NotNull
     private int generation; // 사용자 기수
 
-    //사용자 프로필 수정 기능 추가필요
+    private LocalDate birth;
 }

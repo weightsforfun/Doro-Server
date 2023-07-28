@@ -52,7 +52,6 @@ public class User extends BaseEntity implements UserDetails {
     @NotBlank
     private String name; // 사용자 이름
 
-    @NotNull
     private LocalDate birth; // 생년월일
 
     @Enumerated(EnumType.STRING)
@@ -128,6 +127,10 @@ public class User extends BaseEntity implements UserDetails {
 
     public void updateGeneration(int generation) {
         this.generation = generation;
+    }
+
+    public void updateBirth(LocalDate birth){
+        this.birth = birth;
     }
 
     public void updatePhone(String phone) {
