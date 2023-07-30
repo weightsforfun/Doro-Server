@@ -43,18 +43,16 @@ jobs:
         shell: bash
         
       - name: Make firebase Directory
-        run: |
-          cd ./src/main/resources
-          mkdir firebase
+        run: mkdir -p ./src/main/resources/firebase
         shell: bash
         
-      - name: Make firebase_service_key.json
+      - name: create-fcm-json
         id: create-fcm-json
         uses: jsdaniell/create-json@1.1.2
         with:
           name: "firebase_service_key.json"
           json: ${{ secrets.FIREBASE_SERVICE_KEY }}
-          dir: "./src/main/resources/firebase"
+          dir: "${{ github.workspace }}/src/main/resources/firebase/"
         
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
