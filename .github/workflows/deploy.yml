@@ -52,7 +52,7 @@ jobs:
         with:
           name: "firebase_service_key.json"
           json: ${{ secrets.FIREBASE_SERVICE_KEY }}
-          dir: "${{ github.workspace }}/src/main/resources/firebase/"
+          dir: "src/main/resources/firebase/"
         
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
