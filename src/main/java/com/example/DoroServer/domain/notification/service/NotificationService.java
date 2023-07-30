@@ -221,7 +221,7 @@ public class NotificationService {
                     // 응답을 받았을 때 처리 로직
                     int statusCode = response.code();
                     String responseData = response.body().string();
-//                    log.info("fcm response: {}",responseData);
+                    log.info("fcm response: {}",responseData);
 
                     response.close();
                 }
