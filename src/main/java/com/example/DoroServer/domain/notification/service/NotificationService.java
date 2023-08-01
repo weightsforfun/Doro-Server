@@ -109,10 +109,11 @@ public class NotificationService {
     public void sendNotificationToAll(NotificationContentReq notificationContentReq,
             NotificationType notificationType,Long announcementId) {
         List<User> users = userRepository.findAllWithTokens();
+        Long notificationId = saveNotification(notificationContentReq, notificationType,announcementId);
+
         if (!users.isEmpty()) {
             users.stream().forEach(user -> {
                 // 알림 저장
-                Long notificationId = saveNotification(notificationContentReq, notificationType,announcementId);
                 userNotificationService.saveUserNotification(user.getId(), notificationId);
 
                 // 유저별로 알림 수신 동의 여부 체크
