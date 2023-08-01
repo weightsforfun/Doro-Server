@@ -111,8 +111,6 @@ public class NotificationService {
             NotificationType notificationType,Long announcementId) {
         List<User> users = userRepository.findAllWithTokens();
 
-        AtomicInteger successNum = new AtomicInteger(0);
-
         Long notificationId = saveNotification(notificationContentReq, notificationType,announcementId);
 
         if (!users.isEmpty()) {
@@ -128,7 +126,7 @@ public class NotificationService {
                                     .body(notificationContentReq.getBody())
                                     .id(announcementId)
                                     .build();
-                            sendMessageTo(notificationReq, notificationType, user, notificationId, successNum);
+                            sendMessageTo(notificationReq, notificationType, user, notificationId);
                         });
                     } else if(notificationType == NotificationType.NOTIFICATION) {
                         user.getTokens().stream().forEach(token -> {
@@ -138,16 +136,12 @@ public class NotificationService {
                                     .body(notificationContentReq.getBody())
                                     .id(notificationId)
                                     .build();
-                            sendMessageTo(notificationReq, notificationType, user, notificationId, successNum);
+                            sendMessageTo(notificationReq, notificationType, user, notificationId);
                         });
                     }
                 }
             });
         }
-        if (successNum.get() == 0){
-            notificationRepository.deleteById(notificationId);
-        }
-        log.info("알림 전송 성공 개수: {}", successNum.get());
     }
 
     // 선택한 유저에게 알림 전송
@@ -201,7 +195,7 @@ public class NotificationService {
 
     // FCM 메시지를 보내는 메소드
     public void sendMessageTo(NotificationReq notificationReq, NotificationType notificationType,
-            User user, Long notificationId, AtomicInteger successNum) {
+            User user, Long notificationId) {
         // FCM 메시지 생성
         String message = makeMessage(notificationReq,notificationType);
 
@@ -234,7 +228,7 @@ public class NotificationService {
                     log.info("response 확인 ---------------: {}",response);
                     if (response.isSuccessful()){
                         userNotificationService.saveUserNotification(user.getId(), notificationId);
-                        successNum.incrementAndGet();
+                        log.info("알림 전송 성공: {}", user.getId());
                     } else {
                         log.warn("유효하지 않은 FCM 토큰: {}", response.body().string());
                     }
