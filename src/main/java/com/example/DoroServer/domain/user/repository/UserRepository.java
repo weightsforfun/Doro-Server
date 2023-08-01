@@ -27,7 +27,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = "update User u set u.profileImg = :profile_img where u.id = :userId")
     void updateProfileImgById(@Param("userId") Long userId, @Param("profile_img") String profile_img);
 
-    @Query("SELECT u FROM User u LEFT JOIN FETCH u.tokens")
+    @Query("SELECT u FROM User u INNER JOIN FETCH u.tokens")
     List<User> findAllWithTokens();
 
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.tokens WHERE u.id = :id")
