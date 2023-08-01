@@ -113,9 +113,6 @@ public class NotificationService {
 
         if (!users.isEmpty()) {
             users.stream().forEach(user -> {
-                // 알림 저장
-                userNotificationService.saveUserNotification(user.getId(), notificationId);
-
                 // 유저별로 알림 수신 동의 여부 체크
                 if (user.getNotificationAgreement()) {
                     // 동의했을 경우 보유한 모든 토큰에 알림 발송
@@ -127,7 +124,12 @@ public class NotificationService {
                                     .body(notificationContentReq.getBody())
                                     .id(announcementId)
                                     .build();
-                            sendMessageTo(notificationReq,notificationType);
+                            try {
+                                sendMessageTo(notificationReq, notificationType);
+                                userNotificationService.saveUserNotification(user.getId(), notificationId);
+                            } catch(Exception e){
+                                log.warn("유효하지 않은 FcmToken: {}", e.getMessage());
+                            }
                         });
                     } else if(notificationType == NotificationType.NOTIFICATION) {
                         user.getTokens().stream().forEach(token -> {
@@ -137,7 +139,12 @@ public class NotificationService {
                                     .body(notificationContentReq.getBody())
                                     .id(notificationId)
                                     .build();
-                            sendMessageTo(notificationReq,notificationType);
+                            try {
+                                sendMessageTo(notificationReq, notificationType);
+                                userNotificationService.saveUserNotification(user.getId(), notificationId);
+                            } catch(Exception e){
+                                log.warn("유효하지 않은 FcmToken: {}", e.getMessage());
+                            }
                         });
                     }
 
