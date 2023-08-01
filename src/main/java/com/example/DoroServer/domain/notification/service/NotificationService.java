@@ -24,7 +24,6 @@ import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Call;
@@ -39,7 +38,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -55,6 +53,8 @@ public class NotificationService {
 
     private final UserNotificationService userNotificationService;
 
+    private final SaveNotificationService saveNotificationService;
+
     private final ObjectMapper objectMapper;
 
     private final String API_URL;       // FCM 전송 Api URL
@@ -67,6 +67,7 @@ public class NotificationService {
             ObjectMapper objectMapper,
             UserRepository userRepository,
             UserNotificationService userNotificationService,
+            SaveNotificationService saveNotificationService,
             @Value("${api.url}") String apiUrl,
             @Value("${project.id}") String projectId) {
         this.notificationRepository = notificationRepository;
@@ -74,6 +75,7 @@ public class NotificationService {
         this.objectMapper = objectMapper;
         this.userRepository = userRepository;
         this.userNotificationService = userNotificationService;
+        this.saveNotificationService = saveNotificationService;
         this.API_URL = apiUrl;
         this.PROJECT_ID = projectId;
     }
@@ -97,14 +99,6 @@ public class NotificationService {
         }).toRes();
     }
 
-    // 전달받은 title과 body로 알림을 저장하는 메소드
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public Long saveNotification(NotificationContentReq notificationContentReq,
-            NotificationType notificationType,Long announcementId) {
-        Notification notification = notificationContentReq.toEntity(notificationType, announcementId);
-        notificationRepository.save(notification);
-        return notification.getId();
-    }
 
     // 모든 유저에게 푸쉬알림 발송 후 저장
     @Transactional
@@ -112,7 +106,8 @@ public class NotificationService {
             NotificationType notificationType,Long announcementId) {
         List<User> users = userRepository.findAllWithTokens();
 
-        Long notificationId = saveNotification(notificationContentReq, notificationType,announcementId);
+        Long notificationId = saveNotificationService.saveNotification(
+                notificationContentReq, notificationType,announcementId);
 
         if (!users.isEmpty()) {
             users.stream().forEach(user -> {
@@ -157,8 +152,8 @@ public class NotificationService {
                     }
             );
             // 알림 저장
-            Long notificationId = saveNotification(notificationContentReq,
-                    NotificationType.NOTIFICATION,null);
+            Long notificationId = saveNotificationService.saveNotification(
+                    notificationContentReq, NotificationType.NOTIFICATION,null);
             userNotificationService.saveUserNotification(id, notificationId);
 
             // 유저별로 알림 수신 동의 여부 체크
