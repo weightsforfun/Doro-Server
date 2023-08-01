@@ -39,6 +39,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -97,7 +98,7 @@ public class NotificationService {
     }
 
     // 전달받은 title과 body로 알림을 저장하는 메소드
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Long saveNotification(NotificationContentReq notificationContentReq,
             NotificationType notificationType,Long announcementId) {
         Notification notification = notificationContentReq.toEntity(notificationType, announcementId);
