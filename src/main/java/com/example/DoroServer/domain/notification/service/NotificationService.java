@@ -24,6 +24,7 @@ import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Call;
@@ -109,6 +110,9 @@ public class NotificationService {
     public void sendNotificationToAll(NotificationContentReq notificationContentReq,
             NotificationType notificationType,Long announcementId) {
         List<User> users = userRepository.findAllWithTokens();
+
+        AtomicInteger successNum = new AtomicInteger(0);
+
         Long notificationId = saveNotification(notificationContentReq, notificationType,announcementId);
 
         if (!users.isEmpty()) {
@@ -124,12 +128,7 @@ public class NotificationService {
                                     .body(notificationContentReq.getBody())
                                     .id(announcementId)
                                     .build();
-                            try {
-                                sendMessageTo(notificationReq, notificationType);
-                                userNotificationService.saveUserNotification(user.getId(), notificationId);
-                            } catch(Exception e){
-                                log.warn("유효하지 않은 FcmToken: {}", e.getMessage());
-                            }
+                            sendMessageTo(notificationReq, notificationType, user, notificationId, successNum);
                         });
                     } else if(notificationType == NotificationType.NOTIFICATION) {
                         user.getTokens().stream().forEach(token -> {
@@ -139,18 +138,16 @@ public class NotificationService {
                                     .body(notificationContentReq.getBody())
                                     .id(notificationId)
                                     .build();
-                            try {
-                                sendMessageTo(notificationReq, notificationType);
-                                userNotificationService.saveUserNotification(user.getId(), notificationId);
-                            } catch(Exception e){
-                                log.warn("유효하지 않은 FcmToken: {}", e.getMessage());
-                            }
+                            sendMessageTo(notificationReq, notificationType, user, notificationId, successNum);
                         });
                     }
-
                 }
             });
         }
+        if (successNum.get() == 0){
+            notificationRepository.deleteById(notificationId);
+        }
+        log.info("알림 전송 성공 개수: {}", successNum.get());
     }
 
     // 선택한 유저에게 알림 전송
@@ -180,7 +177,7 @@ public class NotificationService {
                                     .body(notificationContentReq.getBody())
                                     .id(notificationId)
                                     .build();
-                            sendMessageTo(notificationReq,notificationType);
+                            //sendMessageTo(notificationReq, notificationType);
                         });
             }
         });
@@ -196,14 +193,15 @@ public class NotificationService {
                                 .body(body)
 //                                .id(notificationId)
                                 .build();
-                        sendMessageTo(notificationReq,NotificationType.NOTIFICATION);
+                        //sendMessageTo(notificationReq,NotificationType.NOTIFICATION);
                     });
         }
     }
 
 
     // FCM 메시지를 보내는 메소드
-    public void sendMessageTo(NotificationReq notificationReq, NotificationType notificationType) {
+    public void sendMessageTo(NotificationReq notificationReq, NotificationType notificationType,
+            User user, Long notificationId, AtomicInteger successNum) {
         // FCM 메시지 생성
         String message = makeMessage(notificationReq,notificationType);
 
@@ -213,37 +211,42 @@ public class NotificationService {
         RequestBody requestBody = RequestBody.create(message,
                 MediaType.get("application/json; charset=utf-8"));
 
-        try {
+
             // HTTP 요청 생성
-            Request request = new Request.Builder()
+        Request request = null;
+        try {
+            request = new Request.Builder()
                     .url(API_URL.replace("{project-id}", PROJECT_ID))
                     .post(requestBody)
                     .addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getAccessToken())
                     .addHeader(HttpHeaders.CONTENT_TYPE, "application/json; UTF-8")
                     .build();
+        } catch (IOException e) {
+            throw new BaseException(Code.NOTIFICATION_PUSH_FAIL);
+        }
 
-            // HTTP 요청 비동기 실행
+        // HTTP 요청 비동기 실행
             httpClient.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     // 응답을 받았을 때 처리 로직
                     int statusCode = response.code();
-                    String responseData = response.body().string();
-                    log.info("fcm response: {}",responseData);
-
+                    log.info("response 확인 ---------------: {}",response);
+                    if (response.isSuccessful()){
+                        userNotificationService.saveUserNotification(user.getId(), notificationId);
+                        successNum.incrementAndGet();
+                    } else {
+                        log.warn("유효하지 않은 FCM 토큰: {}", response.body().string());
+                    }
                     response.close();
                 }
 
                 @Override
                 public void onFailure(Call call, IOException e) {
-                    // 요청이 실패했을 때 처리 로직
-                    throw new BaseException(Code.FCM_NOTIFICATION_PUSH_FAIL);
+                    // Retry 구현 필요
+                    log.error("FCM 서버 일시적 에러: {}", e.getMessage());
                 }
             });
-
-        } catch (IOException e) {
-            throw new BaseException(Code.NOTIFICATION_PUSH_FAIL);
-        }
 
         // 프로그램 종료 시에 httpClient 정리
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
