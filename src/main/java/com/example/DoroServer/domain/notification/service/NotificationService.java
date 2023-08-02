@@ -53,6 +53,8 @@ public class NotificationService {
 
     private final UserNotificationService userNotificationService;
 
+    private final SaveNotificationService saveNotificationService;
+
     private final ObjectMapper objectMapper;
 
     private final String API_URL;       // FCM 전송 Api URL
@@ -65,6 +67,7 @@ public class NotificationService {
             ObjectMapper objectMapper,
             UserRepository userRepository,
             UserNotificationService userNotificationService,
+            SaveNotificationService saveNotificationService,
             @Value("${api.url}") String apiUrl,
             @Value("${project.id}") String projectId) {
         this.notificationRepository = notificationRepository;
@@ -72,6 +75,7 @@ public class NotificationService {
         this.objectMapper = objectMapper;
         this.userRepository = userRepository;
         this.userNotificationService = userNotificationService;
+        this.saveNotificationService = saveNotificationService;
         this.API_URL = apiUrl;
         this.PROJECT_ID = projectId;
     }
@@ -95,26 +99,18 @@ public class NotificationService {
         }).toRes();
     }
 
-    // 전달받은 title과 body로 알림을 저장하는 메소드
-    @Transactional
-    public Long saveNotification(NotificationContentReq notificationContentReq,
-            NotificationType notificationType,Long announcementId) {
-        Notification notification = notificationContentReq.toEntity(notificationType, announcementId);
-        notificationRepository.save(notification);
-        return notification.getId();
-    }
 
     // 모든 유저에게 푸쉬알림 발송 후 저장
     @Transactional
     public void sendNotificationToAll(NotificationContentReq notificationContentReq,
             NotificationType notificationType,Long announcementId) {
         List<User> users = userRepository.findAllWithTokens();
+
+        Long notificationId = saveNotificationService.saveNotification(
+                notificationContentReq, notificationType,announcementId);
+
         if (!users.isEmpty()) {
             users.stream().forEach(user -> {
-                // 알림 저장
-                Long notificationId = saveNotification(notificationContentReq, notificationType,announcementId);
-                userNotificationService.saveUserNotification(user.getId(), notificationId);
-
                 // 유저별로 알림 수신 동의 여부 체크
                 if (user.getNotificationAgreement()) {
                     // 동의했을 경우 보유한 모든 토큰에 알림 발송
@@ -126,7 +122,7 @@ public class NotificationService {
                                     .body(notificationContentReq.getBody())
                                     .id(announcementId)
                                     .build();
-                            sendMessageTo(notificationReq,notificationType);
+                            sendMessageTo(notificationReq, notificationType, user, notificationId);
                         });
                     } else if(notificationType == NotificationType.NOTIFICATION) {
                         user.getTokens().stream().forEach(token -> {
@@ -136,10 +132,9 @@ public class NotificationService {
                                     .body(notificationContentReq.getBody())
                                     .id(notificationId)
                                     .build();
-                            sendMessageTo(notificationReq,notificationType);
+                            sendMessageTo(notificationReq, notificationType, user, notificationId);
                         });
                     }
-
                 }
             });
         }
@@ -157,8 +152,8 @@ public class NotificationService {
                     }
             );
             // 알림 저장
-            Long notificationId = saveNotification(notificationContentReq,
-                    NotificationType.NOTIFICATION,null);
+            Long notificationId = saveNotificationService.saveNotification(
+                    notificationContentReq, NotificationType.NOTIFICATION,null);
             userNotificationService.saveUserNotification(id, notificationId);
 
             // 유저별로 알림 수신 동의 여부 체크
@@ -172,7 +167,7 @@ public class NotificationService {
                                     .body(notificationContentReq.getBody())
                                     .id(notificationId)
                                     .build();
-                            sendMessageTo(notificationReq,notificationType);
+                            //sendMessageTo(notificationReq, notificationType);
                         });
             }
         });
@@ -188,14 +183,15 @@ public class NotificationService {
                                 .body(body)
 //                                .id(notificationId)
                                 .build();
-                        sendMessageTo(notificationReq,NotificationType.NOTIFICATION);
+                        //sendMessageTo(notificationReq,NotificationType.NOTIFICATION);
                     });
         }
     }
 
 
     // FCM 메시지를 보내는 메소드
-    public void sendMessageTo(NotificationReq notificationReq, NotificationType notificationType) {
+    public void sendMessageTo(NotificationReq notificationReq, NotificationType notificationType,
+            User user, Long notificationId) {
         // FCM 메시지 생성
         String message = makeMessage(notificationReq,notificationType);
 
@@ -205,37 +201,42 @@ public class NotificationService {
         RequestBody requestBody = RequestBody.create(message,
                 MediaType.get("application/json; charset=utf-8"));
 
-        try {
+
             // HTTP 요청 생성
-            Request request = new Request.Builder()
+        Request request = null;
+        try {
+            request = new Request.Builder()
                     .url(API_URL.replace("{project-id}", PROJECT_ID))
                     .post(requestBody)
                     .addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getAccessToken())
                     .addHeader(HttpHeaders.CONTENT_TYPE, "application/json; UTF-8")
                     .build();
+        } catch (IOException e) {
+            throw new BaseException(Code.NOTIFICATION_PUSH_FAIL);
+        }
 
-            // HTTP 요청 비동기 실행
+        // HTTP 요청 비동기 실행
             httpClient.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     // 응답을 받았을 때 처리 로직
                     int statusCode = response.code();
-                    String responseData = response.body().string();
-//                    log.info("fcm response: {}",responseData);
-
+                    log.info("response 확인 ---------------: {}",response);
+                    if (response.isSuccessful()){
+                        userNotificationService.saveUserNotification(user.getId(), notificationId);
+                        log.info("알림 전송 성공: {}", user.getId());
+                    } else {
+                        log.warn("유효하지 않은 FCM 토큰: {}", response.body().string());
+                    }
                     response.close();
                 }
 
                 @Override
                 public void onFailure(Call call, IOException e) {
-                    // 요청이 실패했을 때 처리 로직
-                    throw new BaseException(Code.FCM_NOTIFICATION_PUSH_FAIL);
+                    // Retry 구현 필요
+                    log.error("FCM 서버 일시적 에러: {}", e.getMessage());
                 }
             });
-
-        } catch (IOException e) {
-            throw new BaseException(Code.NOTIFICATION_PUSH_FAIL);
-        }
 
         // 프로그램 종료 시에 httpClient 정리
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {

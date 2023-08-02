@@ -42,14 +42,17 @@ jobs:
           echo "${{ secrets.JWT_PROPERTIES }}" > ./jwt.properties
         shell: bash
         
-      - name: Make firebase_service_key.json
-        run: |
-          cd ./src/main/resources
-          mkdir firebase
-          cd ./firebase
-          touch ./firebase_service_key.json
-          echo "${{ secrets.FIREBASE_SERVICE_KEY }}" > ./firebase_service_key.json
+      - name: Make firebase Directory
+        run: mkdir -p ./src/main/resources/firebase
         shell: bash
+        
+      - name: create-fcm-json
+        id: create-fcm-json
+        uses: jsdaniell/create-json@1.1.2
+        with:
+          name: "firebase_service_key.json"
+          json: ${{ secrets.FIREBASE_SERVICE_KEY }}
+          dir: "src/main/resources/firebase/"
         
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
