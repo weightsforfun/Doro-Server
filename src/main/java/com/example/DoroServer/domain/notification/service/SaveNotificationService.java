@@ -16,12 +16,12 @@ public class SaveNotificationService {
 
     private final NotificationRepository notificationRepository;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public Long saveNotification(NotificationContentReq notificationContentReq,
             NotificationType notificationType,Long announcementId) {
         Notification notification = notificationContentReq.toEntity(notificationType, announcementId);
         notificationRepository.save(notification);
-        notificationRepository.flush();
+
         return notification.getId();
     }
 }
