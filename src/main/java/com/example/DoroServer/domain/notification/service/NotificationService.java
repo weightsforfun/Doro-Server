@@ -112,6 +112,7 @@ public class NotificationService {
         if (!users.isEmpty()) {
             users.stream().forEach(user -> {
                 // 유저별로 알림 수신 동의 여부 체크
+                userNotificationService.saveUserNotification(user.getId(), notificationId);
                 if (user.getNotificationAgreement()) {
                     // 동의했을 경우 보유한 모든 토큰에 알림 발송
                     if(notificationType == NotificationType.ANNOUNCEMENT){
@@ -223,7 +224,6 @@ public class NotificationService {
                     int statusCode = response.code();
                     log.info("response 확인 ---------------: {}",response);
                     if (response.isSuccessful()){
-                        userNotificationService.saveUserNotification(user.getId(), notificationId);
                         log.info("알림 전송 성공: {}", user.getId());
                     } else {
                         log.warn("유효하지 않은 FCM 토큰: {}", response.body().string());
@@ -233,7 +233,7 @@ public class NotificationService {
 
                 @Override
                 public void onFailure(Call call, IOException e) {
-                    // Retry 구현 필요
+                    // Retry 또는 에러 처리 구현 필요
                     log.error("FCM 서버 일시적 에러: {}", e.getMessage());
                 }
             });
