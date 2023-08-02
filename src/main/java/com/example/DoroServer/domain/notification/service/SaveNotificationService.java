@@ -21,7 +21,7 @@ public class SaveNotificationService {
             NotificationType notificationType,Long announcementId) {
         Notification notification = notificationContentReq.toEntity(notificationType, announcementId);
         notificationRepository.save(notification);
-
+        notificationRepository.flush();
         return notification.getId();
     }
 }
