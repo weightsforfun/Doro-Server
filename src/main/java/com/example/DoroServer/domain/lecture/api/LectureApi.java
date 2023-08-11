@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,7 +40,7 @@ public class LectureApi {
                 pageRequest);
         return SuccessResponse.successResponse(allLectures);
     }
-
+    @Secured("ROLE_ADMIN")
     @PostMapping()
     public SuccessResponse createLecture(
             @RequestBody @Valid CreateLectureReq createLectureReq) {
@@ -57,7 +58,7 @@ public class LectureApi {
         FindLectureRes findLectureRes = lectureService.findLecture(lectureId,user);
         return SuccessResponse.successResponse(findLectureRes);
     }
-
+    @Secured("ROLE_ADMIN")
     @PatchMapping("/{id}")
     public SuccessResponse updateLecture(
             @PathVariable("id") Long id,
@@ -66,7 +67,7 @@ public class LectureApi {
         Long lectureId = lectureService.updateLecture(id, updateLectureReq);
         return SuccessResponse.successResponse(lectureId + "th lecture patched");
     }
-
+    @Secured("ROLE_ADMIN")
     @DeleteMapping("/{id}")
     public SuccessResponse deleteLecture(@PathVariable("id") Long id) {
         String lectureId = lectureService.deleteLecture(id);
