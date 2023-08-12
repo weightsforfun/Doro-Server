@@ -4,6 +4,7 @@ import com.example.DoroServer.domain.notification.dto.NotificationContentReq;
 import com.example.DoroServer.domain.notification.dto.NotificationRes;
 import com.example.DoroServer.domain.notification.entity.NotificationType;
 import com.example.DoroServer.domain.notification.service.NotificationService;
+import com.example.DoroServer.domain.notification.service.NotificationServiceRefact;
 import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.domain.userNotification.service.UserNotificationService;
 import com.example.DoroServer.global.common.SuccessResponse;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class NotificationApi {
 
     private final NotificationService notificationService;
+    private final NotificationServiceRefact notificationServiceRefact;
 
     private final UserNotificationService userNotificationService;
 
@@ -74,6 +76,12 @@ public class NotificationApi {
     public SuccessResponse findUserNotifications(@PathVariable("notificationId") Long notificationId) {
         notificationService.readNotification(notificationId);
         return SuccessResponse.successResponse("read Notification complete");
+    }
+
+    @GetMapping("/test")
+    public SuccessResponse testAPI(){
+        String response = notificationServiceRefact.sendNotificationToOne();
+        return SuccessResponse.successResponse(response);
     }
 
 }
