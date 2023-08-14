@@ -31,7 +31,7 @@ public class UserLectureApi {
     @Secured("ROLE_ADMIN")
     @ApiOperation(value = "강사목록 조회",notes = "id에 lecture id 를 넣으면 해당 강의에 신청한 강사 목록을 불러옵니다. 매니저 전용 API")
     @GetMapping("/lectures/{id}")
-    public SuccessResponse findAllTutors(@PathVariable("id") Long id,@AuthenticationPrincipal User user) {
+    public SuccessResponse findAllTutors(@PathVariable("id") Long id) {
         List<FindAllTutorsRes> allTutorsResList = userLectureService.findAllTutors(id);
         return SuccessResponse.successResponse(allTutorsResList);
     }
