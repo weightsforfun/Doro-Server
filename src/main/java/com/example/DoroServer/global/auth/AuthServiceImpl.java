@@ -72,9 +72,9 @@ public class AuthServiceImpl implements AuthService{
     public void join(JoinReq joinReq) {
         validatePhoneRedis(JOIN, joinReq.getPhone());
         // 휴대폰 번호 중복 체크
-        if(userRepository.existsByPhone(joinReq.getPhone())){
-            throw new BaseException(Code.EXIST_PHONE);
-        }
+        checkPhoneNumber(joinReq.getPhone());
+
+        checkAccount(joinReq.getAccount());
         // 비밀번호, 비밀번호 확인 비교
         validatePasswordConsistency(joinReq.getPassword(), joinReq.getPasswordCheck());
 
@@ -132,6 +132,13 @@ public class AuthServiceImpl implements AuthService{
             userRepository.deleteById(user.getId());
         } catch (Exception e){
             throw new BaseException(Code.WITHDRAWAL_FAILED);
+        }
+    }
+
+    @Override
+    public void checkPhoneNumber(String phone) {
+        if(userRepository.existsByPhone(phone)){
+            throw new BaseException(Code.EXIST_PHONE);
         }
     }
 }
