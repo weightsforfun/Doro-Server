@@ -66,7 +66,12 @@ public enum Code {
     USER_NOTIFICATION_NOT_FOUND(HttpStatus.BAD_REQUEST,"USERNOTI001","UserNotification을 찾을 수 없습니다."),
 
     // fcm 관련 오류
-    FCM_NOTIFICATION_PUSH_FAIL(HttpStatus.BAD_REQUEST,"FCM001","FCM 알림 전송에 실패했습니다.");
+    FCM_NOTIFICATION_PUSH_FAIL(HttpStatus.BAD_REQUEST,"FCM001","FCM 알림 전송에 실패했습니다."),
+
+    METHOD_ARGUMENT_NOT_VALID(HttpStatus.BAD_REQUEST, "C-0004", "요청 인자가 유효하지 않음"),
+    METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "C-0002", "허용되지 않은 Request Method 호출"),
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "C-0003", "내부 서버 오류"),
+    INVALID_TYPE_VALUE(HttpStatus.BAD_REQUEST, "C005", "유효하지 않은 값 타입");
 
     private final HttpStatus httpStatus;
     private final String code;
