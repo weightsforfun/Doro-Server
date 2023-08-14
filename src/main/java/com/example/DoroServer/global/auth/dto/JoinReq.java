@@ -39,7 +39,6 @@ public class JoinReq {
 
     private LocalDate birth;
 
-    @NotNull
     private Gender gender;
 
     @NotBlank

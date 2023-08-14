@@ -4,6 +4,7 @@ import static com.example.DoroServer.global.common.Constants.ACCESS_TOKEN_PREFIX
 import static com.example.DoroServer.global.common.Constants.AUTHORIZATION_HEADER;
 
 import com.example.DoroServer.domain.user.repository.UserRepository;
+import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
 import com.example.DoroServer.global.exception.JwtAuthenticationException;
 import io.jsonwebtoken.*;
@@ -101,9 +102,8 @@ public class JwtTokenProvider {
         try {
             return String.valueOf(
                 Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().get("id"));
-        }catch (ExpiredJwtException e){
-            log.info("AccessToken 만료 시 재발급 = {}", e.getClaims().toString());
-            return e.getClaims().getSubject();
+        }catch (Exception e){
+            throw new BaseException(Code.JWT_TOKEN_NOT_FOUND);
         }
     }
 
