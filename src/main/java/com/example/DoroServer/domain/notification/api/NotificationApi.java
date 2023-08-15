@@ -80,7 +80,7 @@ public class NotificationApi {
 
     @GetMapping("/test")
     public SuccessResponse testAPI(){
-        String response = notificationServiceRefact.sendNotificationToOne();
+        String response = notificationServiceRefact.sendNotificationToOne("avc");
         return SuccessResponse.successResponse(response);
     }
 
