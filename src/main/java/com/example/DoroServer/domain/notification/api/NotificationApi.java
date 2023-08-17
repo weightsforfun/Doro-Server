@@ -1,8 +1,9 @@
 package com.example.DoroServer.domain.notification.api;
 
 import com.example.DoroServer.domain.notification.dto.NotificationContentReq;
+import com.example.DoroServer.domain.notification.dto.NotificationReq;
 import com.example.DoroServer.domain.notification.dto.NotificationRes;
-import com.example.DoroServer.domain.notification.entity.NotificationType;
+import com.example.DoroServer.domain.notification.entity.SubscriptionType;
 import com.example.DoroServer.domain.notification.service.NotificationService;
 import com.example.DoroServer.domain.notification.service.NotificationServiceRefact;
 import com.example.DoroServer.domain.user.repository.UserRepository;
@@ -64,10 +65,10 @@ public class NotificationApi {
             ) {
         if (notificationContentReq.getUserIds() == null || notificationContentReq.getUserIds().isEmpty()) {
             // 유저 ID 리스트가 비어 있으면 모든 사용자에게 알림 전송
-            notificationService.sendNotificationToAll(notificationContentReq, NotificationType.NOTIFICATION,null);
+            notificationService.sendNotificationToAll(notificationContentReq, SubscriptionType.NOTIFICATION,null);
         } else {
             // 유저 ID 리스트에 있는 사용자에게만 알림 전송
-            notificationService.sendNotificationsToSelectedUsers(notificationContentReq, NotificationType.NOTIFICATION);
+            notificationService.sendNotificationsToSelectedUsers(notificationContentReq, SubscriptionType.NOTIFICATION);
         }
         return SuccessResponse.successResponse("Notification push complete");
     }
@@ -80,7 +81,8 @@ public class NotificationApi {
 
     @GetMapping("/test")
     public SuccessResponse testAPI(){
-        String response = notificationServiceRefact.sendNotificationToOne("avc");
+        NotificationReq notificationReq = NotificationReq.builder().body("a").build();
+        String response = notificationServiceRefact.sendNotificationToOne("avc",notificationReq);
         return SuccessResponse.successResponse(response);
     }
 

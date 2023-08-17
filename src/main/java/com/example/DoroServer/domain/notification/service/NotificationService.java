@@ -9,7 +9,7 @@ import com.example.DoroServer.domain.notification.dto.NotificationRes;
 import com.example.DoroServer.domain.notification.dto.NotificationReq;
 import com.example.DoroServer.domain.notification.dto.NotificationDto;
 import com.example.DoroServer.domain.notification.entity.Notification;
-import com.example.DoroServer.domain.notification.entity.NotificationType;
+import com.example.DoroServer.domain.notification.entity.SubscriptionType;
 import com.example.DoroServer.domain.notification.repository.NotificationRepository;
 import com.example.DoroServer.domain.token.repository.TokenRepository;
 import com.example.DoroServer.domain.user.entity.User;
@@ -103,11 +103,11 @@ public class NotificationService {
     // 모든 유저에게 푸쉬알림 발송 후 저장
     @Transactional
     public void sendNotificationToAll(NotificationContentReq notificationContentReq,
-            NotificationType notificationType,Long announcementId) {
+                                      SubscriptionType subscriptionType, Long announcementId) {
         List<User> users = userRepository.findAllWithTokens();
 
         Long notificationId = saveNotificationService.saveNotification(
-                notificationContentReq, notificationType,announcementId);
+                notificationContentReq, subscriptionType,announcementId);
 
         if (!users.isEmpty()) {
             users.stream().forEach(user -> {
@@ -115,7 +115,7 @@ public class NotificationService {
                 userNotificationService.saveUserNotification(user.getId(), notificationId);
                 if (user.getNotificationAgreement()) {
                     // 동의했을 경우 보유한 모든 토큰에 알림 발송
-                    if(notificationType == NotificationType.ANNOUNCEMENT){
+                    if(subscriptionType == SubscriptionType.ANNOUNCEMENT){
                         user.getTokens().stream().forEach(token -> {
                             NotificationReq notificationReq = NotificationReq.builder()
                                     .targetToken(token.getToken())
@@ -123,9 +123,9 @@ public class NotificationService {
                                     .body(notificationContentReq.getBody())
                                     .id(announcementId)
                                     .build();
-                            sendMessageTo(notificationReq, notificationType, user, notificationId);
+                            sendMessageTo(notificationReq, subscriptionType, user, notificationId);
                         });
-                    } else if(notificationType == NotificationType.NOTIFICATION) {
+                    } else if(subscriptionType == SubscriptionType.NOTIFICATION) {
                         user.getTokens().stream().forEach(token -> {
                             NotificationReq notificationReq = NotificationReq.builder()
                                     .targetToken(token.getToken())
@@ -133,7 +133,7 @@ public class NotificationService {
                                     .body(notificationContentReq.getBody())
                                     .id(notificationId)
                                     .build();
-                            sendMessageTo(notificationReq, notificationType, user, notificationId);
+                            sendMessageTo(notificationReq, subscriptionType, user, notificationId);
                         });
                     }
                 }
@@ -144,7 +144,7 @@ public class NotificationService {
     // 선택한 유저에게 알림 전송
     @Transactional
     public void sendNotificationsToSelectedUsers(NotificationContentReq notificationContentReq,
-            NotificationType notificationType) {
+            SubscriptionType subscriptionType) {
         notificationContentReq.getUserIds().forEach(id ->
         {
             User user = userRepository.findByIdWithTokens(id).orElseThrow(() -> {
@@ -154,7 +154,7 @@ public class NotificationService {
             );
             // 알림 저장
             Long notificationId = saveNotificationService.saveNotification(
-                    notificationContentReq, NotificationType.NOTIFICATION,null);
+                    notificationContentReq, SubscriptionType.NOTIFICATION,null);
             userNotificationService.saveUserNotification(id, notificationId);
 
             // 유저별로 알림 수신 동의 여부 체크
@@ -191,10 +191,10 @@ public class NotificationService {
 
 
     // FCM 메시지를 보내는 메소드
-    public void sendMessageTo(NotificationReq notificationReq, NotificationType notificationType,
+    public void sendMessageTo(NotificationReq notificationReq, SubscriptionType subscriptionType,
             User user, Long notificationId) {
         // FCM 메시지 생성
-        String message = makeMessage(notificationReq,notificationType);
+        String message = makeMessage(notificationReq, subscriptionType);
 
 
         OkHttpClient httpClient = new OkHttpClient();
@@ -246,7 +246,7 @@ public class NotificationService {
 
 
     // FCM 메시지를 생성하는 메소드
-    private String makeMessage(NotificationReq notificationReq,NotificationType notificationType) {
+    private String makeMessage(NotificationReq notificationReq, SubscriptionType subscriptionType) {
         NotificationDto fcmMessage =
                 NotificationDto.builder()
                         .message(

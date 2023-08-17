@@ -23,7 +23,7 @@ public class FirebaseConfig {
     @PostConstruct
     public FirebaseApp initFireBase(){
         try {
-            // Service Account를 이용하여 Fireabse Admin SDK 초기화
+            // Service Account 를 이용하여 Firebase Admin SDK 초기화
             FileInputStream serviceAccount = new FileInputStream(resource.getFile());
             FirebaseOptions options = new FirebaseOptions.Builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
