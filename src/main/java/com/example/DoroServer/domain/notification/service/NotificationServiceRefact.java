@@ -1,8 +1,10 @@
 package com.example.DoroServer.domain.notification.service;
 
 
+import com.example.DoroServer.domain.notification.dto.NotificationConfig;
+import com.example.DoroServer.domain.notification.dto.NotificationContentReq;
 import com.example.DoroServer.domain.notification.dto.NotificationReq;
-import com.example.DoroServer.domain.notification.entity.NotificationType;
+import com.example.DoroServer.domain.notification.entity.SubscriptionType;
 import com.example.DoroServer.domain.token.service.TokenService;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
@@ -45,20 +47,19 @@ public class NotificationServiceRefact {
 
     }
 
-   public void sendAnnouncementNotification(NotificationReq notificationReq){
+   public void sendAnnouncementNotification(NotificationContentReq notificationContentReq){
        List<String> allTokens = tokenService.findAllTokens()
                .stream()
                .map(tokenDto -> tokenDto.getToken())
                .collect(Collectors.toList());
 
-       Notification noti = Notification.builder()
-               .setBody("hey")
-               .setTitle("youn's notification")
-               .build();
+       AndroidConfig androidConfig = NotificationConfig.androidConfig(notificationContentReq);
+       ApnsConfig apnsConfig = NotificationConfig.apnsConfig(notificationContentReq);
 
        Message mes = Message.builder()
-               .setNotification(noti)
-               .setTopic(NotificationType.ANNOUNCEMENT.toString())
+               .setAndroidConfig(androidConfig)
+               .setApnsConfig(apnsConfig)
+               .setTopic(SubscriptionType.ANNOUNCEMENT.toString())
                .build();
        try {
            firebaseMessaging.send(mes);
@@ -68,17 +69,17 @@ public class NotificationServiceRefact {
 
    }
 
-   public void subscribe(NotificationType notificationType,String token){
+   public void subscribe(SubscriptionType subscriptionType, String token){
        try {
-           firebaseMessaging.subscribeToTopic(List.of("asd"),notificationType.toString());
+           firebaseMessaging.subscribeToTopic(List.of("asd"), subscriptionType.toString());
        } catch (FirebaseMessagingException e) {
            throw new BaseException(Code.FORBIDDEN);
        }
    }
 
-    public void unsubscribe(NotificationType notificationType,String token){
+    public void unsubscribe(SubscriptionType subscriptionType, String token){
         try {
-            firebaseMessaging.unsubscribeFromTopic(List.of("asd"),notificationType.toString());
+            firebaseMessaging.unsubscribeFromTopic(List.of("asd"), subscriptionType.toString());
         } catch (FirebaseMessagingException e) {
             throw new BaseException(Code.FORBIDDEN);
         }
