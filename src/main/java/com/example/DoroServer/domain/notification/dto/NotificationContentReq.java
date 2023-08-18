@@ -25,6 +25,9 @@ public class NotificationContentReq {   // 알림이 생성될 때, 토큰 없�
     @NotBlank(message = "알림 내용을 입력하세요.")
     private String body;
 
+    @NotBlank
+    private SubscriptionType subscriptionType;
+
     private List<Long> userIds = new ArrayList<>();
 
     public Notification toEntity(SubscriptionType subscriptionType, Long announcementId) {
@@ -32,8 +35,8 @@ public class NotificationContentReq {   // 알림이 생성될 때, 토큰 없�
                 .title(title)
                 .body(body)
                 .subscriptionType(subscriptionType)
-                .isRead(false)
-                .announcementId(announcementId)
+//                .isRead(false)
+//                .announcementId(announcementId)
                 .build();
     }
 
