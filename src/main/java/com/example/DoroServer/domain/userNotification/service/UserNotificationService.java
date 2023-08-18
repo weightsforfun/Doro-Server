@@ -11,6 +11,7 @@ import com.example.DoroServer.global.exception.Code;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +30,7 @@ public class UserNotificationService {
 
 
     public List<UserNotification> findUserNotificationsByUserId(Long userId, Pageable pageable) {
-        return userNotificationRepository.findUserNotificationsByUserId(userId,pageable);
+        return userNotificationRepository.findUserNotificationsByUserId(userId, pageable);
     }
 
     @Transactional
@@ -52,9 +53,30 @@ public class UserNotificationService {
                 UserNotification.builder()
                         .user(user)
                         .notification(notification)
-                        .expirationPeriod(LocalDateTime.now().plusMonths(3))
+//                        .expirationPeriod(LocalDateTime.now().plusMonths(3))
                         .build());
+
         return userNotification.getId();
+    }
+
+    @Transactional
+    public void SaveAllUserNotification(Long notificationId) {
+        List<User> userList = userRepository.findAll();
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new BaseException(Code.ACCOUNT_NOT_FOUND));
+
+        List<UserNotification> userNotifications = userList.stream()
+                .filter(user -> user.getIsActive())
+                .map(user ->
+                     UserNotification.builder()
+                            .user(user)
+                            .notification(notification)
+                            .isRead(false)
+                            .build()
+                ).collect(Collectors.toList());
+
+        userNotificationRepository.saveAll(userNotifications);
+
     }
 
     @Transactional
