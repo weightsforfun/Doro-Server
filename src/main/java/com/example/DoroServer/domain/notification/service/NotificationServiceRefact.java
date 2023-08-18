@@ -1,11 +1,18 @@
 package com.example.DoroServer.domain.notification.service;
 
 
-import com.example.DoroServer.domain.notification.dto.NotificationConfig;
 import com.example.DoroServer.domain.notification.dto.NotificationContentReq;
 import com.example.DoroServer.domain.notification.dto.NotificationReq;
+import com.example.DoroServer.domain.notification.entity.Notification;
 import com.example.DoroServer.domain.notification.entity.SubscriptionType;
+import com.example.DoroServer.domain.notification.repository.NotificationRepository;
+import com.example.DoroServer.domain.token.entity.Token;
 import com.example.DoroServer.domain.token.service.TokenService;
+import com.example.DoroServer.domain.user.entity.User;
+import com.example.DoroServer.domain.user.repository.UserRepository;
+import com.example.DoroServer.domain.userNotification.entity.UserNotification;
+import com.example.DoroServer.domain.userNotification.repository.UserNotificationRepository;
+import com.example.DoroServer.domain.userNotification.service.UserNotificationService;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
 import com.google.firebase.messaging.*;
@@ -23,23 +30,49 @@ import java.util.stream.Collectors;
 @Transactional
 @Slf4j
 public class NotificationServiceRefact {
+
+
+    private final UserNotificationService userNotificationService;
+    private final NotificationRepository notificationRepository;
+    private final UserRepository userRepository;
     private final FirebaseMessaging firebaseMessaging;
-    private final TokenService tokenService;
 
 
-    public String sendNotificationToOne(String token, NotificationReq notificationReq){
-        Notification noti = Notification.builder()
-                .setBody("hey")
-                .setTitle("youn's notification")
-                .build();
-        Message mes = Message.builder()
-                .setToken(token)
-                .setNotification(noti)
-                .build();
+
+
+    public Long sendNotificationToOne(Long userId, Long targetId,
+            NotificationContentReq notificationContentReq) {
+
+        User user = userRepository.findByIdWithTokens(userId)
+                .orElseThrow(() -> new BaseException(Code.ACCOUNT_NOT_FOUND));
+
+        List<Token> tokens = user.getTokens();
+
+        AndroidConfig androidConfig = notificationContentReq.toDefaultAndroidConfig();
+        ApnsConfig apnsConfig = notificationContentReq.toDefaultApnsConfig();
+        SubscriptionType subscriptionType = notificationContentReq.getSubscriptionType();
+
+
 
         try {
-            String response = firebaseMessaging.send(mes);
-            return response;
+            for(Token token: tokens){
+
+                Message mes = Message.builder()
+                        .setAndroidConfig(androidConfig)
+                        .setApnsConfig(apnsConfig)
+                        .setToken(String.valueOf(token))
+                        .build();
+
+                firebaseMessaging.send(mes);
+            }
+
+
+            Notification savedNotification = notificationRepository.save(
+                    notificationContentReq.toEntity(subscriptionType, targetId));
+
+            userNotificationService.saveUserNotification(userId,savedNotification.getId());
+
+            return userId;
         } catch (FirebaseMessagingException e) {
             log.info(String.valueOf(e));
             throw new BaseException(Code.BAD_REQUEST);
@@ -47,39 +80,48 @@ public class NotificationServiceRefact {
 
     }
 
-   public void sendAnnouncementNotification(NotificationContentReq notificationContentReq){
-       List<String> allTokens = tokenService.findAllTokens()
-               .stream()
-               .map(tokenDto -> tokenDto.getToken())
-               .collect(Collectors.toList());
+    public String sendNotificationToAllUsers(NotificationContentReq notificationContentReq,Long targetId) {
 
-       AndroidConfig androidConfig = NotificationConfig.androidConfig(notificationContentReq);
-       ApnsConfig apnsConfig = NotificationConfig.apnsConfig(notificationContentReq);
 
-       Message mes = Message.builder()
-               .setAndroidConfig(androidConfig)
-               .setApnsConfig(apnsConfig)
-               .setTopic(SubscriptionType.ANNOUNCEMENT.toString())
-               .build();
-       try {
-           firebaseMessaging.send(mes);
-       }catch (FirebaseMessagingException e){
-           throw new BaseException(Code.NOTIFICATION_PUSH_FAIL);
-       }
+        AndroidConfig androidConfig = notificationContentReq.toDefaultAndroidConfig();
+        ApnsConfig apnsConfig = notificationContentReq.toDefaultApnsConfig();
+        SubscriptionType subscriptionType = notificationContentReq.getSubscriptionType();
 
-   }
+        Message mes = Message.builder()
+                .setAndroidConfig(androidConfig)
+                .setApnsConfig(apnsConfig)
+                .setTopic(String.valueOf(subscriptionType))
+                .build();
 
-   public void subscribe(SubscriptionType subscriptionType, String token){
-       try {
-           firebaseMessaging.subscribeToTopic(List.of("asd"), subscriptionType.toString());
-       } catch (FirebaseMessagingException e) {
-           throw new BaseException(Code.FORBIDDEN);
-       }
-   }
-
-    public void unsubscribe(SubscriptionType subscriptionType, String token){
         try {
-            firebaseMessaging.unsubscribeFromTopic(List.of("asd"), subscriptionType.toString());
+            String response = firebaseMessaging.send(mes);
+
+            Notification savedNotification = notificationRepository.save(
+                    notificationContentReq.toEntity(subscriptionType, targetId));
+
+            userNotificationService.SaveAllUserNotification(savedNotification.getId());
+            return response;
+        } catch (FirebaseMessagingException e) {
+            throw new BaseException(Code.NOTIFICATION_PUSH_FAIL);
+        }
+
+    }
+
+    public TopicManagementResponse subscribe(SubscriptionType subscriptionType, String token) {
+        try {
+            TopicManagementResponse response = firebaseMessaging.subscribeToTopic(List.of(token),
+                    subscriptionType.toString());
+            return response;
+        } catch (FirebaseMessagingException e) {
+            throw new BaseException(Code.FORBIDDEN);
+        }
+    }
+
+    public TopicManagementResponse unsubscribe(SubscriptionType subscriptionType, String token) {
+        try {
+            TopicManagementResponse response = firebaseMessaging.unsubscribeFromTopic(
+                    List.of(token), subscriptionType.toString());
+            return response;
         } catch (FirebaseMessagingException e) {
             throw new BaseException(Code.FORBIDDEN);
         }
