@@ -28,9 +28,9 @@ public class Notification extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private SubscriptionType subscriptionType;
 
-    private Boolean isRead; // 알림 읽음 유무
+//    private Boolean isRead; // 알림 읽음 유무
 
-    private Long announcementId;
+    private Long targetId;
 
     // Notification을 NotificationRes객체로 변환해주는 메소드
     public NotificationRes toRes() {
@@ -39,15 +39,15 @@ public class Notification extends BaseEntity {
                 .title(title)
                 .body(body)
                 .subscriptionType(subscriptionType)
-                .isRead(isRead)
+//                .isRead(isRead)
                 .createdAt(getCreatedAt())
                 .lastModifiedAt(getLastModifiedAt())
-                .announcementId(announcementId)
+                .targetId(targetId)
                 .build();
     }
 
     // 알림 확인 후 읽음 처리하는 메소드
-    public void isReadTrue() {
-        this.isRead = true;
-    }
+//    public void isReadTrue() {
+//        this.isRead = true;
+//    }
 }
