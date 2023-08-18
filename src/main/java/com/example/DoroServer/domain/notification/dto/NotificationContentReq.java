@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.NotBlank;
 
+import com.google.firebase.messaging.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,6 +26,7 @@ public class NotificationContentReq {   // 알림이 생성될 때, 토큰 없�
     private String body;
 
     private List<Long> userIds = new ArrayList<>();
+
     public Notification toEntity(SubscriptionType subscriptionType, Long announcementId) {
         return Notification.builder()
                 .title(title)
@@ -32,6 +34,33 @@ public class NotificationContentReq {   // 알림이 생성될 때, 토큰 없�
                 .subscriptionType(subscriptionType)
                 .isRead(false)
                 .announcementId(announcementId)
+                .build();
+    }
+
+    public AndroidConfig toDefaultAndroidConfig() {
+        return AndroidConfig.builder()
+                .setNotification(
+                        AndroidNotification.builder()
+                                .setTitle(title)
+                                .setBody(body)
+                                .build()
+                )
+                .build();
+    }
+
+    public ApnsConfig toDefaultApnsConfig() {
+        return ApnsConfig.builder()
+                .setAps(
+                        Aps.builder()
+                                .setAlert(
+                                        ApsAlert.builder()
+                                                .setTitle(title)
+                                                .setBody(body)
+                                                .build()
+                                )
+                                .setSound("default")
+                                .build()
+                )
                 .build();
     }
 }
