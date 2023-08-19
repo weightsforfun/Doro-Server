@@ -2,7 +2,7 @@ package com.example.DoroServer.domain.notification.service;
 
 import com.example.DoroServer.domain.notification.dto.NotificationContentReq;
 import com.example.DoroServer.domain.notification.entity.Notification;
-import com.example.DoroServer.domain.notification.entity.SubscriptionType;
+import com.example.DoroServer.domain.notification.entity.NotificationType;
 import com.example.DoroServer.domain.notification.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,8 +17,8 @@ public class SaveNotificationService {
 
     @Transactional
     public Long saveNotification(NotificationContentReq notificationContentReq,
-                                 SubscriptionType subscriptionType, Long announcementId) {
-        Notification notification = notificationContentReq.toEntity(subscriptionType, announcementId);
+                                 NotificationType notificationType, Long announcementId) {
+        Notification notification = notificationContentReq.toEntity(notificationType, announcementId);
         notificationRepository.save(notification);
 
         return notification.getId();

@@ -4,7 +4,7 @@ import com.example.DoroServer.domain.announcement.dto.AnnouncementMultipartReq;
 import com.example.DoroServer.domain.announcement.dto.AnnouncementRes;
 import com.example.DoroServer.domain.announcement.service.AnnouncementService;
 import com.example.DoroServer.domain.notification.dto.NotificationContentReq;
-import com.example.DoroServer.domain.notification.entity.SubscriptionType;
+import com.example.DoroServer.domain.notification.entity.NotificationType;
 import com.example.DoroServer.domain.notification.service.NotificationService;
 import com.example.DoroServer.global.common.SuccessResponse;
 import io.swagger.annotations.Api;
@@ -76,7 +76,7 @@ public class AnnouncementApi {
         notificationService.sendNotificationToAll(NotificationContentReq.builder()
             .title("새로운 공지가 올라왔습니다!")
             .body(announcementMultipartReq.getTitle())
-            .build(), SubscriptionType.ANNOUNCEMENT,announcementId);
+            .build(), NotificationType.ANNOUNCEMENT,announcementId);
         return SuccessResponse.successResponse("announcement created " + announcementId);
     }
 

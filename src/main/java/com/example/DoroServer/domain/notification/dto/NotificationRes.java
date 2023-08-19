@@ -1,6 +1,6 @@
 package com.example.DoroServer.domain.notification.dto;
 
-import com.example.DoroServer.domain.notification.entity.SubscriptionType;
+import com.example.DoroServer.domain.notification.entity.NotificationType;
 import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
@@ -20,7 +20,7 @@ public class NotificationRes {
 
 //    private Boolean isRead; // 알림 읽음 유무
 
-    private SubscriptionType subscriptionType; // 알림 종류 [공지사항 알림, 기본 알림]
+    private NotificationType notificationType; // 알림 종류 [공지사항 알림, 기본 알림]
 
     private LocalDateTime createdAt; // 알림 생성 시간
 

@@ -26,7 +26,7 @@ public class Notification extends BaseEntity {
     private String body; // 알림 내용
 
     @Enumerated(EnumType.STRING)
-    private SubscriptionType subscriptionType;
+    private NotificationType notificationType;
 
 //    private Boolean isRead; // 알림 읽음 유무
 
@@ -38,7 +38,7 @@ public class Notification extends BaseEntity {
                 .id(id)
                 .title(title)
                 .body(body)
-                .subscriptionType(subscriptionType)
+                .notificationType(notificationType)
 //                .isRead(isRead)
                 .createdAt(getCreatedAt())
                 .lastModifiedAt(getLastModifiedAt())

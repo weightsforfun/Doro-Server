@@ -1,7 +1,7 @@
 package com.example.DoroServer.domain.notification.dto;
 
 import com.example.DoroServer.domain.notification.entity.Notification;
-import com.example.DoroServer.domain.notification.entity.SubscriptionType;
+import com.example.DoroServer.domain.notification.entity.NotificationType;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.NotBlank;
@@ -26,15 +26,15 @@ public class NotificationContentReq {   // 알림이 생성될 때, 토큰 없�
     private String body;
 
     @NotBlank
-    private SubscriptionType subscriptionType;
+    private NotificationType notificationType;
 
     private List<Long> userIds = new ArrayList<>();
 
-    public Notification toEntity(SubscriptionType subscriptionType, Long announcementId) {
+    public Notification toEntity(NotificationType notificationType, Long announcementId) {
         return Notification.builder()
                 .title(title)
                 .body(body)
-                .subscriptionType(subscriptionType)
+                .notificationType(notificationType)
 //                .isRead(false)
 //                .announcementId(announcementId)
                 .build();

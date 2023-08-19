@@ -2,16 +2,12 @@ package com.example.DoroServer.domain.notification.service;
 
 
 import com.example.DoroServer.domain.notification.dto.NotificationContentReq;
-import com.example.DoroServer.domain.notification.dto.NotificationReq;
 import com.example.DoroServer.domain.notification.entity.Notification;
-import com.example.DoroServer.domain.notification.entity.SubscriptionType;
+import com.example.DoroServer.domain.notification.entity.NotificationType;
 import com.example.DoroServer.domain.notification.repository.NotificationRepository;
 import com.example.DoroServer.domain.token.entity.Token;
-import com.example.DoroServer.domain.token.service.TokenService;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.repository.UserRepository;
-import com.example.DoroServer.domain.userNotification.entity.UserNotification;
-import com.example.DoroServer.domain.userNotification.repository.UserNotificationRepository;
 import com.example.DoroServer.domain.userNotification.service.UserNotificationService;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
@@ -23,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -50,7 +45,7 @@ public class NotificationServiceRefact {
 
         AndroidConfig androidConfig = notificationContentReq.toDefaultAndroidConfig();
         ApnsConfig apnsConfig = notificationContentReq.toDefaultApnsConfig();
-        SubscriptionType subscriptionType = notificationContentReq.getSubscriptionType();
+        NotificationType notificationType = notificationContentReq.getNotificationType();
 
 
 
@@ -68,7 +63,7 @@ public class NotificationServiceRefact {
 
 
             Notification savedNotification = notificationRepository.save(
-                    notificationContentReq.toEntity(subscriptionType, targetId));
+                    notificationContentReq.toEntity(notificationType, targetId));
 
             userNotificationService.saveUserNotification(userId,savedNotification.getId());
 
@@ -85,19 +80,19 @@ public class NotificationServiceRefact {
 
         AndroidConfig androidConfig = notificationContentReq.toDefaultAndroidConfig();
         ApnsConfig apnsConfig = notificationContentReq.toDefaultApnsConfig();
-        SubscriptionType subscriptionType = notificationContentReq.getSubscriptionType();
+        NotificationType notificationType = notificationContentReq.getNotificationType();
 
         Message mes = Message.builder()
                 .setAndroidConfig(androidConfig)
                 .setApnsConfig(apnsConfig)
-                .setTopic(String.valueOf(subscriptionType))
+                .setTopic(String.valueOf(notificationType))
                 .build();
 
         try {
             String response = firebaseMessaging.send(mes);
 
             Notification savedNotification = notificationRepository.save(
-                    notificationContentReq.toEntity(subscriptionType, targetId));
+                    notificationContentReq.toEntity(notificationType, targetId));
 
             userNotificationService.SaveAllUserNotification(savedNotification.getId());
             return response;
@@ -107,20 +102,20 @@ public class NotificationServiceRefact {
 
     }
 
-    public TopicManagementResponse subscribe(SubscriptionType subscriptionType, String token) {
+    public TopicManagementResponse subscribe(NotificationType notificationType, String token) {
         try {
             TopicManagementResponse response = firebaseMessaging.subscribeToTopic(List.of(token),
-                    subscriptionType.toString());
+                    notificationType.toString());
             return response;
         } catch (FirebaseMessagingException e) {
             throw new BaseException(Code.FORBIDDEN);
         }
     }
 
-    public TopicManagementResponse unsubscribe(SubscriptionType subscriptionType, String token) {
+    public TopicManagementResponse unsubscribe(NotificationType notificationType, String token) {
         try {
             TopicManagementResponse response = firebaseMessaging.unsubscribeFromTopic(
-                    List.of(token), subscriptionType.toString());
+                    List.of(token), notificationType.toString());
             return response;
         } catch (FirebaseMessagingException e) {
             throw new BaseException(Code.FORBIDDEN);
