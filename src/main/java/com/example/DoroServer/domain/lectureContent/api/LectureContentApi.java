@@ -9,6 +9,7 @@ import java.util.List;
 
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -26,6 +27,7 @@ import javax.validation.Valid;
 @Validated
 public class LectureContentApi {
     private final LectureContentService lectureContentService;
+    @Secured("ROLE_ADMIN")
     @PostMapping()
     public SuccessResponse createLectureContent(@RequestBody @Valid LectureContentDto lectureContentDto){
         Long lectureId = lectureContentService.createLecture(lectureContentDto);
@@ -36,6 +38,7 @@ public class LectureContentApi {
         List<LectureContentDto> allLectureContents = lectureContentService.findAllLectureContents();
         return SuccessResponse.successResponse(allLectureContents);
     }
+    @Secured("ROLE_ADMIN")
     @PatchMapping("/{id}")
     public SuccessResponse updateLectureContent(
             @PathVariable("id") Long id,

@@ -15,4 +15,6 @@ public interface AuthService {
     void changePassword(ChangePasswordReq changePasswordReq);
 
     void withdrawalUser(User user);
+
+    void checkPhoneNumber(String phone);
 }

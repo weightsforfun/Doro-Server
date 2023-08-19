@@ -148,6 +148,15 @@ public class AuthController {
         return SuccessResponse.successResponse("회원 탈퇴 성공");
     }
 
+    @Operation(summary = "001_08", description = "휴대폰 번호 중복체크")
+    @GetMapping("/check/phone")
+    public SuccessResponse<String> checkPhoneNumber(
+            @RequestParam @NotBlank @Pattern(regexp = "^01([016789])([0-9]{3,4})([0-9]{4})$",
+                    message = "올바른 휴대폰 번호 형식이 아닙니다.") String phone){
+        authService.checkPhoneNumber(phone);
+        return SuccessResponse.successResponse("사용 가능한 번호입니다.");
+    }
+
     private String createAccessToken(UsernamePasswordAuthenticationToken authenticationToken) {
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
