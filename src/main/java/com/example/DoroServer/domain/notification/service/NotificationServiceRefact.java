@@ -4,6 +4,7 @@ package com.example.DoroServer.domain.notification.service;
 import com.example.DoroServer.domain.notification.dto.NotificationContentReq;
 import com.example.DoroServer.domain.notification.entity.Notification;
 import com.example.DoroServer.domain.notification.entity.NotificationType;
+import com.example.DoroServer.domain.notification.entity.SubscriptionType;
 import com.example.DoroServer.domain.notification.repository.NotificationRepository;
 import com.example.DoroServer.domain.token.entity.Token;
 import com.example.DoroServer.domain.user.entity.User;
@@ -13,6 +14,8 @@ import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
 import com.google.firebase.messaging.*;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -95,6 +98,7 @@ public class NotificationServiceRefact {
                     notificationContentReq.toEntity(notificationType, targetId));
 
             userNotificationService.SaveAllUserNotification(savedNotification.getId());
+
             return response;
         } catch (FirebaseMessagingException e) {
             throw new BaseException(Code.NOTIFICATION_PUSH_FAIL);
@@ -102,20 +106,23 @@ public class NotificationServiceRefact {
 
     }
 
-    public TopicManagementResponse subscribe(NotificationType notificationType, String token) {
+    public TopicManagementResponse subscribe(SubscriptionType subscriptionType, String token) {
         try {
             TopicManagementResponse response = firebaseMessaging.subscribeToTopic(List.of(token),
-                    notificationType.toString());
+                    subscriptionType.toString());
             return response;
         } catch (FirebaseMessagingException e) {
             throw new BaseException(Code.FORBIDDEN);
         }
     }
 
-    public TopicManagementResponse unsubscribe(NotificationType notificationType, String token) {
+
+
+    public TopicManagementResponse unsubscribe(SubscriptionType subscriptionType,List<Token> tokens) {
+        List<String> tokenValues = tokens.stream().map(t -> t.getToken()).collect(Collectors.toList());
         try {
             TopicManagementResponse response = firebaseMessaging.unsubscribeFromTopic(
-                    List.of(token), notificationType.toString());
+                    tokenValues, subscriptionType.toString());
             return response;
         } catch (FirebaseMessagingException e) {
             throw new BaseException(Code.FORBIDDEN);

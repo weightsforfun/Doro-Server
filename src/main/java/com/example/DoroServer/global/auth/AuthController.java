@@ -3,6 +3,9 @@ package com.example.DoroServer.global.auth;
 import static com.example.DoroServer.global.common.Constants.AUTHORIZATION_HEADER;
 import static com.example.DoroServer.global.common.Constants.REDIS_REFRESH_TOKEN_PREFIX;
 
+import com.example.DoroServer.domain.notification.entity.SubscriptionType;
+import com.example.DoroServer.domain.notification.service.NotificationService;
+import com.example.DoroServer.domain.notification.service.NotificationServiceRefact;
 import com.example.DoroServer.domain.token.service.TokenService;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.global.auth.dto.ChangePasswordReq;
@@ -51,6 +54,7 @@ public class AuthController {
     private final CustomUserDetailsService customUserDetailsService;
     private final RedisService redisService;
     private final TokenService tokenService;
+    private final NotificationServiceRefact notificationService;
 
     @Operation(summary = "001_01", description = "회원가입")
     @PostMapping("/join")
@@ -80,6 +84,7 @@ public class AuthController {
         if(fcmToken != null) {
             Long userId = Long.valueOf(tokenProvider.getUserId(accessToken));
             tokenService.saveToken(userId, fcmToken);
+            notificationService.subscribe(SubscriptionType.ALL,fcmToken);
         }
         return ResponseEntity.ok()
             .headers(httpHeaders)

@@ -2,6 +2,7 @@ package com.example.DoroServer.domain.notification.api;
 
 import com.example.DoroServer.domain.notification.dto.NotificationContentReq;
 import com.example.DoroServer.domain.notification.entity.NotificationType;
+import com.example.DoroServer.domain.notification.entity.SubscriptionType;
 import com.example.DoroServer.domain.notification.service.NotificationServiceRefact;
 import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.global.common.SuccessResponse;
@@ -41,7 +42,7 @@ public class NotificationApi {
             @RequestBody @Valid NotificationContentReq notificationContentReq) {
 
         String response = notificationServiceRefact.sendNotificationToAllUsers(
-                notificationContentReq,1L);
+                notificationContentReq,null);
 
         return SuccessResponse.successResponse(response);
     }
@@ -77,7 +78,7 @@ public class NotificationApi {
     @GetMapping("/subscribe")
     public SuccessResponse subscribeTestAPI() {
         TopicManagementResponse response = notificationServiceRefact.subscribe(
-                NotificationType.ANNOUNCEMENT,
+                SubscriptionType.ALL,
                 "drnbi7uAR4Wh3jFK-W-T8g:APA91bEqBFnq8OU1eOB-2zh2AIWl77Bb5PDuyVuI5YhovSFYUcrakzWa5DvQHF9wlX2M7vPQRo7HHsGaDD0YTgiL7t1tA6XM7LdGqOdeJNYKcdhD4E7JQsV1-Bim2EhQzpi518XQmPpS");
         return SuccessResponse.successResponse(response);
     }
