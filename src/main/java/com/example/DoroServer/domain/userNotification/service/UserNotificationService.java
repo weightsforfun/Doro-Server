@@ -1,5 +1,6 @@
 package com.example.DoroServer.domain.userNotification.service;
 
+import com.example.DoroServer.domain.notification.dto.NotificationRes;
 import com.example.DoroServer.domain.notification.entity.Notification;
 import com.example.DoroServer.domain.notification.repository.NotificationRepository;
 import com.example.DoroServer.domain.user.entity.User;
@@ -29,8 +30,26 @@ public class UserNotificationService {
     private final NotificationRepository notificationRepository;
 
 
-    public List<UserNotification> findUserNotificationsByUserId(Long userId, Pageable pageable) {
-        return userNotificationRepository.findUserNotificationsByUserId(userId, pageable);
+    public List<NotificationRes> findUserNotificationsByUserId(Long userId, Pageable pageable) {
+
+        List<UserNotification> userNotificationList = userNotificationRepository.findUserNotificationsByUserId(
+                userId, pageable);
+        List<NotificationRes> notificationResList = userNotificationList.stream()
+                .map(un -> un.getNotification().toRes())
+                .collect(Collectors.toList());
+
+        return notificationResList;
+    }
+
+    @Transactional
+    public NotificationRes findNotificationById(Long userId,Long notificationId){
+
+        UserNotification userNotification = userNotificationRepository.findUserNotificationByUserIdAndNotificationId(
+                userId, notificationId).orElseThrow(() -> new BaseException(Code.FORBIDDEN));
+
+        userNotification.changeIsRead();
+
+        return userNotification.getNotification().toRes();
     }
 
     @Transactional
@@ -78,6 +97,7 @@ public class UserNotificationService {
         userNotificationRepository.saveAll(userNotifications);
 
     }
+
 
     @Transactional
     public void deleteUserNotification(Long id) {

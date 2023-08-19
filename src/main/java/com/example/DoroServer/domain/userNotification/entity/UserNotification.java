@@ -36,5 +36,7 @@ public class UserNotification {
     @ColumnDefault("false")
     private Boolean isRead; // 알림 읽음 유무
 
-
+    public void changeIsRead(){
+        this.isRead=true;
+    }
 }
