@@ -46,6 +46,7 @@ public class NotificationContentReq {   // 알림이 생성될 때, 토큰 없�
                         AndroidNotification.builder()
                                 .setTitle(title)
                                 .setBody(body)
+                                .setClickAction("NOTIFICATION_CLICK")
                                 .build()
                 )
                 .build();
@@ -61,6 +62,7 @@ public class NotificationContentReq {   // 알림이 생성될 때, 토큰 없�
                                                 .setBody(body)
                                                 .build()
                                 )
+                                .setCategory("NOTIFICATION_CLICK")
                                 .setSound("default")
                                 .build()
                 )
