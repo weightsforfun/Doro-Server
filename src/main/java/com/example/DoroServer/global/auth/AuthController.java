@@ -3,6 +3,9 @@ package com.example.DoroServer.global.auth;
 import static com.example.DoroServer.global.common.Constants.AUTHORIZATION_HEADER;
 import static com.example.DoroServer.global.common.Constants.REDIS_REFRESH_TOKEN_PREFIX;
 
+import com.example.DoroServer.domain.notification.entity.SubscriptionType;
+import com.example.DoroServer.domain.notification.service.NotificationService;
+import com.example.DoroServer.domain.notification.service.NotificationServiceRefact;
 import com.example.DoroServer.domain.token.service.TokenService;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.global.auth.dto.ChangePasswordReq;
@@ -51,6 +54,7 @@ public class AuthController {
     private final CustomUserDetailsService customUserDetailsService;
     private final RedisService redisService;
     private final TokenService tokenService;
+    private final NotificationServiceRefact notificationService;
 
     @Operation(summary = "001_01", description = "회원가입")
     @PostMapping("/join")
@@ -80,6 +84,7 @@ public class AuthController {
         if(fcmToken != null) {
             Long userId = Long.valueOf(tokenProvider.getUserId(accessToken));
             tokenService.saveToken(userId, fcmToken);
+            notificationService.subscribe(SubscriptionType.ALL,fcmToken);
         }
         return ResponseEntity.ok()
             .headers(httpHeaders)
@@ -146,6 +151,15 @@ public class AuthController {
         }
         SecurityContextHolder.clearContext();
         return SuccessResponse.successResponse("회원 탈퇴 성공");
+    }
+
+    @Operation(summary = "001_08", description = "휴대폰 번호 중복체크")
+    @GetMapping("/check/phone")
+    public SuccessResponse<String> checkPhoneNumber(
+            @RequestParam @NotBlank @Pattern(regexp = "^01([016789])([0-9]{3,4})([0-9]{4})$",
+                    message = "올바른 휴대폰 번호 형식이 아닙니다.") String phone){
+        authService.checkPhoneNumber(phone);
+        return SuccessResponse.successResponse("사용 가능한 번호입니다.");
     }
 
     private String createAccessToken(UsernamePasswordAuthenticationToken authenticationToken) {

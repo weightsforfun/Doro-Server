@@ -6,7 +6,6 @@ import com.example.DoroServer.domain.notification.entity.NotificationType;
 import com.example.DoroServer.domain.notification.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -18,7 +17,7 @@ public class SaveNotificationService {
 
     @Transactional
     public Long saveNotification(NotificationContentReq notificationContentReq,
-            NotificationType notificationType,Long announcementId) {
+                                 NotificationType notificationType, Long announcementId) {
         Notification notification = notificationContentReq.toEntity(notificationType, announcementId);
         notificationRepository.save(notification);
 

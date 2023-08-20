@@ -1,5 +1,6 @@
 package com.example.DoroServer.domain.userNotification.service;
 
+import com.example.DoroServer.domain.notification.dto.NotificationRes;
 import com.example.DoroServer.domain.notification.entity.Notification;
 import com.example.DoroServer.domain.notification.repository.NotificationRepository;
 import com.example.DoroServer.domain.user.entity.User;
@@ -11,6 +12,7 @@ import com.example.DoroServer.global.exception.Code;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -28,8 +30,26 @@ public class UserNotificationService {
     private final NotificationRepository notificationRepository;
 
 
-    public List<UserNotification> findUserNotificationsByUserId(Long userId, Pageable pageable) {
-        return userNotificationRepository.findUserNotificationsByUserId(userId,pageable);
+    public List<NotificationRes> findUserNotificationsByUserId(Long userId, Pageable pageable) {
+
+        List<UserNotification> userNotificationList = userNotificationRepository.findUserNotificationsByUserId(
+                userId, pageable);
+        List<NotificationRes> notificationResList = userNotificationList.stream()
+                .map(un -> un.getNotification().toRes())
+                .collect(Collectors.toList());
+
+        return notificationResList;
+    }
+
+    @Transactional
+    public NotificationRes findNotificationById(Long userId,Long notificationId){
+
+        UserNotification userNotification = userNotificationRepository.findUserNotificationByUserIdAndNotificationId(
+                userId, notificationId).orElseThrow(() -> new BaseException(Code.FORBIDDEN));
+
+        userNotification.changeIsRead();
+
+        return userNotification.getNotification().toRes();
     }
 
     @Transactional
@@ -52,10 +72,32 @@ public class UserNotificationService {
                 UserNotification.builder()
                         .user(user)
                         .notification(notification)
-                        .expirationPeriod(LocalDateTime.now().plusMonths(3))
+//                        .expirationPeriod(LocalDateTime.now().plusMonths(3))
                         .build());
+
         return userNotification.getId();
     }
+
+    @Transactional
+    public void SaveAllUserNotification(Long notificationId) {
+        List<User> userList = userRepository.findAll();
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new BaseException(Code.ACCOUNT_NOT_FOUND));
+
+        List<UserNotification> userNotifications = userList.stream()
+                .filter(user -> user.getIsActive())
+                .map(user ->
+                     UserNotification.builder()
+                            .user(user)
+                            .notification(notification)
+                            .isRead(false)
+                            .build()
+                ).collect(Collectors.toList());
+
+        userNotificationRepository.saveAll(userNotifications);
+
+    }
+
 
     @Transactional
     public void deleteUserNotification(Long id) {

@@ -103,7 +103,7 @@ public class NotificationService {
     // 모든 유저에게 푸쉬알림 발송 후 저장
     @Transactional
     public void sendNotificationToAll(NotificationContentReq notificationContentReq,
-            NotificationType notificationType,Long announcementId) {
+                                      NotificationType notificationType, Long announcementId) {
         List<User> users = userRepository.findAllWithTokens();
 
         Long notificationId = saveNotificationService.saveNotification(
@@ -194,7 +194,7 @@ public class NotificationService {
     public void sendMessageTo(NotificationReq notificationReq, NotificationType notificationType,
             User user, Long notificationId) {
         // FCM 메시지 생성
-        String message = makeMessage(notificationReq,notificationType);
+        String message = makeMessage(notificationReq, notificationType);
 
 
         OkHttpClient httpClient = new OkHttpClient();
@@ -246,7 +246,7 @@ public class NotificationService {
 
 
     // FCM 메시지를 생성하는 메소드
-    private String makeMessage(NotificationReq notificationReq,NotificationType notificationType) {
+    private String makeMessage(NotificationReq notificationReq, NotificationType notificationType) {
         NotificationDto fcmMessage =
                 NotificationDto.builder()
                         .message(
@@ -299,15 +299,15 @@ public class NotificationService {
     }
 
     // 확인한 알림 읽음 처리
-    @Transactional
-    public void readNotification(Long id) {
-        Optional<Notification> findNotification = notificationRepository.findById(id);
-        Notification notification = findNotification.orElseThrow(() -> {
-            log.info("Notification을 찾을 수 없습니다. id = {}", id);
-            throw new BaseException(Code.NOTIFICATION_NOT_FOUND);
-        });
-        notification.isReadTrue();
-    }
+//    @Transactional
+//    public void readNotification(Long id) {
+//        Optional<Notification> findNotification = notificationRepository.findById(id);
+//        Notification notification = findNotification.orElseThrow(() -> {
+//            log.info("Notification을 찾을 수 없습니다. id = {}", id);
+//            throw new BaseException(Code.NOTIFICATION_NOT_FOUND);
+//        });
+//        notification.isReadTrue();
+//    }
 
 }
 
