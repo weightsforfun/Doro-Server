@@ -68,5 +68,32 @@ public class UserNotificationAPI {
     }
 
 
+    @ApiOperation(value = "유저의 전체 알림 조회", notes = "userId를 전달해서 해당 유저의 알림 전체를 조회합니다. 파라미터로 page랑 size 전달하시면 페이징 됩니다. 이게 Swagger가 잘 안돼서 Postman으로 테스트 해보시는게 나을거에요 Swagger는 이상하게 page랑 size를 인식못하네요")
+    @GetMapping("/test/{userId}")
+    public SuccessResponse findUserNotificationsTest(@PathVariable("userId") Long userId,
+            @PageableDefault(page = 0, size = 10, sort = "id", direction = Direction.DESC) Pageable pageable) {
+
+        // 유저별 알림 조희
+        List<NotificationRes> userNotifications = userNotificationService.findUserNotificationsByUserId(userId,
+                pageable);
+
+        // 병합 후 조회된 전체 알림 페이징 후반환
+        return SuccessResponse.successResponse(userNotifications);
+    }
+
+    @ApiOperation(value = "유저의 알림 조회", notes = "notificationId를 전달하면 현재 user 의 notification 을 전달합니다.")
+    @GetMapping("/test/{userId}/{notificationId}")
+    public SuccessResponse findUserNotificationTest(
+            @PathVariable("userId") Long userId,
+            @PathVariable("notificationId") Long notificationId) {
+
+        NotificationRes notificationRes = userNotificationService.findNotificationById(
+                userId, notificationId);
+
+        return SuccessResponse.successResponse(notificationRes);
+
+    }
+
+
 
 }

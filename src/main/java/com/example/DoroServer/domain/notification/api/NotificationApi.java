@@ -32,8 +32,6 @@ public class NotificationApi {
 
 
 
-    private final UserRepository userRepository;
-
     @ApiOperation(value = "알림 전체 전송", notes =
             "알림 제목(title), 내용(body)를 입력받아 알림을 생성합니다.")
     @Secured("ROLE_ADMIN")
@@ -55,6 +53,7 @@ public class NotificationApi {
         NotificationContentReq notificationContentReq = NotificationContentReq.builder()
                 .body("hi")
                 .title("Announcement")
+                .notificationType(NotificationType.ANNOUNCEMENT)
                 .build();
 
         String response = notificationServiceRefact.sendNotificationToAllUsers(
