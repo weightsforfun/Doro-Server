@@ -57,6 +57,14 @@ public interface UserLectureRepository extends JpaRepository<UserLecture, Long> 
             @Param("userId") Long userId,
             @Param("tutorRole") TutorRole tutorRole
     );
+
+    @Query(
+            value = "select ul from UserLecture ul "
+                    + "join fetch ul.user "
+                    + "where ul.id = :userLectureId"
+    )
+    Optional<UserLecture> findUserLectureByIdWithUser(@Param("userLectureId") Long userLectureId);
+
     void deleteAllByUser(User user);
 
     void deleteAllByLecture(Lecture lecture);
