@@ -81,14 +81,14 @@ public class NotificationService {
     }
 
     // 유저 개인의 알림 조회하는 메소드
-    public List<NotificationRes> findUserNotifications(Long userId, Pageable pageable) {
-        List<UserNotification> userNotifications = userNotificationService
-                .findUserNotificationsByUserId(userId, pageable);
-
-        return userNotifications.stream()
-                .map(un -> un.getNotification().toRes())
-                .collect(Collectors.toList());
-    }
+//    public List<NotificationRes> findUserNotifications(Long userId, Pageable pageable) {
+//        List<UserNotification> userNotifications = userNotificationService
+//                .findUserNotificationsByUserId(userId, pageable);
+//
+//        return userNotifications.stream()
+//                .map(un -> un.getNotification().toRes())
+//                .collect(Collectors.toList());
+//    }
 
     // id에 해당하는 알림을 조회하는 메소드
     public NotificationRes findNotificationById(Long id) {
@@ -174,20 +174,6 @@ public class NotificationService {
         });
     }
 
-    public void sendFixedMessageToUser(User user, String title, String body) {
-        if (user.getNotificationAgreement()) {
-            user.getTokens().stream()
-                    .forEach(token -> {
-                        NotificationReq notificationReq = NotificationReq.builder()
-                                .targetToken(token.getToken())
-                                .title(title)
-                                .body(body)
-//                                .id(notificationId)
-                                .build();
-                        //sendMessageTo(notificationReq,NotificationType.NOTIFICATION);
-                    });
-        }
-    }
 
 
     // FCM 메시지를 보내는 메소드
