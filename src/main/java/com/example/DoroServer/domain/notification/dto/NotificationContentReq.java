@@ -7,6 +7,8 @@ import java.util.List;
 import javax.validation.constraints.NotBlank;
 
 import com.google.firebase.messaging.*;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,7 +27,7 @@ public class NotificationContentReq {   // 알림이 생성될 때, 토큰 없�
     @NotBlank(message = "알림 내용을 입력하세요.")
     private String body;
 
-    @NotBlank
+    @NotNull
     private NotificationType notificationType;
 
     private List<Long> userIds = new ArrayList<>();

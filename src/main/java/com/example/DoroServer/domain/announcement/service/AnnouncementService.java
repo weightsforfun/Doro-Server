@@ -5,6 +5,9 @@ import com.example.DoroServer.domain.announcement.dto.AnnouncementReq;
 import com.example.DoroServer.domain.announcement.dto.AnnouncementRes;
 import com.example.DoroServer.domain.announcement.entity.Announcement;
 import com.example.DoroServer.domain.announcement.repository.AnnouncementRepository;
+import com.example.DoroServer.domain.notification.dto.NotificationContentReq;
+import com.example.DoroServer.domain.notification.entity.NotificationType;
+import com.example.DoroServer.domain.notification.service.NotificationServiceRefact;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
 import com.example.DoroServer.global.s3.AwsS3Service;
@@ -30,6 +33,7 @@ public class AnnouncementService {
 
     private final AnnouncementRepository announcementRepository;
     private final AwsS3Service awsS3Service;
+    private final NotificationServiceRefact notificationService;
 
     // AnnouncementRes Dto객체 단일 조회
     public AnnouncementRes findById(Long id) {
@@ -60,12 +64,22 @@ public class AnnouncementService {
             throw new BaseException(Code.UPLOAD_FAILED);
         }
         Announcement announcement = Announcement.builder()
-            .title(announcementMultipartReq.getTitle())
-            .body(announcementMultipartReq.getBody())
-            .writer(announcementMultipartReq.getWriter())
-            .picture(imgUrl)
-            .build();
-        announcementRepository.save(announcement);
+                .title(announcementMultipartReq.getTitle())
+                .body(announcementMultipartReq.getBody())
+                .writer(announcementMultipartReq.getWriter())
+                .picture(imgUrl)
+                .build();
+
+        Announcement savedAnnouncement = announcementRepository.save(announcement);
+
+        NotificationContentReq notificationContentReq = NotificationContentReq.builder()
+                .title("공지 등록")
+                .body("새로운 공지가 등록되었습니다")
+                .notificationType(NotificationType.ANNOUNCEMENT)
+                .build();
+
+        notificationService.sendNotificationToAllUsers(notificationContentReq,
+                savedAnnouncement.getId());
         return announcement.getId();
     }
 
@@ -77,7 +91,7 @@ public class AnnouncementService {
             return new BaseException(Code.ANNOUNCEMENT_NOT_FOUND);
         });
 
-        if(announcement.getPicture() != null){
+        if (announcement.getPicture() != null) {
             awsS3Service.deleteImage(announcement.getPicture());
         }
 
@@ -104,7 +118,6 @@ public class AnnouncementService {
         });
         announcementRepository.deleteById(id);
     }
-
 
 
 }

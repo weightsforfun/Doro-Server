@@ -9,6 +9,7 @@ import com.example.DoroServer.global.common.SuccessResponse;
 import com.google.firebase.messaging.TopicManagementResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,12 +49,12 @@ public class NotificationApi {
 
 
     @GetMapping("/sendAll")
-    public SuccessResponse sendAll() {
+    public SuccessResponse sendAll(@RequestBody @Valid NotificationContentReq notificationContentReq) {
 
-        NotificationContentReq notificationContentReq = NotificationContentReq.builder()
+       NotificationContentReq.builder()
                 .body("hi")
                 .title("Announcement")
-                .notificationType(NotificationType.ANNOUNCEMENT)
+                .notificationType(notificationContentReq.getNotificationType())
                 .build();
 
         String response = notificationServiceRefact.sendNotificationToAllUsers(
@@ -79,6 +80,14 @@ public class NotificationApi {
         TopicManagementResponse response = notificationServiceRefact.subscribe(
                 SubscriptionType.ALL,
                 "drnbi7uAR4Wh3jFK-W-T8g:APA91bEqBFnq8OU1eOB-2zh2AIWl77Bb5PDuyVuI5YhovSFYUcrakzWa5DvQHF9wlX2M7vPQRo7HHsGaDD0YTgiL7t1tA6XM7LdGqOdeJNYKcdhD4E7JQsV1-Bim2EhQzpi518XQmPpS");
+        return SuccessResponse.successResponse(response);
+    }
+
+    @GetMapping("/unsubscribe")
+    public SuccessResponse unsubscribeTestAPI() {
+        TopicManagementResponse response = notificationServiceRefact.unsubscribe(
+                SubscriptionType.ALL,
+                List.of());
         return SuccessResponse.successResponse(response);
     }
 

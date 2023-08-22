@@ -24,14 +24,15 @@ public class TokenService {
     private final UserRepository userRepository;
 
     // userId를 통해 해당 user가 가지고 있는 토큰들 조회
-    public List<TokenDto> findUserTokens(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> {
-            log.info("유저를 찾을 수 없습니다. id = {}", userId);
-            throw new BaseException(Code.USER_NOT_FOUND);
-        });
-        return user.getTokens().stream()
-                .map(Token::toDto)
-                .collect(Collectors.toList());
+
+
+    public List<Token> findUserTokens(Long userId){
+        User user = userRepository.findByIdWithTokens(userId).orElseThrow(() ->
+            new BaseException(Code.USER_NOT_FOUND)
+        );
+        List<Token> tokens = user.getTokens();
+        return tokens;
+
     }
 
     // 저장되어있는 모든 토큰 조회
