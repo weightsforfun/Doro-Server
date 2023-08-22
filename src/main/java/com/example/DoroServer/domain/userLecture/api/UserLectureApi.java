@@ -53,7 +53,7 @@ public class UserLectureApi {
             @RequestBody @Valid CreateTutorReq createTutorReq,
             @AuthenticationPrincipal User user
     ) {
-        if (user.getId().equals(id)) {
+        if (user.getId().equals(createTutorReq.getUserId())) {
             Long userLectureId = userLectureService.createTutor(id, createTutorReq);
             return SuccessResponse.successResponse(userLectureId + "is created");
         }
@@ -70,12 +70,14 @@ public class UserLectureApi {
     }
     @ApiOperation(value="강사 신청 취소",notes = "id에 해당하는 신청내역을 삭제합니다.")
     @DeleteMapping("/lectures/{id}")
-    public SuccessResponse deleteUserLecture(@PathVariable("id") Long id,@AuthenticationPrincipal User user){
-        if(user.getId().equals(id)){
-            Long deleteLectureID = userLectureService.deleteLecture(id);
-            return SuccessResponse.successResponse("deleted"+deleteLectureID);
-        }
-        throw new BaseException(Code.FORBIDDEN);
+    public SuccessResponse deleteUserLecture(
+            @PathVariable("id") Long id,
+            @AuthenticationPrincipal User user){
+
+        Long deleteLectureID = userLectureService.deleteUserLecture(id,user);
+        return SuccessResponse.successResponse("deleted"+deleteLectureID);
+
+
     }
 
 }
