@@ -1,9 +1,10 @@
 package com.example.DoroServer.domain.userLecture.service;
 
-import com.example.DoroServer.domain.lecture.dto.LectureMapper;
 import com.example.DoroServer.domain.lecture.entity.Lecture;
 import com.example.DoroServer.domain.lecture.repository.LectureRepository;
-import com.example.DoroServer.domain.notification.service.NotificationService;
+import com.example.DoroServer.domain.notification.dto.NotificationContentReq;
+import com.example.DoroServer.domain.notification.entity.NotificationType;
+import com.example.DoroServer.domain.notification.service.NotificationServiceRefact;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.domain.userLecture.dto.CreateTutorReq;
@@ -34,12 +35,13 @@ public class UserLectureService {
     private final UserRepository userRepository;
     private final LectureRepository lectureRepository;
     private final UserLectureMapper userLectureMapper;
-    private final NotificationService notificationService;
+    private final NotificationServiceRefact notificationService;
 
     public List<FindAllTutorsRes> findAllTutors(Long id) {
         List<UserLecture> allTutors = userLectureRepository.findAllTutors(id);
         List<FindAllTutorsRes> allTutorsResList = allTutors.stream()
-                .map(userLecture -> userLectureMapper.toFindAllTutorsRes(userLecture,userLecture.getUser()))
+                .map(userLecture -> userLectureMapper.toFindAllTutorsRes(userLecture,
+                        userLecture.getUser()))
                 .collect(Collectors.toList());
         return allTutorsResList;
     }
@@ -47,7 +49,8 @@ public class UserLectureService {
     public List<FindMyLecturesRes> findMyLectures(Long id) {
         List<UserLecture> myLectures = userLectureRepository.findMyLectures(id);
         List<FindMyLecturesRes> findMyLecturesResList = myLectures.stream()
-                .map(userLecture -> userLectureMapper.toFindMyLecturesRes(userLecture.getLecture(),userLecture))
+                .map(userLecture -> userLectureMapper.toFindMyLecturesRes(userLecture.getLecture(),
+                        userLecture))
                 .collect(Collectors.toList());
         return findMyLecturesResList;
     }
@@ -57,10 +60,9 @@ public class UserLectureService {
         Optional<UserLecture> optionalUserLecture = userLectureRepository.findUserLecture(id,
                 createTutorReq.getUserId(), createTutorReq.getTutorRole());
 
-        if(optionalUserLecture.isPresent()){
+        if (optionalUserLecture.isPresent()) {
             throw new BaseException(Code.ALREADY_EXIST);
-        }
-        else{
+        } else {
             Lecture lecture = lectureRepository.findById(id).
                     orElseThrow(() -> new BaseException(Code.LECTURE_NOT_FOUND));
             User user = userRepository.findById(createTutorReq.getUserId())
@@ -78,23 +80,42 @@ public class UserLectureService {
     }
 
     public String selectTutor(Long lectureId, SelectTutorReq selectTutorReq) {
-        UserLecture userLecture = userLectureRepository.findUserLecture(lectureId,
-                        selectTutorReq.getUserId(), selectTutorReq.getTutorRole())
-                .orElseThrow(() -> new BaseException(Code.TUTOR_NOT_FOUND));
-        User user = userRepository.findById(selectTutorReq.getUserId()).orElseThrow(()->new BaseException(Code.USER_NOT_FOUND));
-        Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(()-> new BaseException(Code.LECTURE_NOT_FOUND));
+        Long userId = selectTutorReq.getUserId();
 
-//        if(userLecture.getTutorStatus()==TutorStatus.WAITING){
-//            notificationService.sendFixedMessageToUser(user,"강사 배정 완료",lecture.getSubTitle()+"강의에 배정되셨습니다");
-//        }
-//        else {
-//            notificationService.sendFixedMessageToUser(user, "강사 배정 취소",
-//                    lecture.getSubTitle() + "강의에 배정이 취소되었습니다.");
-//        }
+        UserLecture userLecture = userLectureRepository.findUserLecture(lectureId,
+                        userId, selectTutorReq.getTutorRole())
+                .orElseThrow(() -> new BaseException(Code.TUTOR_NOT_FOUND));
+        userRepository.findById(userId).orElseThrow(() -> new BaseException(Code.USER_NOT_FOUND));
+        lectureRepository.findById(lectureId)
+                .orElseThrow(() -> new BaseException(Code.LECTURE_NOT_FOUND));
+        if (userLecture.getTutorStatus() == TutorStatus.WAITING) {
+
+            NotificationContentReq successNotificationContentReq = NotificationContentReq
+                    .builder()
+                    .title("강사 신청 결과")
+                    .body("강의에 선정되셨습니다!")
+                    .notificationType(NotificationType.LECTURE)
+                    .build();
+
+            notificationService.sendNotificationToOne(userId, lectureId,
+                    successNotificationContentReq);
+        } else {
+
+            NotificationContentReq faliedNotificationContentReq = NotificationContentReq
+                    .builder()
+                    .title("강사 신청 결과")
+                    .body("강의에 선정이 취소되었습니다...")
+                    .notificationType(NotificationType.LECTURE)
+                    .build();
+            notificationService.sendNotificationToOne(userId, lectureId,
+                    faliedNotificationContentReq);
+
+        }
         userLecture.changeTutorStatus();
         return String.valueOf(userLecture.getTutorStatus());
     }
-    public Long deleteLecture(Long lectureId){
+
+    public Long deleteLecture(Long lectureId) {
         userLectureRepository.deleteById(lectureId);
         return lectureId;
     }

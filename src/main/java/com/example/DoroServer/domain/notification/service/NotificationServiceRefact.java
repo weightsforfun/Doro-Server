@@ -40,7 +40,6 @@ public class NotificationServiceRefact {
 
     public Long sendNotificationToOne(Long userId, Long targetId,
             NotificationContentReq notificationContentReq) {
-
         User user = userRepository.findByIdWithTokens(userId)
                 .orElseThrow(() -> new BaseException(Code.ACCOUNT_NOT_FOUND));
 
@@ -58,7 +57,7 @@ public class NotificationServiceRefact {
                 Message mes = Message.builder()
                         .setAndroidConfig(androidConfig)
                         .setApnsConfig(apnsConfig)
-                        .setToken(String.valueOf(token))
+                        .setToken(String.valueOf(token.getToken()))
                         .build();
 
                 firebaseMessaging.send(mes);
