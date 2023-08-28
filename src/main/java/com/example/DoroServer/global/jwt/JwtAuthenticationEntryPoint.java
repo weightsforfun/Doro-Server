@@ -3,6 +3,7 @@ package com.example.DoroServer.global.jwt;
 import com.example.DoroServer.global.common.AuthErrorResponse;
 import com.example.DoroServer.global.exception.Code;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -20,11 +21,11 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                         AuthenticationException authException) throws IOException, ServletException {
-        response.setContentType("application/json; charset=UTF-8");
-        response.setStatus(401);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("utf-8");
+        response.setStatus(Code.UNAUTHORIZED.getHttpStatus().value());
+        AuthErrorResponse authErrorResponse = buildAuthErrorResponse(Code.UNAUTHORIZED);
         PrintWriter writer = response.getWriter();
-        Code errorCode = Code.UNAUTHORIZED;
-        AuthErrorResponse authErrorResponse = buildAuthErrorResponse(errorCode);
         try{
             writer.write(authErrorResponse.toString());
         }catch(NullPointerException e){

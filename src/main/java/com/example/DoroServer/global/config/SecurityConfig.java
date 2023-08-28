@@ -79,12 +79,7 @@ public class SecurityConfig{
 
                 .and()
                 .authorizeRequests()
-
-                .antMatchers("/test").hasRole("USER")
-
-                .antMatchers("/admin/**").hasRole("ADMIN")
-                .antMatchers("/user/**").hasRole("USER")
-                .anyRequest().permitAll()
+                .anyRequest().authenticated()
 
                 .and()
                 .addFilter(corsConfig.corsFilter())

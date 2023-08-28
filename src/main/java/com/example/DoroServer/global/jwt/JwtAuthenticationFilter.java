@@ -32,10 +32,10 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
             if(redisService.getValues(jwtToken) == null) {
                 Authentication authentication = jwtTokenProvider.getAuthentication(jwtToken);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-                log.info("Security Context에 '{}' 인증 정보를 저장했습니다, uri: {}", authentication.getName(), requestURI);
+                log.debug("Security Context에 '{}' 인증 정보를 저장했습니다, uri: {}", authentication.getName(), requestURI);
             }
         } else {
-            log.info("유효한 JWT 토큰이 없습니다, uri: {}", requestURI);
+            log.debug("유효한 JWT 토큰이 없습니다, uri: {}", requestURI);
         }
 
 
