@@ -95,7 +95,7 @@ public class JwtTokenProvider {
             return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody()
                 .getSubject();
         }catch (ExpiredJwtException e){
-            log.info("AccessToken 만료 시 재발급 = {}", e.getClaims().toString());
+            log.debug("AccessToken 만료 시 재발급 = {}", e.getClaims().toString());
             return e.getClaims().getSubject();
         }
     }
