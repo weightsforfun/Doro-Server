@@ -113,9 +113,7 @@ public class AuthController {
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(@RequestBody @Valid ReissueReq reissueReq,
                                     @RequestHeader("User-Agent") String userAgent){
-        if(!tokenProvider.validateToken(reissueReq.getRefreshToken())){
-            throw new JwtAuthenticationException(Code.JWT_BAD_REQUEST);
-        }
+        tokenProvider.validateRefreshToken(reissueReq.getRefreshToken());
         Authentication authentication = tokenProvider.getAuthentication(
             reissueReq.getAccessToken().substring(7));
         String refreshToken = redisService.getValues(REDIS_REFRESH_TOKEN_PREFIX + authentication.getName() + userAgent);

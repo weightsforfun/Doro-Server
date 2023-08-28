@@ -34,16 +34,16 @@ public class JwtTokenProvider {
     private final CustomUserDetailsService customUserDetailsService;
     private final UserRepository userRepository;
     private String secretKey;
-    private final Integer accessTime;
-    private final Integer refreshTime;
+    private long accessTime;
+    private long refreshTime;
 
     public JwtTokenProvider(
             UserRepository userRepository,
             CustomUserDetailsService customUserDetailsService,
             @Value("${jwt.secret}") String secretKey,
             @Value("${jwt.secret-refresh}") String refreshSecretKey,
-            @Value("${jwt.access-token-seconds}") Integer accessTime,
-            @Value("${jwt.refresh-token-seconds}") Integer refreshTime) {
+            @Value("${jwt.access-token-seconds}") long accessTime,
+            @Value("${jwt.refresh-token-seconds}") long refreshTime) {
         this.userRepository = userRepository;
         this.customUserDetailsService = customUserDetailsService;
         this.secretKey = secretKey;
@@ -54,6 +54,8 @@ public class JwtTokenProvider {
     @PostConstruct
     protected void init(){
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
+        accessTime = accessTime * 60 * 1000L;
+        refreshTime = refreshTime * 60 * 1000L;
     }
 
 
@@ -118,6 +120,19 @@ public class JwtTokenProvider {
             throw new JwtAuthenticationException(Code.JWT_TOKEN_EXPIRED);
         }catch(UnsupportedJwtException e){
             throw new JwtAuthenticationException(Code.JWT_UNSUPPORTED_TOKEN);
+        }
+    }
+
+    public boolean validateRefreshToken(String token) {
+        try {
+            Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+            return !claims.getBody().getExpiration().before(new Date());
+        }catch(SecurityException | MalformedJwtException | IllegalArgumentException e){
+            throw new BaseException(Code.JWT_BAD_REQUEST);
+        }catch(ExpiredJwtException e){
+            throw new BaseException(Code.JWT_TOKEN_EXPIRED);
+        }catch(UnsupportedJwtException e){
+            throw new BaseException(Code.JWT_UNSUPPORTED_TOKEN);
         }
     }
 
