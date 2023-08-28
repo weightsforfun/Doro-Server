@@ -39,7 +39,8 @@ public class UserLectureService {
     public List<FindAllTutorsRes> findAllTutors(Long id) {
         List<UserLecture> allTutors = userLectureRepository.findAllTutors(id);
         List<FindAllTutorsRes> allTutorsResList = allTutors.stream()
-                .map(userLecture -> userLectureMapper.toFindAllTutorsRes(userLecture,userLecture.getUser()))
+                .map(userLecture -> userLectureMapper.toFindAllTutorsRes(userLecture,
+                        userLecture.getUser()))
                 .collect(Collectors.toList());
         return allTutorsResList;
     }
@@ -47,7 +48,8 @@ public class UserLectureService {
     public List<FindMyLecturesRes> findMyLectures(Long id) {
         List<UserLecture> myLectures = userLectureRepository.findMyLectures(id);
         List<FindMyLecturesRes> findMyLecturesResList = myLectures.stream()
-                .map(userLecture -> userLectureMapper.toFindMyLecturesRes(userLecture.getLecture(),userLecture))
+                .map(userLecture -> userLectureMapper.toFindMyLecturesRes(userLecture.getLecture(),
+                        userLecture))
                 .collect(Collectors.toList());
         return findMyLecturesResList;
     }
@@ -57,10 +59,9 @@ public class UserLectureService {
         Optional<UserLecture> optionalUserLecture = userLectureRepository.findUserLecture(id,
                 createTutorReq.getUserId(), createTutorReq.getTutorRole());
 
-        if(optionalUserLecture.isPresent()){
+        if (optionalUserLecture.isPresent()) {
             throw new BaseException(Code.ALREADY_EXIST);
-        }
-        else{
+        } else {
             Lecture lecture = lectureRepository.findById(id).
                     orElseThrow(() -> new BaseException(Code.LECTURE_NOT_FOUND));
             User user = userRepository.findById(createTutorReq.getUserId())
@@ -81,8 +82,10 @@ public class UserLectureService {
         UserLecture userLecture = userLectureRepository.findUserLecture(lectureId,
                         selectTutorReq.getUserId(), selectTutorReq.getTutorRole())
                 .orElseThrow(() -> new BaseException(Code.TUTOR_NOT_FOUND));
-        User user = userRepository.findById(selectTutorReq.getUserId()).orElseThrow(()->new BaseException(Code.USER_NOT_FOUND));
-        Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(()-> new BaseException(Code.LECTURE_NOT_FOUND));
+        User user = userRepository.findById(selectTutorReq.getUserId())
+                .orElseThrow(() -> new BaseException(Code.USER_NOT_FOUND));
+        Lecture lecture = lectureRepository.findById(lectureId)
+                .orElseThrow(() -> new BaseException(Code.LECTURE_NOT_FOUND));
 
 //        if(userLecture.getTutorStatus()==TutorStatus.WAITING){
 //            notificationService.sendFixedMessageToUser(user,"강사 배정 완료",lecture.getSubTitle()+"강의에 배정되셨습니다");
@@ -94,8 +97,25 @@ public class UserLectureService {
         userLecture.changeTutorStatus();
         return String.valueOf(userLecture.getTutorStatus());
     }
-    public Long deleteLecture(Long lectureId){
-        userLectureRepository.deleteById(lectureId);
-        return lectureId;
+
+    public Long deleteUserLecture(Long userLectureId, User user) {
+
+
+        Optional<UserLecture> optionalUserLecture = userLectureRepository.findUserLectureByIdWithUser(
+                userLectureId);
+
+        Long requestUserId=user.getId();
+
+        optionalUserLecture.ifPresentOrElse(ul -> {
+            if (ul.getUser().getId().equals(requestUserId)) {
+                userLectureRepository.deleteById(userLectureId);
+            } else {
+                throw new BaseException(Code.FORBIDDEN);
+            }
+        }, () -> {
+            throw new BaseException(Code.USER_LECTURE_NOT_FOUND);
+        });
+
+        return userLectureId;
     }
 }
