@@ -17,6 +17,7 @@ import com.example.DoroServer.domain.userNotification.repository.UserNotificatio
 import com.example.DoroServer.global.auth.dto.ChangePasswordReq;
 import com.example.DoroServer.global.auth.dto.JoinReq;
 import com.example.DoroServer.global.auth.dto.LoginReq;
+import com.example.DoroServer.global.auth.dto.LoginRes;
 import com.example.DoroServer.global.auth.dto.ReissueReq;
 import com.example.DoroServer.global.common.Constants.REDIS_MESSAGE_PREFIX;
 import com.example.DoroServer.global.exception.BaseException;
@@ -24,7 +25,6 @@ import com.example.DoroServer.global.exception.Code;
 import com.example.DoroServer.global.exception.JwtAuthenticationException;
 import com.example.DoroServer.global.jwt.JwtTokenProvider;
 import com.example.DoroServer.global.jwt.RedisService;
-import com.mysema.commons.lang.Pair;
 import java.time.Duration;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -177,7 +177,7 @@ public class AuthServiceImpl implements AuthService{
     }
 
     @Override
-    public Pair<HttpHeaders, String> login(LoginReq loginReq, String fcmToken, String userAgent) {
+    public LoginRes login(LoginReq loginReq, String fcmToken, String userAgent) {
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(loginReq.getAccount(), loginReq.getPassword());
 
@@ -195,7 +195,7 @@ public class AuthServiceImpl implements AuthService{
             tokenService.saveToken(userId, fcmToken);
         }
 
-        return new Pair<>(httpHeaders, refreshToken);
+        return new LoginRes(httpHeaders, refreshToken);
     }
 
     @Override
