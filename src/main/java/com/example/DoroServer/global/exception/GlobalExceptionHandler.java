@@ -74,7 +74,7 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<ErrorResponse> HttpMediaTypeNotSupportedException(
             HttpMediaTypeNotSupportedException e,
             HttpServletRequest request) {
-        log.error("HttpMessageNotReadableException: {} - {}", e.getMessage(), request.getRequestURL());
+        log.error("HttpMediaTypeNotSupportedException: {} - {}", e.getMessage(), request.getRequestURL());
 
         final ErrorResponse response = ErrorResponse.of(Code.NOT_SUPPORTED_BODY_TYPE);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
