@@ -6,11 +6,11 @@ import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.global.auth.dto.ChangePasswordReq;
 import com.example.DoroServer.global.auth.dto.JoinReq;
 import com.example.DoroServer.global.auth.dto.LoginReq;
+import com.example.DoroServer.global.auth.dto.LoginRes;
 import com.example.DoroServer.global.auth.dto.ReissueReq;
 import com.example.DoroServer.global.common.SuccessResponse;
 import com.example.DoroServer.global.jwt.JwtTokenProvider;
 import com.example.DoroServer.global.jwt.RedisService;
-import com.mysema.commons.lang.Pair;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import javax.validation.Valid;
@@ -54,10 +54,10 @@ public class AuthController {
     public ResponseEntity<?> login (@RequestBody @Valid LoginReq loginReq,
                                     @RequestHeader(required = false) String fcmToken,
                                     @RequestHeader("User-Agent") String userAgent){
-        Pair<HttpHeaders, String> result = authService.login(loginReq, fcmToken, userAgent);
+        LoginRes result = authService.login(loginReq, fcmToken, userAgent);
         return ResponseEntity.ok()
-            .headers(result.getFirst())
-            .body(result.getSecond());
+            .headers(result.getAccessTokenHeader())
+            .body(result.getRefreshToken());
     }
 
     @Operation(summary = "001_03", description = "아이디 중복체크")
