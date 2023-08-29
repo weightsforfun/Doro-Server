@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -66,6 +67,16 @@ public class GlobalExceptionHandler {
         log.error("HttpMessageNotReadableException: {} - {}", e.getMessage(), request.getRequestURL());
 
         final ErrorResponse response = ErrorResponse.of(Code.JSON_SYNTAX_ERROR);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    protected ResponseEntity<ErrorResponse> HttpMediaTypeNotSupportedException(
+            HttpMediaTypeNotSupportedException e,
+            HttpServletRequest request) {
+        log.error("HttpMessageNotReadableException: {} - {}", e.getMessage(), request.getRequestURL());
+
+        final ErrorResponse response = ErrorResponse.of(Code.NOT_SUPPORTED_BODY_TYPE);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
