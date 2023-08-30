@@ -37,7 +37,7 @@ public class JwtLogoutHandler implements LogoutHandler {
             throw new JwtAuthenticationException(Code.BAD_REQUEST);
         }
         Authentication providerAuthentication = tokenProvider.getAuthentication(accessToken);
-        log.info("Argument Authentication={}", providerAuthentication);
+        log.debug("Argument Authentication={}", providerAuthentication);
         if(redisService.getValues(REDIS_REFRESH_TOKEN_PREFIX + providerAuthentication.getName() + userAgent) != null){
             redisService.deleteValues(REDIS_REFRESH_TOKEN_PREFIX + providerAuthentication.getName() + userAgent);
         }
