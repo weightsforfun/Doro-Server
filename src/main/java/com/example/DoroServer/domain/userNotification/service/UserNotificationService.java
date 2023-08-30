@@ -72,7 +72,7 @@ public class UserNotificationService {
                 UserNotification.builder()
                         .user(user)
                         .notification(notification)
-//                        .expirationPeriod(LocalDateTime.now().plusMonths(3))
+                        .isRead(false)
                         .build());
 
         return userNotification.getId();
