@@ -4,7 +4,6 @@ import static com.example.DoroServer.global.common.Constants.AUTHORIZATION_HEADE
 import static com.example.DoroServer.global.common.Constants.REDIS_REFRESH_TOKEN_PREFIX;
 
 import com.example.DoroServer.domain.notification.entity.SubscriptionType;
-import com.example.DoroServer.domain.notification.service.NotificationService;
 import com.example.DoroServer.domain.notification.service.NotificationServiceRefact;
 import com.example.DoroServer.domain.token.service.TokenService;
 import com.example.DoroServer.domain.user.entity.User;

@@ -1,15 +1,16 @@
 package com.example.DoroServer.domain.userNotification.service;
 
-import com.example.DoroServer.domain.notification.dto.NotificationRes;
+
 import com.example.DoroServer.domain.notification.entity.Notification;
 import com.example.DoroServer.domain.notification.repository.NotificationRepository;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.repository.UserRepository;
+import com.example.DoroServer.domain.userNotification.dto.UserNotificationRes;
 import com.example.DoroServer.domain.userNotification.entity.UserNotification;
 import com.example.DoroServer.domain.userNotification.repository.UserNotificationRepository;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
-import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,26 +31,26 @@ public class UserNotificationService {
     private final NotificationRepository notificationRepository;
 
 
-    public List<NotificationRes> findUserNotificationsByUserId(Long userId, Pageable pageable) {
+    public List<UserNotificationRes> findUserNotificationsByUserId(Long userId, Pageable pageable) {
 
         List<UserNotification> userNotificationList = userNotificationRepository.findUserNotificationsByUserId(
                 userId, pageable);
-        List<NotificationRes> notificationResList = userNotificationList.stream()
-                .map(un -> un.getNotification().toRes())
+        List<UserNotificationRes> notificationResList = userNotificationList.stream()
+                .map(un -> un.toUserNotificationRes())
                 .collect(Collectors.toList());
 
         return notificationResList;
     }
 
     @Transactional
-    public NotificationRes findNotificationById(Long userId,Long notificationId){
+    public UserNotificationRes findNotificationById(Long userId,Long notificationId){
 
         UserNotification userNotification = userNotificationRepository.findUserNotificationByUserIdAndNotificationId(
                 userId, notificationId).orElseThrow(() -> new BaseException(Code.FORBIDDEN));
 
         userNotification.changeIsRead();
 
-        return userNotification.getNotification().toRes();
+        return userNotification.toUserNotificationRes();
     }
 
     @Transactional
@@ -92,7 +93,8 @@ public class UserNotificationService {
                             .notification(notification)
                             .isRead(false)
                             .build()
-                ).collect(Collectors.toList());
+                )
+                .collect(Collectors.toList());
 
         userNotificationRepository.saveAll(userNotifications);
 

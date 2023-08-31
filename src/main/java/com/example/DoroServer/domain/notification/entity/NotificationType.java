@@ -9,9 +9,7 @@ public enum NotificationType {
     @JsonCreator
     public static NotificationType fromTestEnum(String val){
         for(NotificationType notificationType : NotificationType.values()){
-            System.out.println("notificationType = " + notificationType);
             if(notificationType.name().equals(val)){
-                System.out.println("notificationType = " + notificationType);
                 return notificationType;
             }
         }
