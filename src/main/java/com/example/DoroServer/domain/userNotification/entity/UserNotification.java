@@ -1,14 +1,13 @@
 package com.example.DoroServer.domain.userNotification.entity;
 
-import com.example.DoroServer.domain.notification.dto.NotificationRes;
+
 import com.example.DoroServer.domain.notification.entity.Notification;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.userNotification.dto.UserNotificationRes;
 import lombok.*;
-import net.bytebuddy.asm.Advice;
+
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import org.hibernate.annotations.ColumnDefault;
 
 @Entity

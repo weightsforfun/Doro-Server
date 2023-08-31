@@ -30,15 +30,11 @@ public class NotificationContentReq {   // 알림이 생성될 때, 토큰 없�
     @NotNull
     private NotificationType notificationType;
 
-    private List<Long> userIds = new ArrayList<>();
-
     public Notification toEntity(NotificationType notificationType, Long announcementId) {
         return Notification.builder()
                 .title(title)
                 .body(body)
                 .notificationType(notificationType)
-//                .isRead(false)
-//                .announcementId(announcementId)
                 .build();
     }
 

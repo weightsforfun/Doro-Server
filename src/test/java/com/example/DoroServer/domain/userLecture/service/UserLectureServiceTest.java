@@ -4,7 +4,6 @@ import com.example.DoroServer.domain.lecture.entity.Lecture;
 import com.example.DoroServer.domain.lecture.entity.LectureDate;
 import com.example.DoroServer.domain.lecture.entity.LectureStatus;
 import com.example.DoroServer.domain.lecture.repository.LectureRepository;
-import com.example.DoroServer.domain.notification.service.NotificationService;
 import com.example.DoroServer.domain.user.entity.Degree;
 import com.example.DoroServer.domain.user.entity.Gender;
 import com.example.DoroServer.domain.user.entity.StudentStatus;
@@ -55,8 +54,6 @@ class UserLectureServiceTest {
     @Spy
     private UserLectureMapper userLectureMapper = Mappers.getMapper(UserLectureMapper.class);
 
-    @Mock
-    private NotificationService notificationService;
 
     private User setUpUser(Long userId){
         return User.builder()

@@ -1,6 +1,6 @@
 package com.example.DoroServer.domain.userNotification.service;
 
-import com.example.DoroServer.domain.notification.dto.NotificationRes;
+
 import com.example.DoroServer.domain.notification.entity.Notification;
 import com.example.DoroServer.domain.notification.repository.NotificationRepository;
 import com.example.DoroServer.domain.user.entity.User;
@@ -10,7 +10,7 @@ import com.example.DoroServer.domain.userNotification.entity.UserNotification;
 import com.example.DoroServer.domain.userNotification.repository.UserNotificationRepository;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
-import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
