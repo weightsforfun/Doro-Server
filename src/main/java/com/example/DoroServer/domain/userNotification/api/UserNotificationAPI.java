@@ -3,6 +3,7 @@ package com.example.DoroServer.domain.userNotification.api;
 
 import com.example.DoroServer.domain.notification.dto.NotificationRes;
 import com.example.DoroServer.domain.user.entity.User;
+import com.example.DoroServer.domain.userNotification.dto.UserNotificationRes;
 import com.example.DoroServer.domain.userNotification.service.UserNotificationService;
 import com.example.DoroServer.global.common.SuccessResponse;
 import io.swagger.annotations.Api;
@@ -36,7 +37,7 @@ public class UserNotificationAPI {
             @PageableDefault(page = 0, size = 10, sort = "id", direction = Direction.DESC) Pageable pageable) {
 
         // 유저별 알림 조희
-        List<NotificationRes> userNotifications = userNotificationService.findUserNotificationsByUserId(user.getId(),
+        List<UserNotificationRes> userNotifications = userNotificationService.findUserNotificationsByUserId(user.getId(),
                 pageable);
 
         // 병합 후 조회된 전체 알림 페이징 후반환
@@ -49,10 +50,10 @@ public class UserNotificationAPI {
             @AuthenticationPrincipal User user,
             @PathVariable("notificationId") Long notificationId) {
 
-        NotificationRes notificationRes = userNotificationService.findNotificationById(
+        UserNotificationRes userNotificationRes = userNotificationService.findNotificationById(
                 user.getId(), notificationId);
 
-        return SuccessResponse.successResponse(notificationRes);
+        return SuccessResponse.successResponse(userNotificationRes);
 
     }
 
@@ -74,7 +75,7 @@ public class UserNotificationAPI {
             @PageableDefault(page = 0, size = 10, sort = "id", direction = Direction.DESC) Pageable pageable) {
 
         // 유저별 알림 조희
-        List<NotificationRes> userNotifications = userNotificationService.findUserNotificationsByUserId(userId,
+        List<UserNotificationRes> userNotifications = userNotificationService.findUserNotificationsByUserId(userId,
                 pageable);
 
         // 병합 후 조회된 전체 알림 페이징 후반환
@@ -87,10 +88,10 @@ public class UserNotificationAPI {
             @PathVariable("userId") Long userId,
             @PathVariable("notificationId") Long notificationId) {
 
-        NotificationRes notificationRes = userNotificationService.findNotificationById(
+        UserNotificationRes userNotificationRes = userNotificationService.findNotificationById(
                 userId, notificationId);
 
-        return SuccessResponse.successResponse(notificationRes);
+        return SuccessResponse.successResponse(userNotificationRes);
 
     }
 

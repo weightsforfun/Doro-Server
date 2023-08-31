@@ -1,7 +1,9 @@
 package com.example.DoroServer.domain.userNotification.entity;
 
+import com.example.DoroServer.domain.notification.dto.NotificationRes;
 import com.example.DoroServer.domain.notification.entity.Notification;
 import com.example.DoroServer.domain.user.entity.User;
+import com.example.DoroServer.domain.userNotification.dto.UserNotificationRes;
 import lombok.*;
 import net.bytebuddy.asm.Advice;
 
@@ -38,5 +40,14 @@ public class UserNotification {
 
     public void changeIsRead(){
         this.isRead=true;
+    }
+
+    public UserNotificationRes toUserNotificationRes() {
+        return UserNotificationRes
+                .builder()
+                .userNotificationId(id)
+                .notification(notification)
+                .isRead(isRead)
+                .build();
     }
 }
