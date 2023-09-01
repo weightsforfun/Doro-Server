@@ -44,6 +44,7 @@ public enum Code {
     // 신청 강사 관련 오류
     TUTOR_NOT_FOUND(HttpStatus.BAD_REQUEST,"TUTOR001","신청하지 않은 강사입니다."),
     ALREADY_EXIST(HttpStatus.BAD_REQUEST,"TUTOR002","이미 신청하셨습니다"),
+    USER_LECTURE_NOT_FOUND(HttpStatus.BAD_REQUEST,"TUTOR003","신청내역이 존재하지 않습니다"),
 
     // 알림톡 관련 오류 M001, M002...
     MESSAGE_SEND_FAILED(HttpStatus.BAD_REQUEST, "M001", "메시지 전송이 실패했습니다. 올바른 번호인지 확인하세요."),
@@ -71,8 +72,9 @@ public enum Code {
     METHOD_ARGUMENT_NOT_VALID(HttpStatus.BAD_REQUEST, "C-0004", "요청 인자가 유효하지 않음"),
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "C-0002", "허용되지 않은 Request Method 호출"),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "C-0003", "내부 서버 오류"),
-    INVALID_TYPE_VALUE(HttpStatus.BAD_REQUEST, "C005", "유효하지 않은 값 타입");
-
+    INVALID_TYPE_VALUE(HttpStatus.BAD_REQUEST, "C005", "유효하지 않은 값 타입"),
+    JSON_SYNTAX_ERROR(HttpStatus.BAD_REQUEST,"C-006","json 형식이 잘못되었습니다."),
+    NOT_SUPPORTED_BODY_TYPE(HttpStatus.BAD_REQUEST,"C-007","지원하지 않는 형식의 Request Body 형식입니다. json 형식으로 보내주세요");
     private final HttpStatus httpStatus;
     private final String code;
     private final String message;

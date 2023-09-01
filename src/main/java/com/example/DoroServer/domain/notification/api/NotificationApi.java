@@ -34,7 +34,7 @@ public class NotificationApi {
 
 
     @ApiOperation(value = "알림 전체 전송", notes =
-            "알림 제목(title), 내용(body)를 입력받아 알림을 생성합니다.")
+            "알림 제목(title), 내용(body)를 입력받아 알림을 수신 동의한 유저 전체에게 전송합니다.")
     @Secured("ROLE_ADMIN")
     @PostMapping
     public SuccessResponse sendNotificationToAll(
@@ -43,51 +43,6 @@ public class NotificationApi {
         String response = notificationServiceRefact.sendNotificationToAllUsers(
                 notificationContentReq,null);
 
-        return SuccessResponse.successResponse(response);
-    }
-
-
-
-    @GetMapping("/sendAll")
-    public SuccessResponse sendAll(@RequestBody @Valid NotificationContentReq notificationContentReq) {
-
-       NotificationContentReq.builder()
-                .body("hi")
-                .title("Announcement")
-                .notificationType(notificationContentReq.getNotificationType())
-                .build();
-
-        String response = notificationServiceRefact.sendNotificationToAllUsers(
-                notificationContentReq,1L);
-
-        return SuccessResponse.successResponse(response);
-    }
-
-    @GetMapping("/test")
-    public SuccessResponse testAPI() {
-        NotificationContentReq notificationContentReq = NotificationContentReq.builder()
-                .body("hi")
-                .title("my name is")
-                .notificationType(NotificationType.ANNOUNCEMENT)
-                .build();
-        Long userId = notificationServiceRefact.sendNotificationToOne(
-                1L,1L,notificationContentReq);
-        return SuccessResponse.successResponse(userId);
-    }
-
-    @GetMapping("/subscribe")
-    public SuccessResponse subscribeTestAPI() {
-        TopicManagementResponse response = notificationServiceRefact.subscribe(
-                SubscriptionType.ALL,
-                "drnbi7uAR4Wh3jFK-W-T8g:APA91bEqBFnq8OU1eOB-2zh2AIWl77Bb5PDuyVuI5YhovSFYUcrakzWa5DvQHF9wlX2M7vPQRo7HHsGaDD0YTgiL7t1tA6XM7LdGqOdeJNYKcdhD4E7JQsV1-Bim2EhQzpi518XQmPpS");
-        return SuccessResponse.successResponse(response);
-    }
-
-    @GetMapping("/unsubscribe")
-    public SuccessResponse unsubscribeTestAPI() {
-        TopicManagementResponse response = notificationServiceRefact.unsubscribe(
-                SubscriptionType.ALL,
-                List.of());
         return SuccessResponse.successResponse(response);
     }
 
