@@ -7,6 +7,9 @@ import static com.example.DoroServer.global.common.Constants.REDIS_MESSAGE_PREFI
 import static com.example.DoroServer.global.common.Constants.REDIS_REFRESH_TOKEN_PREFIX;
 import static com.example.DoroServer.global.common.Constants.VERIFIED_CODE;
 
+import com.example.DoroServer.domain.notification.entity.SubscriptionType;
+import com.example.DoroServer.domain.notification.service.NotificationServiceRefact;
+import com.example.DoroServer.domain.token.entity.Token;
 import com.example.DoroServer.domain.token.repository.TokenRepository;
 import com.example.DoroServer.domain.token.service.TokenService;
 import com.example.DoroServer.domain.user.entity.User;
@@ -26,6 +29,7 @@ import com.example.DoroServer.global.exception.JwtAuthenticationException;
 import com.example.DoroServer.global.jwt.JwtTokenProvider;
 import com.example.DoroServer.global.jwt.RedisService;
 import java.time.Duration;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -46,6 +50,7 @@ public class AuthServiceImpl implements AuthService{
     private final UserRepository userRepository;
     private final UserLectureRepository userLectureRepository;
     private final UserNotificationRepository userNotificationRepository;
+    private final NotificationServiceRefact notificationService;
     private final TokenRepository tokenRepository;
     private final RedisService redisService;
     private final JwtTokenProvider tokenProvider;
@@ -59,6 +64,7 @@ public class AuthServiceImpl implements AuthService{
                             UserRepository userRepository,
                             UserLectureRepository userLectureRepository,
                             UserNotificationRepository userNotificationRepository,
+                            NotificationServiceRefact notificationService,
                             TokenRepository tokenRepository,
                             RedisService redisService,
                             JwtTokenProvider tokenProvider,
@@ -70,6 +76,7 @@ public class AuthServiceImpl implements AuthService{
         this.userRepository = userRepository;
         this.userLectureRepository = userLectureRepository;
         this.userNotificationRepository = userNotificationRepository;
+        this.notificationService = notificationService;
         this.tokenRepository = tokenRepository;
         this.redisService = redisService;
         this.tokenProvider = tokenProvider;
@@ -108,8 +115,11 @@ public class AuthServiceImpl implements AuthService{
     @Override
     public void join(JoinReq joinReq) {
         validatePhoneRedis(JOIN, joinReq.getPhone());
+        // 휴대폰 번호 중복 체크
         checkPhoneNumber(joinReq.getPhone());
+
         checkAccount(joinReq.getAccount());
+        // 비밀번호, 비밀번호 확인 비교
         validatePasswordConsistency(joinReq.getPassword(), joinReq.getPasswordCheck());
 
         // Role - Admin 회원가입 희망 시 Admin Code 입력해야 가입 가능
@@ -162,6 +172,9 @@ public class AuthServiceImpl implements AuthService{
         try {
             userLectureRepository.deleteAllByUser(user);
             userNotificationRepository.deleteAllByUser(user);
+            //토큰 관리
+            List<Token> tokenList = tokenRepository.findAllByUser(user);
+            notificationService.unsubscribe(SubscriptionType.ALL,tokenList);
             tokenRepository.deleteAllByUser(user);
             userRepository.deleteById(user.getId());
         } catch (Exception e){
@@ -193,6 +206,7 @@ public class AuthServiceImpl implements AuthService{
         if(fcmToken != null) {
             Long userId = Long.valueOf(tokenProvider.getUserId(accessToken));
             tokenService.saveToken(userId, fcmToken);
+            notificationService.subscribe(SubscriptionType.ALL,fcmToken);
         }
 
         return new LoginRes(httpHeaders, refreshToken);

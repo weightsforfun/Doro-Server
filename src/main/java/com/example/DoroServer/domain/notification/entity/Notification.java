@@ -1,8 +1,6 @@
 package com.example.DoroServer.domain.notification.entity;
 
 import com.example.DoroServer.domain.base.BaseEntity;
-import com.example.DoroServer.domain.notification.dto.NotificationRes;
-import javax.validation.constraints.NotNull;
 import lombok.*;
 
 import javax.persistence.*;
@@ -29,26 +27,8 @@ public class Notification extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private NotificationType notificationType;
 
-    private Boolean isRead; // 알림 읽음 유무
 
-    private Long announcementId;
+    private Long targetId;
 
-    // Notification을 NotificationRes객체로 변환해주는 메소드
-    public NotificationRes toRes() {
-        return NotificationRes.builder()
-                .id(id)
-                .title(title)
-                .body(body)
-                .notificationType(notificationType)
-                .isRead(isRead)
-                .createdAt(getCreatedAt())
-                .lastModifiedAt(getLastModifiedAt())
-                .announcementId(announcementId)
-                .build();
-    }
 
-    // 알림 확인 후 읽음 처리하는 메소드
-    public void isReadTrue() {
-        this.isRead = true;
-    }
 }
