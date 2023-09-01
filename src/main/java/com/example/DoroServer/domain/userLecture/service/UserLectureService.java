@@ -1,5 +1,6 @@
 package com.example.DoroServer.domain.userLecture.service;
 
+import com.example.DoroServer.domain.lecture.dto.LectureMapper;
 import com.example.DoroServer.domain.lecture.entity.Lecture;
 import com.example.DoroServer.domain.lecture.repository.LectureRepository;
 import com.example.DoroServer.domain.notification.dto.NotificationContentReq;
@@ -115,8 +116,24 @@ public class UserLectureService {
         return String.valueOf(userLecture.getTutorStatus());
     }
 
-    public Long deleteLecture(Long lectureId) {
-        userLectureRepository.deleteById(lectureId);
-        return lectureId;
+    public Long deleteUserLecture(Long userLectureId, User user) {
+
+
+        Optional<UserLecture> optionalUserLecture = userLectureRepository.findUserLectureByIdWithUser(
+                userLectureId);
+
+        Long requestUserId=user.getId();
+
+        optionalUserLecture.ifPresentOrElse(ul -> {
+            if (ul.getUser().getId().equals(requestUserId)) {
+                userLectureRepository.deleteById(userLectureId);
+            } else {
+                throw new BaseException(Code.FORBIDDEN);
+            }
+        }, () -> {
+            throw new BaseException(Code.USER_LECTURE_NOT_FOUND);
+        });
+
+        return userLectureId;
     }
 }

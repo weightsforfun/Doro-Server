@@ -1,14 +1,17 @@
 package com.example.DoroServer.global.auth;
 
+import static com.example.DoroServer.global.common.Constants.AUTHORIZATION_HEADER;
 import static com.example.DoroServer.global.common.Constants.REDIS_MESSAGE_PREFIX.ACCOUNT;
 import static com.example.DoroServer.global.common.Constants.REDIS_MESSAGE_PREFIX.JOIN;
 import static com.example.DoroServer.global.common.Constants.REDIS_MESSAGE_PREFIX.PASSWORD;
+import static com.example.DoroServer.global.common.Constants.REDIS_REFRESH_TOKEN_PREFIX;
 import static com.example.DoroServer.global.common.Constants.VERIFIED_CODE;
 
 import com.example.DoroServer.domain.notification.entity.SubscriptionType;
 import com.example.DoroServer.domain.notification.service.NotificationServiceRefact;
 import com.example.DoroServer.domain.token.entity.Token;
 import com.example.DoroServer.domain.token.repository.TokenRepository;
+import com.example.DoroServer.domain.token.service.TokenService;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.entity.UserRole;
 import com.example.DoroServer.domain.user.repository.UserRepository;
@@ -16,13 +19,24 @@ import com.example.DoroServer.domain.userLecture.repository.UserLectureRepositor
 import com.example.DoroServer.domain.userNotification.repository.UserNotificationRepository;
 import com.example.DoroServer.global.auth.dto.ChangePasswordReq;
 import com.example.DoroServer.global.auth.dto.JoinReq;
+import com.example.DoroServer.global.auth.dto.LoginReq;
+import com.example.DoroServer.global.auth.dto.LoginRes;
+import com.example.DoroServer.global.auth.dto.ReissueReq;
 import com.example.DoroServer.global.common.Constants.REDIS_MESSAGE_PREFIX;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
+import com.example.DoroServer.global.exception.JwtAuthenticationException;
+import com.example.DoroServer.global.jwt.JwtTokenProvider;
 import com.example.DoroServer.global.jwt.RedisService;
+import java.time.Duration;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +53,9 @@ public class AuthServiceImpl implements AuthService{
     private final NotificationServiceRefact notificationService;
     private final TokenRepository tokenRepository;
     private final RedisService redisService;
+    private final JwtTokenProvider tokenProvider;
+    private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final TokenService tokenService;
     private final String DORO_ADMIN;
     private final String DORO_USER;
 
@@ -50,6 +67,9 @@ public class AuthServiceImpl implements AuthService{
                             NotificationServiceRefact notificationService,
                             TokenRepository tokenRepository,
                             RedisService redisService,
+                            JwtTokenProvider tokenProvider,
+                            AuthenticationManagerBuilder authenticationManagerBuilder,
+                            TokenService tokenService,
                             @Value("${doro.admin}") String doro_admin,
                             @Value("${doro.user}") String doro_user) {
         this.passwordEncoder = passwordEncoder;
@@ -59,6 +79,9 @@ public class AuthServiceImpl implements AuthService{
         this.notificationService = notificationService;
         this.tokenRepository = tokenRepository;
         this.redisService = redisService;
+        this.tokenProvider = tokenProvider;
+        this.authenticationManagerBuilder = authenticationManagerBuilder;
+        this.tokenService = tokenService;
         DORO_ADMIN = doro_admin;
         DORO_USER = doro_user;
     }
@@ -73,6 +96,20 @@ public class AuthServiceImpl implements AuthService{
         if(!password.equals(passwordCheck)){
             throw new BaseException(Code.PASSWORD_DID_NOT_MATCH);
         }
+    }
+
+    private String createAccessToken(UsernamePasswordAuthenticationToken authenticationToken) {
+        Authentication authentication = authenticationManagerBuilder.getObject()
+                .authenticate(authenticationToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        log.debug("AccessToken 생성 준비 끝");
+        return getAccessToken(authentication);
+    }
+
+    private String getAccessToken(Authentication authentication) {
+        return tokenProvider.createAccessToken(
+                authentication.getName(), ((User) authentication.getPrincipal()).getId(),
+                authentication.getAuthorities());
     }
 
     @Override
@@ -151,4 +188,47 @@ public class AuthServiceImpl implements AuthService{
             throw new BaseException(Code.EXIST_PHONE);
         }
     }
+
+    @Override
+    public LoginRes login(LoginReq loginReq, String fcmToken, String userAgent) {
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(loginReq.getAccount(), loginReq.getPassword());
+
+        String accessToken = createAccessToken(authenticationToken);
+        String refreshToken = tokenProvider.createRefreshToken();
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(AUTHORIZATION_HEADER, accessToken);
+
+        redisService.setValues(REDIS_REFRESH_TOKEN_PREFIX + loginReq.getAccount() + userAgent,
+                refreshToken, Duration.ofDays(60));
+
+        if(fcmToken != null) {
+            Long userId = Long.valueOf(tokenProvider.getUserId(accessToken));
+            tokenService.saveToken(userId, fcmToken);
+            notificationService.subscribe(SubscriptionType.ALL,fcmToken);
+        }
+
+        return new LoginRes(httpHeaders, refreshToken);
+    }
+
+    @Override
+    public HttpHeaders reissue(ReissueReq reissueReq, String userAgent) {
+        tokenProvider.validateRefreshToken(reissueReq.getRefreshToken());
+        Authentication authentication = tokenProvider.getAuthentication(
+                reissueReq.getAccessToken().substring(7));
+        String refreshToken = redisService.getValues(
+                REDIS_REFRESH_TOKEN_PREFIX + authentication.getName() + userAgent);
+
+        if (!reissueReq.getRefreshToken().equals(refreshToken)) {
+            throw new JwtAuthenticationException(Code.REFRESH_TOKEN_DID_NOT_MATCH);
+        }
+        String newAccessToken = getAccessToken(authentication);
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(AUTHORIZATION_HEADER, newAccessToken);
+
+        return httpHeaders;
+    }
+
 }
