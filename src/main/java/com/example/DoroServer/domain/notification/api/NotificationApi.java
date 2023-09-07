@@ -1,20 +1,14 @@
 package com.example.DoroServer.domain.notification.api;
 
 import com.example.DoroServer.domain.notification.dto.NotificationContentReq;
-import com.example.DoroServer.domain.notification.entity.NotificationType;
-import com.example.DoroServer.domain.notification.entity.SubscriptionType;
 import com.example.DoroServer.domain.notification.service.NotificationServiceRefact;
-import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.global.common.SuccessResponse;
-import com.google.firebase.messaging.TopicManagementResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

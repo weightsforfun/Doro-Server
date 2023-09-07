@@ -12,10 +12,10 @@ import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.domain.userNotification.service.UserNotificationService;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
+import com.example.DoroServer.global.exception.FCMException;
 import com.google.firebase.messaging.*;
 
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -71,8 +71,7 @@ public class NotificationServiceRefact {
 
             return userId;
         } catch (FirebaseMessagingException e) {
-            log.info(String.valueOf(e));
-            throw new BaseException(Code.BAD_REQUEST);
+            throw new FCMException(e.getMessagingErrorCode(),e.getMessage());
         }
 
     }
@@ -100,7 +99,7 @@ public class NotificationServiceRefact {
 
             return response;
         } catch (FirebaseMessagingException e) {
-            throw new BaseException(Code.NOTIFICATION_PUSH_FAIL);
+            throw new FCMException(e.getMessagingErrorCode(),e.getMessage());
         }
 
     }
@@ -111,7 +110,7 @@ public class NotificationServiceRefact {
                     subscriptionType.toString());
             return response;
         } catch (FirebaseMessagingException e) {
-            throw new BaseException(Code.FORBIDDEN);
+            throw new FCMException(e.getMessagingErrorCode(),e.getMessage());
         }
     }
 
@@ -124,7 +123,7 @@ public class NotificationServiceRefact {
                     tokenValues, subscriptionType.toString());
             return response;
         } catch (FirebaseMessagingException e) {
-            throw new BaseException(Code.FORBIDDEN);
+            throw new FCMException(e.getMessagingErrorCode(),e.getMessage());
         }
     }
 }
