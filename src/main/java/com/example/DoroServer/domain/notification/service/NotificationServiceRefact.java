@@ -7,6 +7,7 @@ import com.example.DoroServer.domain.notification.entity.NotificationType;
 import com.example.DoroServer.domain.notification.entity.SubscriptionType;
 import com.example.DoroServer.domain.notification.repository.NotificationRepository;
 import com.example.DoroServer.domain.token.entity.Token;
+import com.example.DoroServer.domain.token.service.TokenService;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.domain.userNotification.service.UserNotificationService;
@@ -34,8 +35,7 @@ public class NotificationServiceRefact {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     private final FirebaseMessaging firebaseMessaging;
-
-
+    private final TokenService tokenService;
 
 
     public Long sendNotificationToOne(Long userId, Long targetId,
@@ -45,39 +45,58 @@ public class NotificationServiceRefact {
 
         List<Token> tokens = user.getTokens();
 
+        List<String> tokenString = tokens.stream()
+                .map(t -> String.valueOf(t.getToken()))
+                .collect(Collectors.toList());
+
         AndroidConfig androidConfig = notificationContentReq.toDefaultAndroidConfig();
         ApnsConfig apnsConfig = notificationContentReq.toDefaultApnsConfig();
         NotificationType notificationType = notificationContentReq.getNotificationType();
 
-
-
         try {
-            for(Token token: tokens){
 
-                Message mes = Message.builder()
-                        .setAndroidConfig(androidConfig)
-                        .setApnsConfig(apnsConfig)
-                        .setToken(String.valueOf(token.getToken()))
-                        .build();
+            MulticastMessage message = MulticastMessage.builder()
+                    .setAndroidConfig(androidConfig)
+                    .setApnsConfig(apnsConfig)
+                    .addAllTokens(tokenString)
+                    .build();
 
-                firebaseMessaging.send(mes);
+            BatchResponse response = firebaseMessaging.sendMulticast(message);
+            List<SendResponse> responses = response.getResponses();
+
+            for (int i = 0; i < responses.size(); i++) {
+                //유효하지 않은 토큰일 경우 삭제해야한다. FCM 서버 내에서 topic 을 관리안할 경우 topic unsubscribe 도 해줘야 한다.
+                //FCM docs 에 UNREGISTERED, INVALID_ARGUMENT 일 경우 유효하지 않은 토큰이므로 삭제하라고 권고한다.
+
+                SendResponse sr = responses.get(i);
+                //sr 이 Successful 이 아니면 NotNull 을 보장한다.
+                if (!sr.isSuccessful()) {
+
+                    MessagingErrorCode messagingErrorCode = sr.getException()
+                            .getMessagingErrorCode();
+
+                    if (messagingErrorCode == MessagingErrorCode.UNREGISTERED
+                            || messagingErrorCode == MessagingErrorCode.INVALID_ARGUMENT) {
+                        log.info(user.getName()+"token 이 만료되어 제거되었습니다.");
+                        tokenService.deleteToken(userId, tokenString.get(i));
+                    }
+                }
             }
-
 
             Notification savedNotification = notificationRepository.save(
                     notificationContentReq.toEntity(notificationType, targetId));
 
-            userNotificationService.saveUserNotification(userId,savedNotification.getId());
+            userNotificationService.saveUserNotification(userId, savedNotification.getId());
 
             return userId;
         } catch (FirebaseMessagingException e) {
-            throw new FCMException(e.getMessagingErrorCode(),e.getMessage());
+            throw new FCMException(e.getMessagingErrorCode(), e.getMessage());
         }
 
     }
 
-    public String sendNotificationToAllUsers(NotificationContentReq notificationContentReq,Long targetId) {
-
+    public String sendNotificationToAllUsers(NotificationContentReq notificationContentReq,
+            Long targetId) {
 
         AndroidConfig androidConfig = notificationContentReq.toDefaultAndroidConfig();
         ApnsConfig apnsConfig = notificationContentReq.toDefaultApnsConfig();
@@ -99,7 +118,7 @@ public class NotificationServiceRefact {
 
             return response;
         } catch (FirebaseMessagingException e) {
-            throw new FCMException(e.getMessagingErrorCode(),e.getMessage());
+            throw new FCMException(e.getMessagingErrorCode(), e.getMessage());
         }
 
     }
@@ -110,20 +129,21 @@ public class NotificationServiceRefact {
                     subscriptionType.toString());
             return response;
         } catch (FirebaseMessagingException e) {
-            throw new FCMException(e.getMessagingErrorCode(),e.getMessage());
+            throw new FCMException(e.getMessagingErrorCode(), e.getMessage());
         }
     }
 
 
-
-    public TopicManagementResponse unsubscribe(SubscriptionType subscriptionType,List<Token> tokens) {
-        List<String> tokenValues = tokens.stream().map(t -> t.getToken()).collect(Collectors.toList());
+    public TopicManagementResponse unsubscribe(SubscriptionType subscriptionType,
+            List<Token> tokens) {
+        List<String> tokenValues = tokens.stream().map(t -> t.getToken())
+                .collect(Collectors.toList());
         try {
             TopicManagementResponse response = firebaseMessaging.unsubscribeFromTopic(
                     tokenValues, subscriptionType.toString());
             return response;
         } catch (FirebaseMessagingException e) {
-            throw new FCMException(e.getMessagingErrorCode(),e.getMessage());
+            throw new FCMException(e.getMessagingErrorCode(), e.getMessage());
         }
     }
 }
