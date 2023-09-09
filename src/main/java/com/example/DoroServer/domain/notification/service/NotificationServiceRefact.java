@@ -105,7 +105,7 @@ public class NotificationServiceRefact {
         Message mes = Message.builder()
                 .setAndroidConfig(androidConfig)
                 .setApnsConfig(apnsConfig)
-                .setTopic(String.valueOf(SubscriptionType.ALL))
+                .setTopic(String.valueOf(notificationContentReq.getNotificationType()))
                 .build();
 
         try {

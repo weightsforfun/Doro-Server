@@ -1,5 +1,5 @@
 package com.example.DoroServer.domain.notification.entity;
 
 public enum SubscriptionType {
-    ALL
+    ALL,LECTURE,ANNOUNCEMENT,NOTIFICATION
 }
