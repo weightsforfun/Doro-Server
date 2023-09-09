@@ -52,8 +52,6 @@ public class JwtLogoutHandler implements LogoutHandler {
         String fcmToken = request.getHeader("fcmToken");
         if (fcmToken != null) {
             Long userId = Long.valueOf(tokenProvider.getUserId(accessToken));
-            List<Token> tokens = tokenService.findUserTokens(userId);
-            notificationService.unsubscribe(SubscriptionType.ALL,tokens);
             tokenService.deleteToken(userId, fcmToken);
         }
     }

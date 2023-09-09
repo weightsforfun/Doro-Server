@@ -173,8 +173,6 @@ public class AuthServiceImpl implements AuthService{
             userLectureRepository.deleteAllByUser(user);
             userNotificationRepository.deleteAllByUser(user);
             //토큰 관리
-            List<Token> tokenList = tokenRepository.findAllByUser(user);
-            notificationService.unsubscribe(SubscriptionType.ALL,tokenList);
             tokenRepository.deleteAllByUser(user);
             userRepository.deleteById(user.getId());
         } catch (Exception e){
@@ -206,7 +204,10 @@ public class AuthServiceImpl implements AuthService{
         if(fcmToken != null) {
             Long userId = Long.valueOf(tokenProvider.getUserId(accessToken));
             tokenService.saveToken(userId, fcmToken);
-            notificationService.subscribe(SubscriptionType.ALL,fcmToken);
+            //처음 알림 동의시에는 모든 topic 에 관하여 subscribe 를 한다.
+            notificationService.subscribe(SubscriptionType.NOTIFICATION,fcmToken);
+            notificationService.subscribe(SubscriptionType.ANNOUNCEMENT,fcmToken);
+            notificationService.subscribe(SubscriptionType.LECTURE,fcmToken);
         }
 
         return new LoginRes(httpHeaders, refreshToken);
