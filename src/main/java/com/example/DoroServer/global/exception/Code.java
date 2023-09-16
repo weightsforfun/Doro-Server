@@ -70,8 +70,8 @@ public enum Code {
     FCM_UNSPECIFIED_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,"FCM001","현재 알림을 보낼 수 없습니다. 다시 한번 시도하시고 안되면 관리자에게 문의 바랍니다."),
     FCM_CERTIFICATION_IS_NOT_VALID(HttpStatus.SERVICE_UNAVAILABLE,"FCM002","FCM 계정을 확인해주세요 apns 혹은 web 인증서에 문제가 있습니다."),
     FCM_INTERNAL_SERVER_ERROR(HttpStatus.SERVICE_UNAVAILABLE,"FCM003","현재 FCM 서버에 문제가 있습니다, 다시 한번 시도해보시고 계속 문제가 있으면 FCM 측에 문의를 해주세요"),
-    FCM_INVALID_ARGUMENT(HttpStatus.INTERNAL_SERVER_ERROR,"FCM004","서버 내부 오류입니다. 관리자에게 문의 주시면 감사하겠습니다."),
-
+    FCM_INVALID_ARGUMENT(HttpStatus.INTERNAL_SERVER_ERROR,"FCM004","어플리케이션 이용이 오래되어 토큰이 삭제되었습니다, 로그아웃 혹은 앱을 지웠다가 다시 접속해주세요."),
+    FCM_UNREGISTERED(HttpStatus.INTERNAL_SERVER_ERROR,"FCM005","어플리케이션 이용이 오래되어 토큰이 삭제되었습니다, 로그아웃 혹은 앱을 지웠다가 다시 접속해주세요"),
 
     METHOD_ARGUMENT_NOT_VALID(HttpStatus.BAD_REQUEST, "C-0004", "요청 인자가 유효하지 않음"),
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "C-0002", "허용되지 않은 Request Method 호출"),

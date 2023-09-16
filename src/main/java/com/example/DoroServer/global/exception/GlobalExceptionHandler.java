@@ -110,6 +110,9 @@ public class GlobalExceptionHandler {
             case INVALID_ARGUMENT:
                 response = ErrorResponse.of(Code.FCM_INVALID_ARGUMENT);
                 break;
+            case UNREGISTERED:
+                response = ErrorResponse.of(Code.FCM_UNREGISTERED);
+                break;
             default:
                 response = ErrorResponse.of(Code.FCM_UNSPECIFIED_ERROR);
         }
