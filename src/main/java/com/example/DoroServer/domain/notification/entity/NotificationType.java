@@ -7,7 +7,7 @@ public enum NotificationType {
     NOTIFICATION,ANNOUNCEMENT,LECTURE;
 
     @JsonCreator
-    public static NotificationType fromTestEnum(String val){
+    public static NotificationType from(String val){
         for(NotificationType notificationType : NotificationType.values()){
             if(notificationType.name().equals(val)){
                 return notificationType;
