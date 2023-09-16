@@ -7,9 +7,8 @@ import static com.example.DoroServer.global.common.Constants.REDIS_MESSAGE_PREFI
 import static com.example.DoroServer.global.common.Constants.REDIS_REFRESH_TOKEN_PREFIX;
 import static com.example.DoroServer.global.common.Constants.VERIFIED_CODE;
 
-import com.example.DoroServer.domain.notification.entity.SubscriptionType;
+import com.example.DoroServer.domain.notification.entity.NotificationType;
 import com.example.DoroServer.domain.notification.service.NotificationServiceRefact;
-import com.example.DoroServer.domain.token.entity.Token;
 import com.example.DoroServer.domain.token.repository.TokenRepository;
 import com.example.DoroServer.domain.token.service.TokenService;
 import com.example.DoroServer.domain.user.entity.User;
@@ -29,7 +28,6 @@ import com.example.DoroServer.global.exception.JwtAuthenticationException;
 import com.example.DoroServer.global.jwt.JwtTokenProvider;
 import com.example.DoroServer.global.jwt.RedisService;
 import java.time.Duration;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -205,9 +203,9 @@ public class AuthServiceImpl implements AuthService{
             Long userId = Long.valueOf(tokenProvider.getUserId(accessToken));
             tokenService.saveToken(userId, fcmToken);
             //처음 알림 동의시에는 모든 topic 에 관하여 subscribe 를 한다.
-            notificationService.subscribe(SubscriptionType.NOTIFICATION,fcmToken);
-            notificationService.subscribe(SubscriptionType.ANNOUNCEMENT,fcmToken);
-            notificationService.subscribe(SubscriptionType.LECTURE,fcmToken);
+            notificationService.subscribe(NotificationType.NOTIFICATION,fcmToken);
+            notificationService.subscribe(NotificationType.ANNOUNCEMENT,fcmToken);
+            notificationService.subscribe(NotificationType.LECTURE,fcmToken);
         }
 
         return new LoginRes(httpHeaders, refreshToken);
