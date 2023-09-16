@@ -202,6 +202,7 @@ public class AuthServiceImpl implements AuthService{
         if(fcmToken != null) {
             Long userId = Long.valueOf(tokenProvider.getUserId(accessToken));
             tokenService.saveToken(userId, fcmToken);
+
             //처음 알림 동의시에는 모든 topic 에 관하여 subscribe 를 한다.
             notificationService.subscribe(NotificationType.NOTIFICATION,fcmToken,userId);
             notificationService.subscribe(NotificationType.ANNOUNCEMENT,fcmToken,userId);

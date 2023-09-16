@@ -52,45 +52,48 @@ public class NotificationServiceRefact {
         ApnsConfig apnsConfig = notificationContentReq.toDefaultApnsConfig();
         NotificationType notificationType = notificationContentReq.getNotificationType();
 
-        try {
+        //개인 알림 수신 동의시 알림 전송 비동의라도 메세지는 저장 해야함
+        if (user.getNotificationAgreement()) {
+            try {
+                MulticastMessage message = MulticastMessage.builder()
+                        .setAndroidConfig(androidConfig)
+                        .setApnsConfig(apnsConfig)
+                        .addAllTokens(tokenString)
+                        .build();
 
-            MulticastMessage message = MulticastMessage.builder()
-                    .setAndroidConfig(androidConfig)
-                    .setApnsConfig(apnsConfig)
-                    .addAllTokens(tokenString)
-                    .build();
+                BatchResponse response = firebaseMessaging.sendMulticast(message);
+                List<SendResponse> responses = response.getResponses();
 
-            BatchResponse response = firebaseMessaging.sendMulticast(message);
-            List<SendResponse> responses = response.getResponses();
+                for (int i = 0; i < responses.size(); i++) {
+                    //유효하지 않은 토큰일 경우 삭제해야한다.
+                    //FCM docs 에 UNREGISTERED, INVALID_ARGUMENT 일 경우 유효하지 않은 토큰이므로 삭제하라고 권고한다.
 
-            for (int i = 0; i < responses.size(); i++) {
-                //유효하지 않은 토큰일 경우 삭제해야한다.
-                //FCM docs 에 UNREGISTERED, INVALID_ARGUMENT 일 경우 유효하지 않은 토큰이므로 삭제하라고 권고한다.
+                    SendResponse sr = responses.get(i);
+                    //sr 이 Successful 이 아니면 NotNull 을 보장한다.
+                    if (!sr.isSuccessful()) {
 
-                SendResponse sr = responses.get(i);
-                //sr 이 Successful 이 아니면 NotNull 을 보장한다.
-                if (!sr.isSuccessful()) {
+                        MessagingErrorCode messagingErrorCode = sr.getException()
+                                .getMessagingErrorCode();
 
-                    MessagingErrorCode messagingErrorCode = sr.getException()
-                            .getMessagingErrorCode();
-
-                    if (messagingErrorCode == MessagingErrorCode.UNREGISTERED
-                            || messagingErrorCode == MessagingErrorCode.INVALID_ARGUMENT) {
-                        log.info(user.getName()+"token 이 만료되어 제거되었습니다.");
-                        tokenService.deleteToken(userId, tokenString.get(i));
+                        if (messagingErrorCode == MessagingErrorCode.UNREGISTERED
+                                || messagingErrorCode == MessagingErrorCode.INVALID_ARGUMENT) {
+                            log.info(user.getName() + "token 이 만료되어 제거되었습니다.");
+                            tokenService.deleteToken(userId, tokenString.get(i));
+                        }
                     }
                 }
+
+            } catch (FirebaseMessagingException e) {
+                throw new FCMException(e.getMessagingErrorCode(), e.getMessage());
             }
-
-            Notification savedNotification = notificationRepository.save(
-                    notificationContentReq.toEntity(notificationType, targetId));
-
-            userNotificationService.saveUserNotification(userId, savedNotification.getId());
-
-            return userId;
-        } catch (FirebaseMessagingException e) {
-            throw new FCMException(e.getMessagingErrorCode(), e.getMessage());
         }
+
+        Notification savedNotification = notificationRepository.save(
+                notificationContentReq.toEntity(notificationType, targetId));
+
+        userNotificationService.saveUserNotification(userId, savedNotification.getId());
+
+        return userId;
 
     }
 
@@ -122,18 +125,28 @@ public class NotificationServiceRefact {
 
     }
 
-    public TopicManagementResponse subscribe(NotificationType notificationType, String token,Long userId) {
+    public TopicManagementResponse subscribe(NotificationType notificationType, String token,
+            Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(Code.USER_NOT_FOUND));
+
+        if (notificationType.equals(NotificationType.LECTURE)) {
+            user.updateNotificationAgreement(true);
+        }
+
         try {
             TopicManagementResponse response = firebaseMessaging.subscribeToTopic(List.of(token),
                     notificationType.toString());
             return response;
         } catch (FirebaseMessagingException e) {
+
             MessagingErrorCode messagingErrorCode = e.getMessagingErrorCode();
 
             if (messagingErrorCode == MessagingErrorCode.UNREGISTERED
                     || messagingErrorCode == MessagingErrorCode.INVALID_ARGUMENT) {
-                log.info(userId+" token 이 만료되어 제거되었습니다.");
-                tokenService.deleteToken(userId, token);
+                log.info(user.getName() + " token 이 만료되어 제거되었습니다.");
+                tokenService.deleteToken(user.getId(), token);
             }
 
             throw new FCMException(e.getMessagingErrorCode(), e.getMessage());
@@ -143,6 +156,14 @@ public class NotificationServiceRefact {
 
     public TopicManagementResponse unsubscribe(NotificationType notificationType,
             String token, Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(Code.USER_NOT_FOUND));
+
+        if (notificationType.equals(NotificationType.LECTURE)) {
+            user.updateNotificationAgreement(false);
+        }
+
         try {
             TopicManagementResponse response = firebaseMessaging.unsubscribeFromTopic(
                     List.of(token), notificationType.toString());
@@ -153,8 +174,8 @@ public class NotificationServiceRefact {
 
             if (messagingErrorCode == MessagingErrorCode.UNREGISTERED
                     || messagingErrorCode == MessagingErrorCode.INVALID_ARGUMENT) {
-                log.info(userId+" token 이 만료되어 제거되었습니다.");
-                tokenService.deleteToken(userId, token);
+                log.info(user.getName() + " token 이 만료되어 제거되었습니다.");
+                tokenService.deleteToken(user.getId(), token);
             }
 
             throw new FCMException(e.getMessagingErrorCode(), e.getMessage());
