@@ -45,11 +45,13 @@ public class NotificationApi {
     @ApiOperation(value = "알림 구독", notes = "알림 유형을 선택하고 요청하면 로그인한 유저가 해당 유형의 알림을 받습니다. 로그인시 모든 알림이 구독됩니다.")
     @PostMapping("/subscribe")
     public SuccessResponse subscribe(
-            @RequestBody SubscriptionDto subscriptionDto
+            @RequestBody SubscriptionDto subscriptionDto,
+            @AuthenticationPrincipal User user
     ) {
         TopicManagementResponse response = notificationServiceRefact.subscribe(
                 subscriptionDto.getNotificationType(),
-                subscriptionDto.getFcmToken());
+                subscriptionDto.getFcmToken(),
+                user.getId());
 
         return SuccessResponse.successResponse(response);
     }
@@ -57,11 +59,13 @@ public class NotificationApi {
     @ApiOperation(value = "알림 구독 취소", notes = "알림 유형을 선택하고 요청하면 로그인한 유저가 해당 유형의 알림을 받습니다.")
     @PostMapping("/unsubscribe")
     public SuccessResponse unsubscribe(
-            @RequestBody SubscriptionDto subscriptionDto
+            @RequestBody SubscriptionDto subscriptionDto,
+            @AuthenticationPrincipal User user
     ) {
         TopicManagementResponse response = notificationServiceRefact.unsubscribe(
                 subscriptionDto.getNotificationType(),
-                subscriptionDto.getFcmToken());
+                subscriptionDto.getFcmToken(),
+                user.getId());
 
         return SuccessResponse.successResponse(response);
     }
