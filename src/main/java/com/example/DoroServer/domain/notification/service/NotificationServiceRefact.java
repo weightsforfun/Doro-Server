@@ -122,24 +122,41 @@ public class NotificationServiceRefact {
 
     }
 
-    public TopicManagementResponse subscribe(NotificationType notificationType, String token) {
+    public TopicManagementResponse subscribe(NotificationType notificationType, String token,Long userId) {
         try {
             TopicManagementResponse response = firebaseMessaging.subscribeToTopic(List.of(token),
                     notificationType.toString());
             return response;
         } catch (FirebaseMessagingException e) {
+            MessagingErrorCode messagingErrorCode = e.getMessagingErrorCode();
+
+            if (messagingErrorCode == MessagingErrorCode.UNREGISTERED
+                    || messagingErrorCode == MessagingErrorCode.INVALID_ARGUMENT) {
+                log.info(userId+" token 이 만료되어 제거되었습니다.");
+                tokenService.deleteToken(userId, token);
+            }
+
             throw new FCMException(e.getMessagingErrorCode(), e.getMessage());
         }
     }
 
 
     public TopicManagementResponse unsubscribe(NotificationType notificationType,
-            String token) {
+            String token, Long userId) {
         try {
             TopicManagementResponse response = firebaseMessaging.unsubscribeFromTopic(
                     List.of(token), notificationType.toString());
             return response;
         } catch (FirebaseMessagingException e) {
+
+            MessagingErrorCode messagingErrorCode = e.getMessagingErrorCode();
+
+            if (messagingErrorCode == MessagingErrorCode.UNREGISTERED
+                    || messagingErrorCode == MessagingErrorCode.INVALID_ARGUMENT) {
+                log.info(userId+" token 이 만료되어 제거되었습니다.");
+                tokenService.deleteToken(userId, token);
+            }
+
             throw new FCMException(e.getMessagingErrorCode(), e.getMessage());
         }
     }
