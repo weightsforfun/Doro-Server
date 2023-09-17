@@ -7,9 +7,8 @@ import static com.example.DoroServer.global.common.Constants.REDIS_MESSAGE_PREFI
 import static com.example.DoroServer.global.common.Constants.REDIS_REFRESH_TOKEN_PREFIX;
 import static com.example.DoroServer.global.common.Constants.VERIFIED_CODE;
 
-import com.example.DoroServer.domain.notification.entity.SubscriptionType;
+import com.example.DoroServer.domain.notification.entity.NotificationType;
 import com.example.DoroServer.domain.notification.service.NotificationServiceRefact;
-import com.example.DoroServer.domain.token.entity.Token;
 import com.example.DoroServer.domain.token.repository.TokenRepository;
 import com.example.DoroServer.domain.token.service.TokenService;
 import com.example.DoroServer.domain.user.entity.User;
@@ -29,7 +28,6 @@ import com.example.DoroServer.global.exception.JwtAuthenticationException;
 import com.example.DoroServer.global.jwt.JwtTokenProvider;
 import com.example.DoroServer.global.jwt.RedisService;
 import java.time.Duration;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -173,8 +171,6 @@ public class AuthServiceImpl implements AuthService{
             userLectureRepository.deleteAllByUser(user);
             userNotificationRepository.deleteAllByUser(user);
             //토큰 관리
-            List<Token> tokenList = tokenRepository.findAllByUser(user);
-            notificationService.unsubscribe(SubscriptionType.ALL,tokenList);
             tokenRepository.deleteAllByUser(user);
             userRepository.deleteById(user.getId());
         } catch (Exception e){
@@ -206,7 +202,11 @@ public class AuthServiceImpl implements AuthService{
         if(fcmToken != null) {
             Long userId = Long.valueOf(tokenProvider.getUserId(accessToken));
             tokenService.saveToken(userId, fcmToken);
-            notificationService.subscribe(SubscriptionType.ALL,fcmToken);
+
+            //처음 알림 동의시에는 모든 topic 에 관하여 subscribe 를 한다.
+            notificationService.subscribe(NotificationType.NOTIFICATION,fcmToken,userId);
+            notificationService.subscribe(NotificationType.ANNOUNCEMENT,fcmToken,userId);
+            notificationService.subscribe(NotificationType.LECTURE,fcmToken,userId);
         }
 
         return new LoginRes(httpHeaders, refreshToken);

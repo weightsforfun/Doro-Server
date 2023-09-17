@@ -1,5 +1,7 @@
 package com.example.DoroServer.global.exception;
 
+
+import com.google.firebase.messaging.MessagingErrorCode;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,8 +24,10 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException e,
             HttpServletRequest request) {
-        log.error("MethodArgumentNotValidException: {} - {}", e.getMessage(), request.getRequestURL());
-        final ErrorResponse response = ErrorResponse.of(Code.METHOD_ARGUMENT_NOT_VALID, e.getBindingResult());
+        log.error("MethodArgumentNotValidException: {} - {}", e.getMessage(),
+                request.getRequestURL());
+        final ErrorResponse response = ErrorResponse.of(Code.METHOD_ARGUMENT_NOT_VALID,
+                e.getBindingResult());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -44,7 +48,8 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(
             MethodArgumentTypeMismatchException e,
             HttpServletRequest request) {
-        log.error("MethodArgumentTypeMismatchException: {} - {}", e.getMessage(), request.getRequestURL());
+        log.error("MethodArgumentTypeMismatchException: {} - {}", e.getMessage(),
+                request.getRequestURL());
         final ErrorResponse response = ErrorResponse.of(e);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
@@ -54,7 +59,8 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<ErrorResponse> handleHttpRequestMethodNotSupportedException(
             HttpRequestMethodNotSupportedException e,
             HttpServletRequest request) {
-        log.error("HttpRequestMethodNotSupportedException: {} - {}", e.getMessage(), request.getRequestURL());
+        log.error("HttpRequestMethodNotSupportedException: {} - {}", e.getMessage(),
+                request.getRequestURL());
         final ErrorResponse response = ErrorResponse.of(Code.METHOD_NOT_ALLOWED);
         return new ResponseEntity<>(response, HttpStatus.METHOD_NOT_ALLOWED);
     }
@@ -64,7 +70,8 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(
             HttpMessageNotReadableException e,
             HttpServletRequest request) {
-        log.error("HttpMessageNotReadableException: {} - {}", e.getMessage(), request.getRequestURL());
+        log.error("HttpMessageNotReadableException: {} - {}", e.getMessage(),
+                request.getRequestURL());
 
         final ErrorResponse response = ErrorResponse.of(Code.JSON_SYNTAX_ERROR);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -74,12 +81,44 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<ErrorResponse> HttpMediaTypeNotSupportedException(
             HttpMediaTypeNotSupportedException e,
             HttpServletRequest request) {
-        log.error("HttpMediaTypeNotSupportedException: {} - {}", e.getMessage(), request.getRequestURL());
+        log.error("HttpMediaTypeNotSupportedException: {} - {}", e.getMessage(),
+                request.getRequestURL());
 
         final ErrorResponse response = ErrorResponse.of(Code.NOT_SUPPORTED_BODY_TYPE);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(FCMException.class)
+    protected ResponseEntity<ErrorResponse> handlerFCMException(
+            FCMException e,
+            HttpServletRequest request
+    ) {
+
+        MessagingErrorCode messagingErrorCode = e.getMessagingErrorCode();
+
+        log.error("FirebaseMessagingException : {} - {}", e.getMessage(), request.getRequestURL());
+
+        final ErrorResponse response;
+
+        switch (messagingErrorCode) {
+            case THIRD_PARTY_AUTH_ERROR:
+                response = ErrorResponse.of(Code.FCM_CERTIFICATION_IS_NOT_VALID);
+                break;
+            case INTERNAL:
+                response = ErrorResponse.of(Code.FCM_INTERNAL_SERVER_ERROR);
+                break;
+            case INVALID_ARGUMENT:
+                response = ErrorResponse.of(Code.FCM_INVALID_ARGUMENT);
+                break;
+            case UNREGISTERED:
+                response = ErrorResponse.of(Code.FCM_UNREGISTERED);
+                break;
+            default:
+                response = ErrorResponse.of(Code.FCM_UNSPECIFIED_ERROR);
+        }
+
+        return new ResponseEntity<>(response, response.getStatus());
+    }
 
     @ExceptionHandler(BaseException.class)
     protected ResponseEntity<ErrorResponse> handleBaseException(
@@ -98,4 +137,6 @@ public class GlobalExceptionHandler {
         final ErrorResponse response = ErrorResponse.of(Code.INTERNAL_SERVER_ERROR);
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+
 }
