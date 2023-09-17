@@ -1,23 +1,21 @@
 package com.example.DoroServer.domain.announcement.api;
 
 import com.example.DoroServer.domain.announcement.dto.AnnouncementMultipartReq;
-import com.example.DoroServer.domain.announcement.dto.AnnouncementReq;
 import com.example.DoroServer.domain.announcement.dto.AnnouncementRes;
 import com.example.DoroServer.domain.announcement.service.AnnouncementService;
 import com.example.DoroServer.domain.notification.dto.NotificationContentReq;
 import com.example.DoroServer.domain.notification.entity.NotificationType;
-import com.example.DoroServer.domain.notification.service.NotificationService;
+import com.example.DoroServer.domain.notification.service.NotificationServiceRefact;
 import com.example.DoroServer.global.common.SuccessResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import java.lang.reflect.Parameter;
+
 import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.lang.Nullable;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,13 +23,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 @Api(tags = "공지📋")
 @RestController
@@ -40,7 +33,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class AnnouncementApi {
 
     private final AnnouncementService announcementService;
-    private final NotificationService notificationService;
 
     // 모든 공지를 찾아 반환
     @ApiOperation(value = "공지 글 전체 조회", notes = "생성되어있는 모든 공지를 조회합니다. 파라미터로 page랑 size 전달하시면 페이징 됩니다. 이게 Swagger가 잘 안돼서 Postman으로 테스트 해보시는게 나을거에요 Swagger는 이상하게 page랑 size를 인식못하네요")
@@ -80,10 +72,6 @@ public class AnnouncementApi {
     public SuccessResponse createAnnouncement(
         @ModelAttribute @Valid AnnouncementMultipartReq announcementMultipartReq) {
         Long announcementId = announcementService.createAnnouncement(announcementMultipartReq);
-        notificationService.sendNotificationToAll(NotificationContentReq.builder()
-            .title("새로운 공지가 올라왔습니다!")
-            .body(announcementMultipartReq.getTitle())
-            .build(), NotificationType.ANNOUNCEMENT,announcementId);
         return SuccessResponse.successResponse("announcement created " + announcementId);
     }
 

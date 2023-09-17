@@ -1,7 +1,11 @@
 package com.example.DoroServer.global.auth;
 
+
 import static com.example.DoroServer.global.common.Constants.REDIS_REFRESH_TOKEN_PREFIX;
 
+
+import com.example.DoroServer.domain.notification.service.NotificationServiceRefact;
+import com.example.DoroServer.domain.token.service.TokenService;
 import com.example.DoroServer.domain.user.entity.User;
 import com.example.DoroServer.global.auth.dto.ChangePasswordReq;
 import com.example.DoroServer.global.auth.dto.JoinReq;
@@ -9,10 +13,13 @@ import com.example.DoroServer.global.auth.dto.LoginReq;
 import com.example.DoroServer.global.auth.dto.LoginRes;
 import com.example.DoroServer.global.auth.dto.ReissueReq;
 import com.example.DoroServer.global.common.SuccessResponse;
+import com.example.DoroServer.global.jwt.CustomUserDetailsService;
 import com.example.DoroServer.global.jwt.JwtTokenProvider;
 import com.example.DoroServer.global.jwt.RedisService;
+import com.example.DoroServer.global.util.annotation.ClearSecurityContext;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
@@ -21,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,8 +45,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
-    private final JwtTokenProvider tokenProvider;
     private final RedisService redisService;
+
 
     @Operation(summary = "001_01", description = "회원가입")
     @PostMapping("/join")
@@ -84,6 +92,7 @@ public class AuthController {
         return SuccessResponse.successResponse("비밀번호가 변경되었습니다.");
     }
 
+    @ClearSecurityContext
     @Operation(summary = "001_06", description = "토큰 재발급")
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(@RequestBody @Valid ReissueReq reissueReq,
