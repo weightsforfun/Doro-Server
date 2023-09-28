@@ -48,6 +48,7 @@ public class SecurityConfig{
                         "/message/send",
                         "/message/verify",
                         "/check/account",
+                        "/check/phone",
                         "/find/account",
                         "/change/password",
                         "/",
