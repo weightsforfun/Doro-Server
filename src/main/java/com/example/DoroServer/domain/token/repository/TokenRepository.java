@@ -10,10 +10,10 @@ import org.springframework.data.repository.query.Param;
 
 public interface TokenRepository extends JpaRepository<Token, Long> {
 
-    @Query("SELECT t.user FROM Token t WHERE t.token= :token")
-    Optional<User> findUserIdByToken(@Param("token") String token);
 
     void deleteAllByUser(User user);
+
+    Optional<Token> findByToken(String token);
 
     List<Token> findAllByUser(User user);
 }

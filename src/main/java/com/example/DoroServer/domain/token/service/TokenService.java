@@ -8,6 +8,7 @@ import com.example.DoroServer.domain.user.repository.UserRepository;
 import com.example.DoroServer.global.exception.BaseException;
 import com.example.DoroServer.global.exception.Code;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,14 @@ public class TokenService {
     // id에 해당하는 user에 token 추가
     @Transactional
     public Long saveToken(Long userId, String tokenValue) {
+
+        Optional<Token> optionalToken = tokenRepository.findByToken(tokenValue);
+
+        if(optionalToken.isPresent()){
+            Token token=optionalToken.get();
+            return token.getId();
+        }
+
         User user = userRepository.findById(userId).orElseThrow(() -> {
             log.info("유저를 찾을 수 없습니다. id = {}", userId);
             throw new BaseException(Code.USER_NOT_FOUND);
