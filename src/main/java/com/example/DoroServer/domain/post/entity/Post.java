@@ -25,13 +25,27 @@ public class Post extends BaseEntity {
     private Long id; // PK
 
     private String title;
+
     private String content;
+
     private String password;
+
     private boolean isLocked;
+
     private String ownerName;
+
     private String institution;
+
     private String phoneNumber;
+
     private String email;
+
     private String answer;
 
+    private boolean isAnswered;
+
+    public void enrollAnswer(String answer){
+        this.answer=answer;
+        this.isAnswered=true;
+    }
 }
